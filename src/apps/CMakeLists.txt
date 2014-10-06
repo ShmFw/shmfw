@@ -1,0 +1,6 @@
+add_subdirectory(admin)
+add_subdirectory(editor)
+add_subdirectory(reconfigure)
+add_subdirectory(log)
+add_subdirectory(oszi)
+add_subdirectory(viewer)
