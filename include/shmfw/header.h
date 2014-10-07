@@ -59,7 +59,6 @@
 namespace ShmFw {
 
 
-
 class SharedHeader {
 public:
     SharedHeader()
@@ -99,7 +98,7 @@ public:
     static const int CONTAINER_VECTOR   = 2;
     static const int CONTAINER_DEQUE    = 3;
     static const int CONTAINER_IMAGE    = 4;
-    static const int CONTAINER_BOX  = 5;
+    static const int CONTAINER_ALLOC  = 5;
 
 ///local header to to manage changes
     struct LocalHeader {

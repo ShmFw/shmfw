@@ -1,5 +1,7 @@
 
 #include "shmfw/variable.h"
+#include "shmfw/allocator.h"
+#include "shmfw/objects/points.h"
 #include "shmfw/objects/parameterentry.h"
 #include <boost/thread.hpp>
 #include "gtest/gtest.h"
@@ -69,10 +71,21 @@ protected:
 
     std::string shmSegmentName_;
     int shmSegmentSize_;
+    
+    double rand_01() {
+        return ( double ) rand() / RAND_MAX;
+    }
+    double randf ( double fmin, double fmax ) {
+        return rand_01() * ( fmax - fmin ) + fmin;
+    }
+    double randAngle() {
+        return rand_01() * 2 * M_PI - M_PI;
+    }
+    double randf() {
+        return randf ( -10, 10 );
+    }
 };
-
 TEST_F ( VariableTest, TestParameterEntry ) {
-
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
     ShmFw::Var<ShmFw::ParameterEntry<int> > a ( "a", shmHdl );
     a() = 10;
@@ -110,7 +123,6 @@ TEST_F ( VariableTest, TestParameterEntry ) {
     EXPECT_FALSE ( compareOperators );
     compareOperators = b() > ( v-1 );
     EXPECT_TRUE ( compareOperators );
-
     b() = max;
     b().increase();
     EXPECT_EQ ( b(), max );
@@ -122,39 +134,72 @@ TEST_F ( VariableTest, TestParameterEntry ) {
     EXPECT_EQ ( b(), v+step );
     b().decrease();
     EXPECT_EQ ( b(), v );
-
     /*
     ShmFw::Var<ShmFw::ParameterEntry<double> > c ( "c", shmHdl);
     ShmFw::Var<ShmFw::ParameterEntry<double> > d ( "a", shmHdl);
     try{
-      c() = d();
+    c() = d();
     } catch (int e){
-      int exeptionID = ShmFw::ParameterEntryHeader::EXEPTION_TYPE_ASSIGNMENT;
-      EXPECT_EQ (e, exeptionID);
+    int exeptionID = ShmFw::ParameterEntryHeader::EXEPTION_TYPE_ASSIGNMENT;
+    EXPECT_EQ (e, exeptionID);
     }
     */
     shmHdl->removeSegment();
-
 }
 
+TEST_F ( VariableTest, AllocPoints ) {
+  
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
+    ShmFw::Alloc<ShmFw::Points> a ( "var0", shmHdl ) ;
+    a->points.push_back(ShmFw::Point(rand_01(), rand_01(), rand_01()));
+    a->points.push_back(ShmFw::Point(rand_01(), rand_01(), rand_01()));
+    a().frame = "world";
+    ShmFw::Alloc<ShmFw::Points> b ( "var0", shmHdl ) ;
+    EXPECT_EQ (a(), b());
+    ShmFw::Alloc<ShmFw::Points> c ( "var1", shmHdl ) ;
+    c().copyFrom(b());
+    EXPECT_EQ (a(), c());
+    a->points[0].x = 3;
+    EXPECT_TRUE (a() == b());
+    EXPECT_FALSE (a() == c());
+    // std::cout << "a: " << a() << "c: " << c();
+    shmHdl->removeSegment();
+
+}
 TEST_F ( VariableTest, TestSharedLockPtr ) {
 
-  /**
-   * @ToDo
-    std::string name("a");
-    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
-    ShmFw::Var<int> a ( name, shmHdl, 1 );
-    ShmFw::ScopedLockPtr lock;    
-    boost::thread t1 ( triggerItHasChanged<double>, shmHdl, name, 1000 );
-    a.wait ( lock );
-    bool isLocked = a.locked();
-    EXPECT_TRUE ( isLocked ) << "it should be locked";
-    lock.reset();
-    isLocked = a.locked();
-    EXPECT_FALSE ( isLocked ) << "it not should be locked";
-    shmHdl->removeSegment();
-    */
+    /**
+     * @ToDo
+      std::string name("a");
+      ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
+      ShmFw::Var<int> a ( name, shmHdl, 1 );
+      ShmFw::ScopedLockPtr lock;
+      boost::thread t1 ( triggerItHasChanged<double>, shmHdl, name, 1000 );
+      a.wait ( lock );
+      bool isLocked = a.locked();
+      EXPECT_TRUE ( isLocked ) << "it should be locked";
+      lock.reset();
+      isLocked = a.locked();
+      EXPECT_FALSE ( isLocked ) << "it not should be locked";
+      shmHdl->removeSegment();
+      */
 }
+
+TEST_F ( VariableTest, TestClasses ) {
+
+    std::string nameA ( "myVarA" );
+    std::string nameB ( "myVarB" );
+    std::string nameC ( "myVarC" );
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
+    ShmFw::Var<int> a ( nameA, shmHdl, 1 );
+    ShmFw::Var<double> b ( nameB, shmHdl, 1 );
+    ShmFw::Var<double> c ( nameC, shmHdl, 1 );
+    std::cout << a.type_name() << std::endl;
+    EXPECT_FALSE ( a.isType<ShmFw::Var<double> >() );
+    EXPECT_TRUE ( a.isType<ShmFw::Var<int> >() );
+    shmHdl->removeSegment();
+}
+
 
 TEST_F ( VariableTest, TestTypeName ) {
 

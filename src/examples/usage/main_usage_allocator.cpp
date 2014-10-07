@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Software License Agreement (BSD License)                              *  
+ *   Software License Agreement (BSD License)                              *
  *   Copyright (C) 2012 by Markus Bader <markus.bader@tuwien.ac.at>        *
  *                                                                         *
  *   Redistribution and use in source and binary forms, with or without    *
@@ -29,30 +29,79 @@
  *   WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE           *
  *   POSSIBILITY OF SUCH DAMAGE.                                           *
  ***************************************************************************/
-
-#ifndef SHARED_MEM_VIZ_OBJECTS
-#define SHARED_MEM_VIZ_OBJECTS
-
 #include <iostream>
-#include <shmfw/header.h>
-#include <shmfw/vector.h>
+#include <stdlib.h>
+
+#include <shmfw/objects/laser_scan.h>
+#include <shmfw/objects/points.h>
 #include <shmfw/variable.h>
+#include <shmfw/allocator.h>
 
 
-namespace ShmFw {
+#include <boost/program_options.hpp>
+#include <boost/thread.hpp>
 
-    class VizPoint3F {
-    public:
-      float x, y, z;
-    public:
-        VizPointF() {}
-        VizPointF(float _x, float _y, float _z): x(_x), y(_y), z(_z) {}
-        VizPointF(const VizPointF &r): x(r.x), y(r.y), z(r.z) {}
-    };
-}
-inline std::ostream &operator << ( std::ostream &os, const ShmFw::Oszi::VizPoint3F &o ) {
-    os "<" << std::setprecision ( 4 ) << o.x <<  ", " << o.y << ", " << o.z << ">";
+struct Prarmeters {
+    bool clear;
+    std::string shm_memory_name;
+    unsigned int shm_memory_size;
+    std::string variable_name;
 };
 
-#endif //SHARED_MEM_VIZ_OBJECTS
+Prarmeters readArgs ( int argc, char **argv ) {
+    namespace po = boost::program_options;
 
+    Prarmeters params;
+    po::options_description desc ( "Allowed Parameters" );
+    desc.add_options()
+    ( "help", "get this help message" )
+    ( "clear,c", "clears the shared memory" )
+    ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( DEFAULT_SEGMENT_NAME ), "shared memory segment name" )
+    ( "shm_memory_size,s", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( DEFAULT_SEGMENT_SIZE ), "shared memory segment size" );
+
+    po::variables_map vm;
+    try {
+        po::store ( po::parse_command_line ( argc, argv, desc ), vm );
+    } catch ( const std::exception &ex ) {
+        std::cout << desc << std::endl;;
+        exit ( 1 );
+    }
+    po::notify ( vm );
+
+    if ( vm.count ( "help" ) )  {
+        std::cout << desc << std::endl;
+        exit ( 1 );
+    }
+    params.clear = ( vm.count ( "clear" ) > 0 );
+
+    return params;
+}
+
+double rand_01(){
+  return ((double) rand()) / RAND_MAX;
+}
+
+int main ( int argc, char *argv[] ) {
+
+
+    Prarmeters params = readArgs ( argc, argv );
+    if ( params.clear ) {
+        ShmFw::Handler::removeSegment ( params.shm_memory_name );
+        std::cout << "Shared Memory " << params.shm_memory_name << " cleared" << std::endl;
+    }
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
+    ShmFw::Alloc<ShmFw::LaserScan> l("scan", shmHdl);
+    srand (time(NULL));
+    
+    l->ranges.push_back(rand_01());
+    //for(size_t i = 0; i < l->ranges.size(); i++) std::cout << i << ": " << l->ranges[i] << std::endl;
+    
+    ShmFw::Alloc<ShmFw::Points> p("points", shmHdl);
+    ShmFw::Point p0(rand_01(), rand_01(), rand_01());
+    p->points.push_back(p0);
+    for(size_t i = 0; i < p->points.size(); i++) std::cout << i << ": " << p->points[i] << std::endl;
+    
+
+    exit ( 0 );
+
+}

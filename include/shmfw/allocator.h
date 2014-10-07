@@ -30,8 +30,8 @@
  *   POSSIBILITY OF SUCH DAMAGE.                                           *
  ***************************************************************************/
 
-#ifndef SHARED_MEM_CLASS_H
-#define SHARED_MEM_CLASS_H
+#ifndef SHARED_MEM_CONTAINER_H
+#define SHARED_MEM_CONTAINER_H
 
 #include <shmfw/header.h>
 #include <boost/archive/xml_oarchive.hpp>
@@ -43,24 +43,24 @@
 namespace ShmFw {
 
 /// Exdented header (not used in our case)
-class SharedHeaderClass : private SharedHeader {
+class SharedHeaderAlloc : private SharedHeader {
     friend class boost::serialization::access;
 };
 
 /// Class to manage a simple shared memory variable or array
 template<typename T>
-class Class : public Header {
-    typedef bi::allocator<T, SegmentManager> Allocator;
+class Alloc : public Header {
     friend class boost::serialization::access;
-    SharedHeaderClass *header_shm;  /// exdented shared Header
+    typedef bi::allocator<T, SegmentManager> Allocator;
+    SharedHeaderAlloc *header_shm;  /// exdented shared Header
     LocalData<T>  data_local;         /// local data
 public:
 
 
     /** Default constructor
-     * @post Class::construct
+     * @post Alloc::construct
      **/
-    Class() {
+    Alloc() {
     }
     /** Constructor
      * @param name name of the variable
@@ -70,8 +70,8 @@ public:
      * @see ShmFw::createSegment
      * @see ShmFw::construct
      **/
-    Class ( const std::string &name, HandlerPtr &shmHdl ) {
-        if ( construct ( name, shmHdl ) == ERROR ) exit ( 1 );
+    Alloc ( const std::string &name, HandlerPtr &shmHdl, size_t size = 1 ) {
+        if ( construct ( name, shmHdl, size ) == ERROR ) exit ( 1 );
     }
     /**
      * @param name name of the variable
@@ -80,25 +80,25 @@ public:
      * @see ShmFw::createSegment
      * @see ShmFw::construct
      **/
-    int construct ( const std::string &name, HandlerPtr &shmHdl ) {
+    int construct ( const std::string &name, HandlerPtr &shmHdl, size_t size = 1 ) {
 #if __cplusplus > 199711L
-        size_t type_hash_code = typeid ( Class<T> ).hash_code() ); const char *type_name = typeid ( Class<T> ).name();
+        size_t type_hash_code = typeid ( Alloc<T> ).hash_code() ); const char *type_name = typeid ( Alloc<T> ).name();
 #else
-        size_t type_hash_code = 0; const char *type_name = typeid ( Class<T> ).name();
+        size_t type_hash_code = 0; const char *type_name = typeid ( Alloc<T> ).name();
 #endif
-        if ( constructHeader<SharedHeaderClass> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;;
-            header_shm = ( SharedHeaderClass * ) pHeaderShm;
+        if ( constructHeader<SharedHeaderAlloc> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;;
+            header_shm = ( SharedHeaderAlloc * ) pHeaderShm;
             if ( pHeaderShm->array_size > 0 ) {
                 data_local.creator = false;
             } else {
                 /// constructing shared data
                 try {
                     ScopedLock myLock ( pHeaderShm->mutex );
-                        pHeaderShm->container = ShmFw::Header::CONTAINER_BOX;
+                        pHeaderShm->container = ShmFw::Header::CONTAINER_ALLOC;
 			Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
-                        pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct<T> ( bi::anonymous_instance )(a);
+                        pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct<T> ( bi::anonymous_instance )[size](a);
                         data_local.creator = true;
-                        pHeaderShm->array_size = 1;
+                        pHeaderShm->array_size = size;
                     } catch ( ... ) {
                         std::cerr << "Error when constructing shared data" << std::endl;
                         return ERROR;
@@ -112,7 +112,7 @@ public:
      * @warning do not use this fnc, it is only for serialization
      * @return ref to shared data
      **/
-    SharedHeaderClass &shared_header() {
+    SharedHeaderAlloc &shared_header() {
         return *header_shm;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
@@ -120,7 +120,7 @@ public:
      * @warning do not use this fnc, it is only for serialization
      * @return ref to shared data
      **/
-    const SharedHeaderClass &shared_header() const {
+    const SharedHeaderAlloc &shared_header() const {
         return *header_shm;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
@@ -168,6 +168,19 @@ public:
         return data_local.ptr;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
+     * returns a reference to the shared object by index
+     * it is slower as (), band checks index > size
+     * @n index
+     * @return ref to shared data
+     **/
+    T &operator [] ( unsigned int n ) const {
+        if ( n < size() ) return data_local.ptr[n];
+        else {
+            throw std::runtime_error ( "Shm::Alloc::[] out of range" );
+            return *data_local.ptr;
+        }
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
      * Returns a human readable string to show the context
      * @return string
      **/
@@ -202,11 +215,11 @@ public:
     /**
      * overloads the << and calls the varalible overloades operator
      **/
-    friend std::ostream &operator << ( std::ostream &os, const Class<T> &o ) {
+    friend std::ostream &operator << ( std::ostream &os, const Alloc<T> &o ) {
         return os << *o.data_local.ptr;
     };
 };
 };
-#endif //SHARED_MEM_CLASS_H
+#endif //SHARED_MEM_CONTAINER_H
 
 

@@ -33,8 +33,8 @@
 
 #include <gazebo/physics/physics.hh>
 #include "gazebo_shm_laser.h"
-#include <shmfw/class.h>
-#include <shmfw/classes/laser_scan.h>
+#include <shmfw/allocator.h>
+#include <shmfw/objects/laser_scan.h>
 
 
 using namespace gazebo;
@@ -48,7 +48,7 @@ GazeboShmLaser::GazeboShmLaser()
 : RayPlugin()
 {
     shmHdl = ShmFw::Handler::create ( DEFAULT_SEGMENT_NAME, DEFAULT_SEGMENT_SIZE );
-    shmScan.reset(new ShmFw::Class<ShmFw::LaserScan>( "scan", shmHdl ));
+    shmScan.reset(new ShmFw::Alloc<ShmFw::LaserScan>( "scan", shmHdl ));
     tstamp = boost::posix_time::microsec_clock::local_time();
 }
 

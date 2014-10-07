@@ -38,14 +38,12 @@ class RGB {
 public:
     char r, g, b;
     RGB(): r(0), g(0), b(0) {};
+    RGB(uint8_t r, uint8_t g, uint8_t b): r(r), g(g), b(b) {};
     RGB(const RGB &p): r(p.r), g(p.g), b(p.b) {};
-    std::string getToStringFormat(const std::string &format) const{
-      char buf[0xFF];
-      sprintf(buf, format.c_str(), r, g, b); 
-      return std::string(buf);
-    }
     std::string getToString() const{
-      return getToStringFormat("[ %d, %d, %d]");
+      char buf[0xFF];
+      sprintf(buf, "[ %d, %d, %d]", r, g, b); 
+      return std::string(buf);
     }
     bool setFromString(const std::string &str) {
       int start = str.find("[");
@@ -67,6 +65,21 @@ public:
         getline (input, str);
 	o.setFromString(str);
         return input;
+    }
+    void setColour(float _r, float _g, float _b){
+      r = _r, g = _g, b = _b;
+    }
+    bool operator == ( const RGB& o ) const {
+        return r == o.r && g == o.g && b == o.b;
+    } 
+    template<typename T>
+    void copyTo ( T& des ) const {
+        des.r = r, des.g = g, des.b = b;
+    }
+    template<typename T>
+    RGB& copyFrom ( const T& src ) {
+        r = src.r, g = src.g, b = src.b;
+        return *this;
     }
 protected:
     friend class boost::serialization::access;

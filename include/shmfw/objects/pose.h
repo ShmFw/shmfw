@@ -46,6 +46,8 @@ public:
     Pose() : position(), orientation() {};
     Pose ( const Point &p, const Quaternion &o ) : position ( p ), orientation ( o ) {};
     Pose ( const Pose &p ) : position ( p.position ), orientation ( p.orientation ) {};
+    Pose ( double x, double y, double z, double qx = 0, double qy = 0, double qz = 0, double qw = 1 ) 
+      : position ( x, y, z ), orientation ( qx, qy, qz, qw ) {};
     Pose ( const Pose2D &p, double z = 0 ) {
       setPose(p, z);
     };

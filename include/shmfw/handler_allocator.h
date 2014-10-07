@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Software License Agreement (BSD License)                              *  
- *   Copyright (C) 2014 by Markus Bader <markus.bader@tuwien.ac.at>        *
+ *   Software License Agreement (BSD License)                              *
+ *   Copyright (C) 2012 by Markus Bader <markus.bader@tuwien.ac.at>        *
  *                                                                         *
  *   Redistribution and use in source and binary forms, with or without    *
  *   modification, are permitted provided that the following conditions    *
@@ -30,36 +30,69 @@
  *   POSSIBILITY OF SUCH DAMAGE.                                           *
  ***************************************************************************/
 
-#ifndef SHARED_MEM_FORWARD_DECLARATIONS_H
-#define SHARED_MEM_FORWARD_DECLARATIONS_H
+#ifndef SHARED_MEM_HANDLER_ALLOCATOR
+#define SHARED_MEM_HANDLER_ALLOCATOR
+
+#include <shmfw/handler_object.h>
+#include <shmfw/allocator.h>
 
 namespace ShmFw {
-  class Handler;
-  template <class> class Var;
-  template <class> class Deque;
-  template <class> class Vector;
-  template<typename T>  class Alloc;
-  template <class> class Vec;
-  template <class> class Vector2;
-  template <class> class Vector3;
-  template <class> class Vector4;
-  template <class> class Matrix3x3;
-  class LaserScan;
-  class Points;
-  class Marker;
-  class Point;
-  class Point2D;
-  class Pose;
-  class Pose2D;
-  class Pose2DAGV;
-  class Quaternion;
-  class Twist;
-  class RouteSegment;
-  class WayPoint;
-  class Handler;
+
+template <class T>
+class HandlerAlloc : public HandlerObject {
+public:
+private:
+    ShmFw::Alloc<T> v;
+public:
+    HandlerAlloc(const std::string &name, HandlerPtr &shmHdl) {
+        v.construct (name, shmHdl);
+    }
+    std::string type_name () {
+        return v.type_name();
+    }
+    virtual void it_has_changed() {
+      v.itHasChanged();
+    }
+    virtual void lock() {
+      v.try_lock();
+    }
+    virtual void unlock() {
+      v.unlock();
+    }
+    virtual bool locked() {
+      return v.locked();
+    }
+    virtual std::string timestamp() {
+        return to_simple_string(v.timestampShm()) ;
+    }
+    std::string name () {
+        return v.name();
+    }
+    std::string value() const {
+      return boost::lexical_cast<std::string>(v());
+    }
+    virtual std::string value(uint32_t i) const {
+	if( i > size()) return "Out of bound";
+	return v[i].getToString();	
+    }
+    virtual uint32_t size() const {
+        return v.size();
+    }
+    void value(const std::string &str) {
+        v().getFromString(str);
+    }
+    int construct ( const std::string &name, HandlerPtr &shmHdl, unsigned int size = 1 ){
+      return v.construct(name, shmHdl, size);
+    }
 };
 
 
-#endif //SHARED_MEM_FORWARD_DECLARATIONS_H
+};
+
+
+
+#endif //SHARED_MEM_HANDLER_ALLOCATOR
+
+
 
 

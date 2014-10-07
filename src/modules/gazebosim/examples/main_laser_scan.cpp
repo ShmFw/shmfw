@@ -34,8 +34,8 @@
 
 #include <boost/program_options.hpp>
 
-#include <shmfw/classes/laser_scan.h>
-#include <shmfw/class.h>
+#include <shmfw/objects/laser_scan.h>
+#include <shmfw/allocator.h>
 #include <shmfw/vector.h>
 
 
@@ -88,7 +88,7 @@ int main ( int argc, char *argv[] ) {
     srand ( time ( NULL ) );
 
 
-    ShmFw::Class<ShmFw::LaserScan> src ( "a", shmHdl );
+    ShmFw::Alloc<ShmFw::LaserScan> src ( "a", shmHdl );
 
     src().range_max =  M_PI/2;
     src().range_min = -M_PI/2;
@@ -97,7 +97,7 @@ int main ( int argc, char *argv[] ) {
         src().ranges[i] = rand();
     }
 
-    ShmFw::Class<ShmFw::LaserScan> des ( "a", shmHdl );
+    ShmFw::Alloc<ShmFw::LaserScan> des ( "a", shmHdl );
 
     for ( size_t i = 0; i < src().ranges.size(); i++ ) {
         std::cout << i << ": " << src().ranges[i] << " = " << des().ranges[i] << std::endl;

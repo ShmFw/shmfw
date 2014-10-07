@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Software License Agreement (BSD License)                              *
- *   Copyright (C) 2014 by Markus Bader <markus.bader@tuwien.ac.at>        *
+ *   Copyright (C) 2012 by Markus Bader <markus.bader@tuwien.ac.at>        *
  *                                                                         *
  *   Redistribution and use in source and binary forms, with or without    *
  *   modification, are permitted provided that the following conditions    *
@@ -29,101 +29,94 @@
  *   WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE           *
  *   POSSIBILITY OF SUCH DAMAGE.                                           *
  ***************************************************************************/
-#ifndef SHARED_MEM_OBJECTS_POINT_H
-#define SHARED_MEM_OBJECTS_POINT_H
+#ifndef SHARED_MEM_OBJECTS_RGBA_H
+#define SHARED_MEM_OBJECTS_RGBA_H
 
-#include <stdio.h>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/binary_object.hpp>
-#include <shmfw/objects/base_object.h>
-#include <shmfw/objects/vector3.h>
-#include <boost/algorithm/string.hpp>
+#include <shmfw/objects/rgb.h>
+
 namespace ShmFw {
-class Point : public ShmFw::BaseObject {
+
+class RGBA {
 public:
-    double x, y, z;
-    Point(): x(0), y(0), z(0) {};
-    Point(double x, double y, double z): x(x), y(y), z(z) {};
-    Point(const Point &p): x(p.x), y(p.y), z(p.z) {};
-    std::string getToStringFormat(const std::string &format) const{
-      char buf[0xFF];
-      sprintf(buf, format.c_str(), x, y, z); 
-      return std::string(buf);
-    }
+    float r, g, b, a;
+    RGBA(): r(.0), g(.0), b(.0), a(.0) {};
+    RGBA(const RGBA &p): r(p.r), g(p.g), b(p.b), a(p.a) {};
+    RGBA(float r, float g, float b, float a): r(r), g(g), b(b), a(a) {};
+    RGBA(const RGB &c, float A) {
+      setColour(c, A);
+    };
     std::string getToString() const{
-      return getToStringFormat("[ %lf, %lf, %lf]");
+      char buf[0xFF];
+      sprintf(buf, "[ %f, %f, %f, %f]", r, g, b, a); 
+      return std::string(buf);
     }
     bool setFromString(const std::string &str) {
       int start = str.find("[");
       int end = str.find_last_of("]");
       std::string data = str.substr(start+1, end-1); 
       boost::erase_all(data, " ");
-      if(sscanf(data.c_str(), "%lf,%lf,%lf", &x, &y, &z) == EOF) return false; 
+      if(sscanf(data.c_str(), "%f,%f,%f,%f", &r, &g, &b, &a) == EOF) return false; 
       return true;
     }
-    friend std::ostream& operator<< (std::ostream &output, const Point &o) {
+    friend std::ostream& operator<< (std::ostream &output, const RGBA &o) {
         output << o.getToString();
         return output;
     }
-    friend std::istream& operator>>(std::istream &input, Point &o)
+    friend std::istream& operator>>(std::istream &input, RGBA &o)
     {
         std::string str;
         getline (input, str);
 	o.setFromString(str);
         return input;
     }
-    bool operator == ( const Point& o ) const {
-        return x == o.x && y == o.y && z == o.z;
-    } 
-    /** casts to vector3
-     * @return vector3<double> cast
-     **/
-    ShmFw::Vector3<double> &asVector () {
-        return (ShmFw::Vector3<double>&) *this;;
-    } 
-    /** sets values
-     **/
-    void setValues (double _x, double _y, double _z) {
-        this->x = _x, this->y = _y, this->z = _z;
-    }   
-    /** casts to vector3
-     * @return vector3<double> cast
-     **/
-    const ShmFw::Vector3<double> &asVector () const {
-        return (ShmFw::Vector3<double>&) *this;;
-    }    
-    /** compares with within tolerance
-     * @param o 
-     * @param tolerance 
-     **/
-    bool equal( const Point& o, double tolerance = 0.01 ) const {
-         return this->asVector().equal(o.asVector(), tolerance);
+    void setColour(const RGB &c, float A = 1){
+      r = ((float) c.r) / 255.0, g = ((float) c.g) / 255.0, b = ((float) c.b) / 255.0, a = A;
     }
-    /** Copies data from an array
-     * @param src data source
-     **/
-    template<typename T2>
-    Point& copyFrom ( const T2 &src) {
-        x = src.x, y = src.y, z = src.z;
+    void setColour(float _r, float _g, float _b, float _a = 1.){
+      r = _r, g = _g, b = _b, a = _a;
+    }
+    bool operator == ( const RGBA& o ) const {
+        return r == o.r && g == o.g && b == o.b && a == o.a;
+    } 
+    template<typename T>
+    void copyTo ( T& des ) const {
+        des.r = r, des.g = g, des.b = b, des.a = a;
+    }
+    template<typename T>
+    RGBA& copyFrom ( const T& src ) {
+        r = src.r, g = src.g, b = src.b, a = src.a;
         return *this;
     }
-    /** Copies data to an array
-     * @param des data target
-     **/
-    template<typename T2>
-    void copyTo( T2 &des ) const {
-        des.x = x, des.y = y, des.z = z;
+    static const RGBA green(){
+      return RGBA(0,1,0,1);
+    }
+    static const RGBA blue(){
+      return RGBA(0,0,1,1);
+    }
+    static const RGBA red(){
+      return RGBA(1,0,0,1);
+    }
+    static const RGBA yellow(){
+      return RGBA(1,1,0,1);
+    }
+    static const RGBA white(){
+      return RGBA(1,1,1,1);
+    }
+    static const RGBA black(){
+      return RGBA(0,0,0,1);
     }
 protected:
     friend class boost::serialization::access;
     /** Boost serialization function **/
     template<class archive>  void serialize ( archive &ar, const unsigned int version ) {
         using boost::serialization::make_nvp;
-        ar & make_nvp ( "x", x );
-        ar & make_nvp ( "y", y );
-        ar & make_nvp ( "z", z );
+        ar & make_nvp ( "r", r );
+        ar & make_nvp ( "g", g );
+        ar & make_nvp ( "b", b );
+        ar & make_nvp ( "a", a );
     }
+    
 };
 };
-#endif //SHARED_MEM_OBJECTS_POINT_H
+#endif //SHARED_MEM_OBJECTS_RGBA_H
 

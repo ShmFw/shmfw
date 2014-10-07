@@ -17,21 +17,9 @@
 #define SHARED_MEM_UNITTEST_OBJECTS_H
 
 namespace ShmFwTest {
-  
-  
 
-inline double rand_01() {
-    return (double)rand() / RAND_MAX;
-}
-inline double randf(double fmin, double fmax) {
-    return rand_01() * (fmax - fmin) + fmin;
-}
-inline double randAngle(){
-    return rand_01() * 2 * M_PI - M_PI;
-}
-inline double randf() {
-    return randf(-10, 10);
-}
+
+
 
 // The fixture for testing class Foo.
 class ObjectTest : public ::testing::Test {
@@ -39,8 +27,11 @@ protected:
     // You can remove any or all of the following functions if its body
     // is empty.
 
-    ObjectTest() {
+    ObjectTest()
+        : shmSegmentName_ ( "ShmTestSegment" )
+        , shmSegmentSize_ ( 65536 ) {
         // You can do set-up work for each test here.
+        srand ( time ( NULL ) );
     }
 
     virtual ~ObjectTest() {
@@ -58,6 +49,21 @@ protected:
     virtual void TearDown() {
         // Code here will be called immediately after each test (right
         // before the destructor).
+    }
+    std::string shmSegmentName_;
+    int shmSegmentSize_;
+
+    double rand_01() {
+        return ( double ) rand() / RAND_MAX;
+    }
+    double randf ( double fmin, double fmax ) {
+        return rand_01() * ( fmax - fmin ) + fmin;
+    }
+    double randAngle() {
+        return rand_01() * 2 * M_PI - M_PI;
+    }
+    double randf() {
+        return randf ( -10, 10 );
     }
 };
 

@@ -30,8 +30,8 @@
  *   POSSIBILITY OF SUCH DAMAGE.                                           *
  ***************************************************************************/
 
-#ifndef SHARED_MEM_LASER_SCAN
-#define SHARED_MEM_LASER_SCAN
+#ifndef SHARED_MEM_CLASSES_POINTS_H
+#define SHARED_MEM_CLASSES_POINTS_H
 
 #include <vector>
 #include <string>
@@ -42,59 +42,77 @@
 #include <boost/interprocess/sync/interprocess_condition.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/containers/string.hpp>
+#include <shmfw/objects/point.h>
 
-namespace bi = boost::interprocess;
 
 namespace ShmFw {
 
-
-class LaserScan {
+/**
+ * @note this class can only be used in combination with ShmFw::Alloc
+ **/
+namespace bi = boost::interprocess;
+class Points {
     typedef bi::managed_shared_memory::segment_manager SegmentManager;
     typedef bi::allocator<void,   SegmentManager> AllocatorVoid;
+    typedef bi::allocator<ShmFw::Point, SegmentManager> AllocatorPoint;
     typedef bi::allocator<char,   SegmentManager> AllocatorChar;
-    typedef bi::allocator<double, SegmentManager> AllocatorDouble;
     typedef bi::basic_string<char, std::char_traits<char>, AllocatorChar>   CharString;
-    typedef bi::vector<double, AllocatorDouble > VectorDouble;
+    typedef bi::vector<ShmFw::Point, AllocatorPoint > VectorPoints;
+
 public:
     CharString frame;
-    double angle_min;        // start angle of the scan [rad]
-    double angle_max;        // end angle of the scan [rad]
-    double angle_increment;  // angular distance between measurements [rad]
+    VectorPoints points;
 
-    double time_increment;   // time between measurements [seconds] - if your scanner
-    // is moving, this will be used in interpolating position of 3d points
-    double scan_time;        // time between scans [seconds]
-
-    double range_min;        // minimum range value [m]
-    double range_max;        // maximum range value [m]
-    VectorDouble ranges;     // range data [m] (Note: values < range_min or > range_max should be discarded)
-    VectorDouble intensities;// intensity data [device-specific units].  If your
-    // device does not provide intensities, please leave the array empty.
-    LaserScan ( const AllocatorVoid &void_alloc )
-        : frame ( void_alloc ), range_min ( 0 ), range_max ( 0 ), ranges ( void_alloc ), intensities ( void_alloc )
+    Points ( const AllocatorVoid &void_alloc )
+        : frame ( void_alloc ), points ( void_alloc )
     {}
 
+    Points ( const Points &p )
+        : frame ( p.frame.get_allocator() ), points ( p.points.get_allocator() ) {
+        copyFrom ( p );
+    }
+
     std::string getToString() const {
-        char header[0xFF];
-        sprintf ( header, "%s: %frad <-> %frad\n", frame.c_str(), range_min, range_max );
-        std::stringstream ss ( header );
-        for ( size_t i = 0; i < ranges.size(); i++ ) {
-            ss << ranges[i] << ( ( i != ranges.size()-1 ) ?", ":";\n" );
+        std::stringstream ss;
+        ss << frame << ", ";
+        for ( size_t i = 0; i < points.size(); i++ ) {
+            ss << points[i] << ( ( i != points.size()-1 ) ?", ":";\n" );
         }
         return ss.str();
     }
-    friend std::ostream& operator<< ( std::ostream &output, const LaserScan &o ) {
+    void getFromString ( const std::string &str ) {
+    }
+    friend std::ostream& operator<< ( std::ostream &output, const Points &o ) {
         output << o.getToString();
         return output;
     }
-    friend std::istream& operator>> ( std::istream &input, LaserScan &o ) {
+    friend std::istream& operator>> ( std::istream &input, Points &o ) {
         return input;
+    }
+    bool operator == ( const Points& o ) const {
+        if ( points.size() != o.points.size() ) return false;
+        if ( frame.compare ( o.frame ) != 0 ) return false;
+        for ( VectorPoints::const_iterator it0 = points.begin(),  it1 = o.points.begin(); it1 != o.points.end(); it1++, it0++ ) {
+            if ( !(*it0 == *it1) ) return false;
+        }
+        return true;
+    }
+    template<typename T>
+    void copyTo ( T& des ) const {
+        des.frame = frame;
+        des.points = points;
+    }
+    template<typename T>
+    Points& copyFrom ( const T& src ) {
+        frame = src.frame;
+        points = src.points;
+        return *this;
     }
 };
 
 };
 
 
-#endif //SHARED_MEM_LASER_SCAN
+#endif //SHARED_MEM_CLASSES_POINTS_H
 
 

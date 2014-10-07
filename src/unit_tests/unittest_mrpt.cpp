@@ -7,12 +7,6 @@
 
 namespace {
   
-double RandAngle()
-{
-    double f = (double)rand() / RAND_MAX;
-    return f * 2 * M_PI - M_PI;
-}
-
 // The fixture for testing class Foo.
 class MrptTest : public ::testing::Test {
 protected:
@@ -22,6 +16,7 @@ protected:
     MrptTest()
         : shmSegmentName_ ( "ShmTestSegment" )
         , shmSegmentSize_ ( 65536 ) {
+	srand ( time ( NULL ) );
         // You can do set-up work for each test here.
     }
 
@@ -44,6 +39,18 @@ protected:
 
     std::string shmSegmentName_;
     int shmSegmentSize_;
+    double rand_01() {
+        return ( double ) rand() / RAND_MAX;
+    }
+    double randf ( double fmin, double fmax ) {
+        return rand_01() * ( fmax - fmin ) + fmin;
+    }
+    double randAngle() {
+        return rand_01() * 2 * M_PI - M_PI;
+    }
+    double randf() {
+        return randf ( -10, 10 );
+    }
 };
 
 TEST_F ( MrptTest, MrptInShm_Point2D ) {
@@ -110,7 +117,7 @@ TEST_F ( MrptTest, Assignment_Point3D ) {
 
 TEST_F ( MrptTest, Assignment_Pose2D ) {
 
-    double angle = RandAngle();
+    double angle = randAngle();
     ShmFw::Pose2D a ( rand(), rand() , angle );
     ShmFw::Pose2D b ( a );
     EXPECT_EQ ( a, b );
@@ -118,7 +125,7 @@ TEST_F ( MrptTest, Assignment_Pose2D ) {
     c << a;
     EXPECT_TRUE ( b == c );
     EXPECT_TRUE ( c == b );
-    angle = RandAngle();
+    angle = randAngle();
     mrpt::poses::CPose2D d ( rand(), rand(), angle );
     EXPECT_FALSE ( b == d );
     EXPECT_FALSE ( d == b );
@@ -129,9 +136,9 @@ TEST_F ( MrptTest, Assignment_Pose2D ) {
 
 TEST_F ( MrptTest, Assignment_Pose3D ) {
 
-    double roll = RandAngle();
-    double pitch = RandAngle();
-    double yaw = RandAngle();
+    double roll = randAngle();
+    double pitch = randAngle();
+    double yaw = randAngle();
     mrpt::poses::CPose3D a( rand(), rand(), rand() , roll, pitch, yaw );
     ShmFw::Pose b;
     b << a;
