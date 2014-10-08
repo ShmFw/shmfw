@@ -29,71 +29,73 @@
  *   WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE           *
  *   POSSIBILITY OF SUCH DAMAGE.                                           *
  ***************************************************************************/
+#include <iostream>
+#include <stdlib.h>
 
-#ifndef SHARED_MEM_HANDLER_VAR
-#define SHARED_MEM_HANDLER_VAR
+#include <shmfw/vector.h>
+#include <boost/program_options.hpp>
+#include <boost/thread.hpp>
 
-#include <shmfw/handler_object.h>
-
-namespace ShmFw {
-  
-template <class T>
-class HandlerVar : public HandlerObject {
-public:
-private:
-    ShmFw::Var<T> v;
-public:
-    HandlerVar(const std::string &name, HandlerPtr &shmHdl) {
-        v.construct (name, shmHdl);
-    }
-    HandlerVar() {
-    }    
-    std::string type_name () {
-        return v.type_name();
-    }
-    virtual void it_has_changed() {
-      v.itHasChanged();
-    }
-    virtual void lock() {
-      v.try_lock();
-    }
-    virtual void unlock() {
-      v.unlock();
-    }
-    virtual bool locked() {
-      return v.locked();
-    }
-    virtual std::string timestamp() {
-        return to_simple_string(v.timestampShm()) ;
-    }
-    std::string name () {
-        return v.name();
-    }
-    std::string value() const {
-      return boost::lexical_cast<std::string>(v());
-    }
-    virtual std::string value(uint32_t i) const {
-	if( i > size()) return "Out of bound";
-	return boost::lexical_cast<std::string>(v[i]);	
-    }
-    virtual uint32_t size() const {
-        return v.size();
-    }
-    void value(const std::string &str) {
-        v() = boost::lexical_cast<T>(str);
-    }
-    int construct ( const std::string &name, HandlerPtr &shmHdl, unsigned int size = 1 ){
-      return v.construct(name, shmHdl, size);
-    }
+struct Prarmeters {
+    bool clear;
+    std::string shm_memory_name;
+    unsigned int shm_memory_size;
+    std::string variable_name;
 };
 
+Prarmeters readArgs ( int argc, char **argv ) {
+    namespace po = boost::program_options;
 
-};
+    Prarmeters params;
+    po::options_description desc ( "Allowed Parameters" );
+    desc.add_options()
+    ( "help", "get this help message" )
+    ( "clear,c", "clears the shared memory" )
+    ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( DEFAULT_SEGMENT_NAME ), "shared memory segment name" )
+    ( "shm_memory_size,s", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( DEFAULT_SEGMENT_SIZE ), "shared memory segment size" );
+
+    po::variables_map vm;
+    try {
+        po::store ( po::parse_command_line ( argc, argv, desc ), vm );
+    } catch ( const std::exception &ex ) {
+        std::cout << desc << std::endl;;
+        exit ( 1 );
+    }
+    po::notify ( vm );
+
+    if ( vm.count ( "help" ) )  {
+        std::cout << desc << std::endl;
+        exit ( 1 );
+    }
+    params.clear = ( vm.count ( "clear" ) > 0 );
+
+    return params;
+}
+
+double rand_01() {
+    return ( ( double ) rand() ) / RAND_MAX;
+}
+int main ( int argc, char *argv[] ) {
+
+
+    Prarmeters params = readArgs ( argc, argv );
+    if ( params.clear ) {
+        ShmFw::Handler::removeSegment ( params.shm_memory_name );
+        std::cout << "Shared Memory " << params.shm_memory_name << " cleared" << std::endl;
+    }
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
+    srand ( time ( NULL ) );
+
+    ShmFw::Vector<double> a ( "vector_a", shmHdl );
+    a.clear();
+    for ( int i = 0; i < 10; i++ ) {
+        a.push_back ( rand_01() );
+    }
+    std::cout << a.info() << std::endl;
+    std::cout << a.human_readable() << std::endl;
 
 
 
-#endif //SHARED_MEM_HANDLER_VAR
+    exit ( 0 );
 
-
-
-
+}

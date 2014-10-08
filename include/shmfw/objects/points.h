@@ -96,6 +96,10 @@ public:
         }
         return true;
     }
+    Points &operator = ( const Points& o ) {
+        copyFrom(o);
+        return *this;
+    }
     template<typename T>
     void copyTo ( T& des ) const {
         des.frame = frame;

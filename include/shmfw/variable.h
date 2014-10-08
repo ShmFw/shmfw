@@ -106,6 +106,42 @@ public:
                 }
         data_local.ptr = ( T * ) pHeaderShm->ptr.get();
         return OK;
+    }    
+    /**
+     * @param name name of the variable
+     * @param shmHdl pointer to the shared memory segment handler
+     * @pre the ShmPtr poitner must be created first
+     * @see ShmFw::createSegment
+     * @see ShmFw::construct
+     **/
+    template<typename TA>
+    int constructWithAllocator ( const std::string &name, HandlerPtr &shmHdl, size_t size = 1 ) {
+    typedef bi::allocator<TA, SegmentManager> Allocator;
+#if __cplusplus > 199711L
+        size_t type_hash_code = typeid ( Var<TA> ).hash_code() ); const char *type_name = typeid ( Var<TA> ).name();
+#else
+        size_t type_hash_code = 0; const char *type_name = typeid ( Var<TA> ).name();
+#endif
+        if ( constructHeader<SharedHeaderVar> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;;
+            header_shm = ( SharedHeaderVar * ) pHeaderShm;
+            if ( pHeaderShm->array_size > 0 ) {
+                data_local.creator = false;
+            } else {
+                /// constructing shared data
+                try {
+                    ScopedLock myLock ( pHeaderShm->mutex );
+                        pHeaderShm->container = ShmFw::Header::CONTAINER_VARIABLE;
+			Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
+                        pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct<TA> ( bi::anonymous_instance )[size](a);
+                        data_local.creator = true;
+                        pHeaderShm->array_size = size;
+                    } catch ( ... ) {
+                        std::cerr << "Error when constructing shared data" << std::endl;
+                        return ERROR;
+                    }
+                }
+        data_local.ptr = ( TA * ) pHeaderShm->ptr.get();
+        return OK;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared header
@@ -283,6 +319,7 @@ public:
 };
 };
 #endif //SHARED_MEM_VARIABLE_H
+
 
 
 

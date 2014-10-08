@@ -122,7 +122,10 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     }
     ShmFw::Header shmHeader ( shmHdl, name );
 
-#define RETURN_IF_TYPE_VAR( TYPE ) if(shmHeader.isType<ShmFw::Var< TYPE > >()) return HandlerObjectPtr( new ShmFw::HandlerVar< TYPE >( name, shmHdl));
+#define RETURN_IF_TYPE_VAR( TYPE ) \
+    if(shmHeader.isType<ShmFw::Var< TYPE > >()) {\
+      return HandlerObjectPtr( new ShmFw::HandlerVar< TYPE >(name, shmHdl));\
+    };
     RETURN_IF_TYPE_VAR ( float );
     RETURN_IF_TYPE_VAR ( double );
     RETURN_IF_TYPE_VAR ( bool );
