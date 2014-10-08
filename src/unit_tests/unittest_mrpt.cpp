@@ -132,6 +132,7 @@ TEST_F ( MrptTest, Assignment_Pose2D ) {
     b << d;
     EXPECT_TRUE ( b == d );
     EXPECT_TRUE ( d == b );
+    
 }
 
 TEST_F ( MrptTest, Assignment_Pose3D ) {
@@ -139,12 +140,15 @@ TEST_F ( MrptTest, Assignment_Pose3D ) {
     double roll = randAngle();
     double pitch = randAngle();
     double yaw = randAngle();
-    mrpt::poses::CPose3D a( rand(), rand(), rand() , roll, pitch, yaw );
+    mrpt::poses::CPose3D a( rand(), rand(), rand() , yaw, pitch, roll );
     ShmFw::Pose b;
     b << a;
     mrpt::poses::CPose3D c;
     c << b;
-    EXPECT_TRUE ( c == a );
+    ShmFw::Pose d;
+    d << c;
+    // std::cout << b << std::endl << d << std::endl;
+    EXPECT_EQ ( true, b.equal ( d, 0.1f ) ) << "Should be equal";
 }
 
 

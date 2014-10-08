@@ -285,6 +285,12 @@ public:
         data_local.ptr->push_back ( src );
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
+     * Removes all elements from the vector (which are destroyed), leaving the container with a size of 0.
+     **/
+    void clear () {
+        data_local.ptr->clear ( );
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
      * destroies the shared memory
      * @ToDo
      **/
@@ -295,13 +301,13 @@ public:
     };
 };
 
-class VectorStr : public ShmFw::Vector<ShmFw::String> {
+class VectorStr : public ShmFw::Vector<ShmFw::CharString> {
 public:
     /** Default constructor
      * @post Vector::construct
      **/
     VectorStr()
-        : ShmFw::Vector<ShmFw::String>() {
+        : ShmFw::Vector<ShmFw::CharString>() {
     }
 
     /** Constructor
@@ -311,14 +317,14 @@ public:
      * @see ShmFw::createSegment
      **/
     VectorStr ( const std::string &name, HandlerPtr &shmHdl )
-        : ShmFw::Vector<ShmFw::String> ( name, shmHdl ) {
+        : ShmFw::Vector<ShmFw::CharString> ( name, shmHdl ) {
     }
 
     /** UNSAVE!! (user have to lock and to update timestamp)
      * Inserts a copy of x at the end of the vector.
      **/
     void push_back ( const std::string &str ) {
-        String shmStr = headerLoc.pShmHdl->createString ( str );
+        CharString shmStr = headerLoc.pShmHdl->createString ( str );
         data_local.ptr->push_back ( shmStr );
     }
 

@@ -205,34 +205,71 @@ public:
      * @param z x
      * @param w x
      **/
-    void setRotation ( T x, T y, T z, T w ) {
-        T  d = x*x+y*y+z*z+w*w;
+    void setRotation ( T qx, T qy, T qz, T qw ) {
+        T  d = qx*qx+qy*qy+qz*qz+qw*qw;
         if ( d != 0.0 ) {
             T s = T ( 2.0 ) / d;
-            T xs = x * s,   ys = y * s,   zs = z * s;
-            T wx = w * xs,  wy = w * ys,  wz = w * zs;
-            T xx = x * xs,  xy = x * ys,  xz = x * zs;
-            T yy = y * ys,  yz = y * zs,  zz = z * zs;
+            T xs = qx * s,   ys = qy * s,   zs = qz * s;
+            T wx = qw * xs,  wy = qw * ys,  wz = qw * zs;
+            T xx = qx * xs,  xy = qx * ys,  xz = qx * zs;
+            T yy = qy * ys,  yz = qy * zs,  zz = qz * zs;
             this->setValues ( T ( 1.0 ) - ( yy + zz ), xy - wz,                 xz + wy,
                               xy + wz,                 T ( 1.0 ) - ( xx + zz ), yz - wx,
                               xz - wy,                 yz + wx,                 T ( 1.0 ) - ( xx + yy ) );
         }
     }
-protected:
-    friend class boost::serialization::access;
-    template<class archive>  void serialize ( archive &ar, const unsigned int version ) {
-        using boost::serialization::make_nvp;
-        ar & make_nvp ( "m00", m00 );
-        ar & make_nvp ( "m01", m01 );
-        ar & make_nvp ( "m02", m02 );
-        ar & make_nvp ( "m10", m10 );
-        ar & make_nvp ( "m11", m11 );
-        ar & make_nvp ( "m12", m12 );
-        ar & make_nvp ( "m20", m20 );
-        ar & make_nvp ( "m21", m21 );
-        ar & make_nvp ( "m22", m22 );
+
+    /**
+     * gets quaterion
+     * @param x x
+     * @param y y
+     * @param z x
+     * @param w x
+     * @see http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
+     **/
+    void getRotation ( T &qx, T &qy, T &qz, T &qw ) {
+        T tr = m00 + m11 + m22;
+        if ( tr > 0 ) {
+            T S = sqrt ( tr+1.0 ) * 2; // S=4*qw
+            qw = 0.25 * S;
+            qx = ( m21 - m12 ) / S;
+            qy = ( m02 - m20 ) / S;
+            qz = ( m10 - m01 ) / S;
+        } else if ( ( m00 > m11 ) & ( m00 > m22 ) ) {
+            T S = sqrt ( 1.0 + m00 - m11 - m22 ) * 2; // S=4*qx
+            qw = ( m21 - m12 ) / S;
+            qx = 0.25 * S;
+            qy = ( m01 + m10 ) / S;
+            qz = ( m02 + m20 ) / S;
+        } else if ( m11 > m22 ) {
+            T S = sqrt ( 1.0 + m11 - m00 - m22 ) * 2; // S=4*qy
+            qw = ( m02 - m20 ) / S;
+            qx = ( m01 + m10 ) / S;
+            qy = 0.25 * S;
+            qz = ( m12 + m21 ) / S;
+        } else {
+            T S = sqrt ( 1.0 + m22 - m00 - m11 ) * 2; // S=4*qz
+            qw = ( m10 - m01 ) / S;
+            qx = ( m02 + m20 ) / S;
+            qy = ( m12 + m21 ) / S;
+            qz = 0.25 * S;
+        }
     }
-};
+    protected:
+        friend class boost::serialization::access;
+        template<class archive>  void serialize ( archive &ar, const unsigned int version ) {
+            using boost::serialization::make_nvp;
+            ar & make_nvp ( "m00", m00 );
+            ar & make_nvp ( "m01", m01 );
+            ar & make_nvp ( "m02", m02 );
+            ar & make_nvp ( "m10", m10 );
+            ar & make_nvp ( "m11", m11 );
+            ar & make_nvp ( "m12", m12 );
+            ar & make_nvp ( "m20", m20 );
+            ar & make_nvp ( "m21", m21 );
+            ar & make_nvp ( "m22", m22 );
+        }
+    };
 };
 
 

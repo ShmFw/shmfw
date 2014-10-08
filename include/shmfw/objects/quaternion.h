@@ -90,8 +90,8 @@ public:
         z = axis.z * s;
         w = cos ( angle * 0.5 );
     }
-    void setValue ( double x, double y, double z, double w ) {
-        this->x = x, this->y = y, this->z = z, this->w = w;
+    void setValue ( double _x, double _y, double _z, double _w ) {
+        this->x = _x, this->y = _y, this->z = _z, this->w = _w;
     }
     void setEuler ( const double& yaw, const double& pitch, const double& roll ) {
         double halfYaw = double ( yaw ) * double ( 0.5 );
@@ -146,7 +146,7 @@ public:
 	 return d < tolerance;
     }
     
-    double getYaw() {
+    double getYaw() const {
         double opposite = 2 * z * w;
         double adjacent = 1 - 2 * z * z;
         if ( opposite >= 0 && adjacent >= 0 ) {

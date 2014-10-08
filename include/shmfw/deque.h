@@ -367,13 +367,13 @@ public:
     };
 };
 
-class DequeStr : public ShmFw::Deque<ShmFw::String> {
+class DequeStr : public ShmFw::Deque<ShmFw::CharString> {
 public:
     /** Default constructor
      * @post Deque::construct
      **/
     DequeStr()
-        : ShmFw::Deque<ShmFw::String>() {
+        : ShmFw::Deque<ShmFw::CharString>() {
     }
 
     /** Constructor
@@ -383,14 +383,14 @@ public:
      * @see ShmFw::createSegment
      **/
     DequeStr ( const std::string &name, HandlerPtr &shmHdl )
-        : ShmFw::Deque<ShmFw::String> ( name, shmHdl ) {
+        : ShmFw::Deque<ShmFw::CharString> ( name, shmHdl ) {
     }
 
     /** UNSAVE!! (user have to lock and to update timestamp)
      * Inserts a copy of x at the end of the vector.
      **/
     void push_back ( const std::string &str ) {
-        String shmStr = headerLoc.pShmHdl->createString ( str );
+        CharString shmStr = headerLoc.pShmHdl->createString ( str );
         data_local.ptr->push_back ( shmStr );
     }
 };

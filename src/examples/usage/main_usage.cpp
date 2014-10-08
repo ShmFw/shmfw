@@ -184,10 +184,10 @@ int main ( int argc, char *argv[] ) {
 
     ShmFw::VectorStr log ( "log", shmHdl );
     ShmFw::CharAllocator allocator ( shmHdl->getShm()->get_segment_manager() );
-    ShmFw::String mystring ( allocator );
+    ShmFw::CharString mystring ( allocator );
     mystring = "Hello";
     log().push_back ( mystring );
-    ShmFw::String xx = shmHdl->createString();
+    ShmFw::CharString xx = shmHdl->createString();
     xx = "-";
     log().push_back ( xx );
     log().push_back ( shmHdl->createString ( "World" ) );

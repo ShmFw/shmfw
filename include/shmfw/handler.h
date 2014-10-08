@@ -73,10 +73,12 @@ typedef boost::shared_ptr<bi::managed_shared_memory> ShmPtr;
 typedef bi::managed_shared_memory::segment_manager SegmentManager;
 typedef bi::allocator<char, SegmentManager>   CharAllocator;
 typedef boost::shared_ptr<CharAllocator >   CharAllocatorPtr;
-typedef bi::basic_string<char, std::char_traits<char> , CharAllocator > String;
-typedef bi::allocator<String, bi::managed_shared_memory::segment_manager> StringAllocator;
+typedef bi::basic_string<char, std::char_traits<char> , CharAllocator > CharString;
+typedef bi::allocator<CharString, bi::managed_shared_memory::segment_manager> StringAllocator;
 typedef boost::shared_ptr<StringAllocator> StringAllocatorPtr;
 typedef boost::shared_ptr<std::stringstream> StringStreamPtr;
+
+
 inline bp::ptime now(){
  return bp::microsec_clock::local_time();
 }
@@ -198,8 +200,8 @@ public:
      * @see ShmFw::createSegment
      * @return shared string
      **/
-    String createString() {
-        return String(*pCharAllocator_);
+    CharString createString() {
+        return CharString(*pCharAllocator_);
     }
     /**
      * crates a anonymous string with a context
@@ -208,8 +210,8 @@ public:
      * @see ShmFw::createSegment
      * @return shared string
      **/
-    String createString(const char *str) {
-        String ret = createString();
+    CharString createString(const char *str) {
+        CharString ret = createString();
         ret = str;
         return ret;
     }
@@ -220,8 +222,8 @@ public:
      * @see ShmFw::createSegment
      * @return shared string
      **/
-    String createString(const std::string &str) {
-        String ret = createString();
+    CharString createString(const std::string &str) {
+        CharString ret = createString();
         ret = str.c_str();
         return ret;
     }

@@ -41,18 +41,18 @@ namespace {
 
 
 // The fixture for testing class Foo.
-class VariableTest : public ::testing::Test {
+class ShmTest : public ::testing::Test {
 protected:
     // You can remove any or all of the following functions if its body
     // is empty.
 
-    VariableTest()
+    ShmTest()
         : shmSegmentName_ ( "ShmTestSegment" )
         , shmSegmentSize_ ( 65536 ) {
         // You can do set-up work for each test here.
     }
 
-    virtual ~VariableTest() {
+    virtual ~ShmTest() {
         // You can do clean-up work that doesn't throw exceptions here.
     }
 
@@ -85,7 +85,7 @@ protected:
         return randf ( -10, 10 );
     }
 };
-TEST_F ( VariableTest, TestParameterEntry ) {
+TEST_F ( ShmTest, TestParameterEntry ) {
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
     ShmFw::Var<ShmFw::ParameterEntry<int> > a ( "a", shmHdl );
     a() = 10;
@@ -147,7 +147,7 @@ TEST_F ( VariableTest, TestParameterEntry ) {
     shmHdl->removeSegment();
 }
 
-TEST_F ( VariableTest, AllocPoints ) {
+TEST_F ( ShmTest, AllocPoints ) {
   
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
     ShmFw::Alloc<ShmFw::Points> a ( "var0", shmHdl ) ;
@@ -166,7 +166,7 @@ TEST_F ( VariableTest, AllocPoints ) {
     shmHdl->removeSegment();
 
 }
-TEST_F ( VariableTest, TestSharedLockPtr ) {
+TEST_F ( ShmTest, TestSharedLockPtr ) {
 
     /**
      * @ToDo
@@ -185,7 +185,7 @@ TEST_F ( VariableTest, TestSharedLockPtr ) {
       */
 }
 
-TEST_F ( VariableTest, TestClasses ) {
+TEST_F ( ShmTest, TestClasses ) {
 
     std::string nameA ( "myVarA" );
     std::string nameB ( "myVarB" );
@@ -194,14 +194,14 @@ TEST_F ( VariableTest, TestClasses ) {
     ShmFw::Var<int> a ( nameA, shmHdl, 1 );
     ShmFw::Var<double> b ( nameB, shmHdl, 1 );
     ShmFw::Var<double> c ( nameC, shmHdl, 1 );
-    std::cout << a.type_name() << std::endl;
+    //std::cout << a.type_name() << std::endl;
     EXPECT_FALSE ( a.isType<ShmFw::Var<double> >() );
     EXPECT_TRUE ( a.isType<ShmFw::Var<int> >() );
     shmHdl->removeSegment();
 }
 
 
-TEST_F ( VariableTest, TestTypeName ) {
+TEST_F ( ShmTest, TestTypeName ) {
 
     std::string nameA ( "myVarA" );
     std::string nameB ( "myVarB" );
@@ -210,13 +210,13 @@ TEST_F ( VariableTest, TestTypeName ) {
     ShmFw::Var<int> a ( nameA, shmHdl, 1 );
     ShmFw::Var<double> b ( nameB, shmHdl, 1 );
     ShmFw::Var<double> c ( nameC, shmHdl, 1 );
-    std::cout << a.type_name() << std::endl;
+    //std::cout << a.type_name() << std::endl;
     EXPECT_FALSE ( a.isType<ShmFw::Var<double> >() );
     EXPECT_TRUE ( a.isType<ShmFw::Var<int> >() );
     shmHdl->removeSegment();
 }
 
-TEST_F ( VariableTest, TestSimpleAssignment ) {
+TEST_F ( ShmTest, TestSimpleAssignment ) {
 
     std::string name ( "myVar" );
     srand ( time ( NULL ) );
@@ -237,7 +237,7 @@ TEST_F ( VariableTest, TestSimpleAssignment ) {
     shmHdl->removeSegment();
 }
 
-TEST_F ( VariableTest, TestLocks ) {
+TEST_F ( ShmTest, TestLocks ) {
     std::string name ( "myVar" );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
     ShmFw::Var<double> a ( name, shmHdl, 1 );
@@ -249,7 +249,7 @@ TEST_F ( VariableTest, TestLocks ) {
     shmHdl->removeSegment();
 }
 
-TEST_F ( VariableTest, TestChanged ) {
+TEST_F ( ShmTest, TestChanged ) {
     std::string name ( "myVar" );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
     ShmFw::Var<double> a ( name, shmHdl, 1 );
@@ -267,7 +267,7 @@ TEST_F ( VariableTest, TestChanged ) {
     shmHdl->removeSegment();
 }
 
-TEST_F ( VariableTest, TestSignals ) {
+TEST_F ( ShmTest, TestSignals ) {
     std::string name ( "myVar" );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
     ShmFw::Var<double> a ( name, shmHdl, 1 );
@@ -277,8 +277,26 @@ TEST_F ( VariableTest, TestSignals ) {
     shmHdl->removeSegment();
 }
 
+TEST_F ( ShmTest, StringVector ) {
+    std::string name ( "var0" );
+    std::string entry0 ( "Hello" );
+    std::string entry1 ( " " );
+    std::string entry2 ( "World" );
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
+    ShmFw::VectorStr a (name, shmHdl );
+    a.clear();
+    a.push_back(entry0);
+    a.push_back(entry1);
+    a.push_back(entry2);
+    ShmFw::VectorStr b (name, shmHdl );
+    EXPECT_TRUE ( (b[0].compare (entry0.c_str()) == 0) );
+    EXPECT_TRUE ( (b[1].compare (entry1.c_str()) == 0) );
+    EXPECT_FALSE ( (b[2].compare (entry0.c_str()) == 0) );  
+    shmHdl->removeSegment();
+}
 
-TEST_F ( VariableTest, TestSerializeXML ) {
+
+TEST_F ( ShmTest, TestSerializeXML ) {
     std::string filename ( "unittest.txt" );
     std::string name1 ( "myVar1" );
     std::string name2 ( "myVar2" );
@@ -295,7 +313,7 @@ TEST_F ( VariableTest, TestSerializeXML ) {
     shmHdl->removeSegment();
 }
 
-TEST_F ( VariableTest, TestSerializeTXT ) {
+TEST_F ( ShmTest, TestSerializeTXT ) {
     std::string filename ( "unittest.txt" );
     std::string name1 ( "myVar1" );
     std::string name2 ( "myVar2" );
@@ -320,7 +338,7 @@ TEST_F ( VariableTest, TestSerializeTXT ) {
     shmHdl->removeSegment();
 }
 
-TEST_F ( VariableTest, TestSerializeBinary ) {
+TEST_F ( ShmTest, TestSerializeBinary ) {
     std::string filename ( "unittest.bin" );
     std::string name1 ( "myVar1" );
     std::string name2 ( "myVar2" );
@@ -345,7 +363,7 @@ TEST_F ( VariableTest, TestSerializeBinary ) {
     shmHdl->removeSegment();
 }
 
-TEST_F ( VariableTest, TestSerializeVectorXML ) {
+TEST_F ( ShmTest, TestSerializeVectorXML ) {
     std::string filename ( "points.xml" );
     std::string name1 ( "myVector1" );
     std::string name2 ( "myVector2" );
@@ -363,7 +381,7 @@ TEST_F ( VariableTest, TestSerializeVectorXML ) {
     shmHdl->removeSegment();
 }
 
-TEST_F ( VariableTest, TestSerializeDequeXML ) {
+TEST_F ( ShmTest, TestSerializeDequeXML ) {
     std::string filename ( "pointsDeque.xml" );
     std::string name1 ( "myDeque1" );
     std::string name2 ( "myDeque2" );
@@ -381,7 +399,7 @@ TEST_F ( VariableTest, TestSerializeDequeXML ) {
 }
 
 
-TEST_F ( VariableTest, file_postix ) {
+TEST_F ( ShmTest, file_postix ) {
     EXPECT_TRUE ( ShmFw::FORMAT_NA == ShmFw::file_postix ( "" ) );
     EXPECT_TRUE ( ShmFw::FORMAT_NA == ShmFw::file_postix ( "." ) );
     EXPECT_TRUE ( ShmFw::FORMAT_NA == ShmFw::file_postix ( ".file" ) );

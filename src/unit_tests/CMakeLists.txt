@@ -5,8 +5,8 @@ include_directories(${GTEST_INCLUDE_DIR})
 enable_testing()
 
 # Add test cpp file
-add_executable(shmfw-unittest unittest.cpp)
-target_link_libraries(shmfw-unittest gtest ${Boost_LIBRARIES} rt shmfw)
+add_executable(shmfw-unittest_shm unittest_shm.cpp)
+target_link_libraries(shmfw-unittest_shm gtest ${Boost_LIBRARIES} rt shmfw)
 
 add_test(
     NAME shmfw-unittest
