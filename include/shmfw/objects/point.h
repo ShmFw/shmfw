@@ -32,12 +32,12 @@
 #ifndef SHARED_MEM_OBJECTS_POINT_H
 #define SHARED_MEM_OBJECTS_POINT_H
 
-#include <stdio.h>
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/binary_object.hpp>
 #include <shmfw/objects/base_object.h>
 #include <shmfw/objects/vector3.h>
 #include <boost/algorithm/string.hpp>
+
 namespace ShmFw {
 class Point : public ShmFw::BaseObject {
 public:

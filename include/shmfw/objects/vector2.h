@@ -36,6 +36,7 @@
 #include <iostream>
 #include <valarray>
 #include <vector>
+#include <stdio.h>
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 #include <boost/lexical_cast.hpp>

@@ -33,7 +33,6 @@
 #ifndef SHARED_MEM_VECTOR3
 #define SHARED_MEM_VECTOR3
 
-#include <iostream>
 #include <shmfw/objects/vector2.h>
 
 namespace ShmFw {

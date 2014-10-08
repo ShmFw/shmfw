@@ -43,6 +43,7 @@
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/containers/string.hpp>
 #include <shmfw/objects/point.h>
+#include <shmfw/handler.h>
 
 
 namespace ShmFw {
@@ -55,8 +56,6 @@ class Points {
     typedef bi::managed_shared_memory::segment_manager SegmentManager;
     typedef bi::allocator<void,   SegmentManager> AllocatorVoid;
     typedef bi::allocator<ShmFw::Point, SegmentManager> AllocatorPoint;
-    typedef bi::allocator<char,   SegmentManager> AllocatorChar;
-    typedef bi::basic_string<char, std::char_traits<char>, AllocatorChar>   CharString;
     typedef bi::vector<ShmFw::Point, AllocatorPoint > VectorPoints;
 
 public:
