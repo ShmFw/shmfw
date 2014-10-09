@@ -36,8 +36,6 @@
 #include <shmfw/objects/pose.h>
 #include <shmfw/objects/rgba.h>
 
-namespace bi = boost::interprocess;
-
 namespace ShmFw {
 
 

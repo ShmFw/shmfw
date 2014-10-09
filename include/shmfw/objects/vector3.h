@@ -75,6 +75,12 @@ public:
     void clear() const {
         x = 0, y = 0, z = 0;
     }
+     /**
+      * sets 0 0 0
+     **/
+    void zero(){
+      x = 0, y = 0, z = 0;
+    }
     /** generates a random x and y between min and max
      * @ToDo the rand number genrator should be replaced by a better one
      * @param min

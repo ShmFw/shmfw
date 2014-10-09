@@ -69,6 +69,12 @@ public:
 	o.setFromString(str);
         return input;
     }
+     /**
+      * sets 0 0 0 1
+     **/
+    void zero(){
+      r = 0, g = 0, b = 0, a = 1.;
+    }
     void setColour(const RGB &c, float A = 1){
       r = ((float) c.r) / 255.0, g = ((float) c.g) / 255.0, b = ((float) c.b) / 255.0, a = A;
     }

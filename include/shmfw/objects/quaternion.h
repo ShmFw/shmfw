@@ -90,6 +90,12 @@ public:
         z = axis.z * s;
         w = cos ( angle * 0.5 );
     }
+     /**
+      * sets 0 0 0 1
+     **/
+    void zero(){
+      x = 0, y = 0, z = 0, w = 1.;
+    }
     void setValue ( double _x, double _y, double _z, double _w ) {
         this->x = _x, this->y = _y, this->z = _z, this->w = _w;
     }

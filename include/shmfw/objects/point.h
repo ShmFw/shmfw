@@ -75,6 +75,12 @@ public:
     bool operator == ( const Point& o ) const {
         return x == o.x && y == o.y && z == o.z;
     } 
+     /**
+      * sets 0 0 0
+     **/
+    void zero(){
+      x = 0, y = 0, z = 0;
+    }
     /** casts to vector3
      * @return vector3<double> cast
      **/

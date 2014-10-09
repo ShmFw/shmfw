@@ -2,6 +2,7 @@
 
 add_subdirectory(usage)
 add_subdirectory(serialization)
+add_subdirectory(ros)
 
 
 SET(EXAMPLE_OPENCV 1 CACHE BOOL "shmfw opencv example" )

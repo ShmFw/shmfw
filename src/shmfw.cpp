@@ -62,6 +62,8 @@
 #include "shmfw/objects/mrpt.h"
 
 #include "shmfw/objects/points.h"
+#include "shmfw/objects/ros/header.h"
+#include "shmfw/objects/ros/visualization_marker.h"
 
 using namespace ShmFw;
 
@@ -239,6 +241,9 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
 #define RETURN_IF_TYPE_ALLOC( TYPE ) if(shmHeader.isType<ShmFw::Alloc< TYPE > >()) return HandlerObjectPtr( new ShmFw::HandlerAlloc< TYPE >( name, shmHdl));
  
     RETURN_IF_TYPE_ALLOC ( Points );
+    RETURN_IF_TYPE_ALLOC ( ros::Header );
+    RETURN_IF_TYPE_ALLOC ( ros::VisualizationMarker );
+    RETURN_IF_TYPE_ALLOC ( ros::VisualizationMarkers );
     return HandlerObjectPtr();
 }
 

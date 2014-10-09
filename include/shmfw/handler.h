@@ -71,6 +71,7 @@ typedef bi::scoped_lock<bi::interprocess_mutex> ScopedLock;
 typedef boost::shared_ptr<ScopedLock> ScopedLockPtr;
 typedef boost::shared_ptr<bi::managed_shared_memory> ShmPtr;
 typedef bi::managed_shared_memory::segment_manager SegmentManager;
+typedef bi::allocator<void,   SegmentManager> VoidAllocator;
 typedef bi::allocator<char, SegmentManager>   CharAllocator;
 typedef boost::shared_ptr<CharAllocator >   CharAllocatorPtr;
 typedef bi::basic_string<char, std::char_traits<char> , CharAllocator > CharString;

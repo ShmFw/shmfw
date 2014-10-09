@@ -102,6 +102,13 @@ public:
         position.z = z;
         orientation.setRotation ( ShmFw::Vector3<double> ( 0.,0.,1. ), pose.orientation );
     }
+     /**
+      * sets the pose to 0 0 0, 0 0 0 1
+     **/
+    void zero(){
+      position.zero();
+      orientation.zero();
+    }
     /** Sets the pose values
      * @param p translation
      * @param o rotation

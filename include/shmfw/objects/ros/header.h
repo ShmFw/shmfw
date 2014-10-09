@@ -30,10 +30,10 @@
  *   POSSIBILITY OF SUCH DAMAGE.                                           *
  ***************************************************************************/
 
-#ifndef SHARED_MEM_CLASSES_POINTS_H
-#define SHARED_MEM_CLASSES_POINTS_H
+#ifndef SHARED_MEM_ROS_HEADER_H
+#define SHARED_MEM_ROS_HEADER_H
 
-#include <vector>
+
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -45,75 +45,83 @@
 #include <shmfw/objects/point.h>
 #include <shmfw/handler.h>
 
-
+#ifdef INCLUDE_ROS_HEADERS  
+  #include <ros/ros.h>
+#endif
+  
 namespace ShmFw {
+namespace ros {
 
-/**
- * @note this class can only be used in combination with ShmFw::Alloc
- **/
-namespace bi = boost::interprocess;
-class Points {
-    typedef bi::allocator<ShmFw::Point, SegmentManager> AllocatorPoint;
-    typedef bi::vector<ShmFw::Point, AllocatorPoint > VectorPoints;
 
+class Header {
 public:
-    CharString frame;
-    VectorPoints points;
+    uint32_t seq;
+    bp::ptime stamp;
+    CharString frame_id;
 
-    Points ( const VoidAllocator &void_alloc )
-        : frame ( void_alloc ), points ( void_alloc )
-    {}
-
-    Points ( const Points &p )
-        : frame ( p.frame.get_allocator() ), points ( p.points.get_allocator() ) {
-        copyFrom ( p );
+    Header ( const VoidAllocator &void_alloc )
+        : seq ( 0 )
+        , stamp( boost::posix_time::microsec_clock::local_time())
+        , frame_id ( void_alloc ) {
+    }
+    Header ( const Header &o, const VoidAllocator &void_alloc )
+        : seq ( o.seq )
+        , stamp ( o.stamp )
+        , frame_id (o.frame_id, void_alloc ) {
     }
 
     std::string getToString() const {
         std::stringstream ss;
-        ss << frame << ", ";
-        for ( size_t i = 0; i < points.size(); i++ ) {
-            ss << points[i] << ( ( i != points.size()-1 ) ?", ":";\n" );
-        }
+        ss << "[ " << frame_id << ", " << seq << ", " << stamp << "]";
         return ss.str();
     }
     void getFromString ( const std::string &str ) {
     }
-    friend std::ostream& operator<< ( std::ostream &output, const Points &o ) {
+    friend std::ostream& operator<< ( std::ostream &output, const Header &o ) {
         output << o.getToString();
         return output;
     }
-    friend std::istream& operator>> ( std::istream &input, Points &o ) {
+    friend std::istream& operator>> ( std::istream &input, Header &o ) {
         return input;
     }
-    bool operator == ( const Points& o ) const {
-        if ( points.size() != o.points.size() ) return false;
-        if ( frame.compare ( o.frame ) != 0 ) return false;
-        for ( VectorPoints::const_iterator it0 = points.begin(),  it1 = o.points.begin(); it1 != o.points.end(); it1++, it0++ ) {
-            if ( !(*it0 == *it1) ) return false;
-        }
+    bool operator == ( const Header& o ) const {
+        if ( frame_id.compare ( o.frame_id ) != 0 ) return false;
+        if ( seq != o.seq ) return false;
+        if ( stamp != o.stamp ) return false;
         return true;
     }
-    Points &operator = ( const Points& o ) {
-        copyFrom(o);
+    Header &operator = ( const Header& o ) {
+        copyFrom ( o );
         return *this;
     }
-    template<typename T>
-    void copyTo ( T& des ) const {
-        des.frame = frame;
-        des.points = points;
+    void copyTo ( Header& des ) const {
+        des.frame_id = frame_id.c_str();
+        des.seq = seq;
+        des.stamp = stamp;
     }
-    template<typename T>
-    Points& copyFrom ( const T& src ) {
-        frame = src.frame;
-        points = src.points;
+    void clear ( ){
+        frame_id.clear();
+        seq = 0;
+        stamp = boost::posix_time::microsec_clock::local_time();
+    }
+    Header& copyFrom ( const Header& src ) {
+        frame_id = src.frame_id.c_str();
+        seq = src.seq;
+        stamp = src.stamp;
         return *this;
     }
+#ifdef INCLUDE_ROS_HEADERS  
+    void copyTo ( std_msgs::Header& des ) const {
+        des.frame_id = frame_id.c_str();
+        des.seq = seq;
+        des.stamp = des.stamp.fromBoost(stamp);
+    }
+#endif
+};
+};
 };
 
-};
 
-
-#endif //SHARED_MEM_CLASSES_POINTS_H
+#endif //SHARED_MEM_ROS_HEADER_H
 
 
