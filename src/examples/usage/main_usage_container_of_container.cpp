@@ -67,7 +67,7 @@ int main ()
     * Problem
     * How to I resize or add new elements?
     **/
-   complex_data_vector0->resize(3);  
+   //complex_data_vector0->resize(3);  
    
    
    return 0;

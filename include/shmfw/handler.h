@@ -303,9 +303,31 @@ public:
     bool removeSegment() {
 	  return removeSegment(name_);
 	}
+
+    /** returns namespace 
+    * @return namespace 
+    **/
+    const std::string &getNamespace() const{
+      return namespace_;      
+    }
+    /** defines a namespace for shared memory varaibles constructed with this handler
+    * @param namespace name of segment to remove
+    **/
+    void setNamespace(const std::string& ns){
+      namespace_ = ns + "/";
+    }
+    /** adds the prefix to a name
+    * @param name 
+    * @return prefix + name 
+    **/
+    std::string resolve_namespace(const std::string &name){
+      if(namespace_.empty()) return name;
+      return namespace_ + name;
+    }
 private:
     Handler(const Handler &) {};
     bool valid_;
+    std::string namespace_;
     std::string name_;
     unsigned int size_;
     ShmPtr pShm_;

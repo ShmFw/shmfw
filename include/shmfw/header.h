@@ -131,9 +131,9 @@ protected:
     int findHeader ( const std::string &name, HandlerPtr &shmHdl ) {
         headerLoc.creator = false;
         headerLoc.pShmHdl = shmHdl;
-        headerLoc.varName = name;
+        headerLoc.varName = shmHdl->resolve_namespace(name);
         try {
-            pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->find<char> ( name.c_str() ).first;
+            pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->find<char> ( headerLoc.varName.c_str() ).first;
             if ( pHeaderShm == NULL ) {
                 std::cerr << "variable does not exist" << std::endl;
             }
@@ -159,18 +159,18 @@ protected:
         pHeaderShm = NULL;
         headerLoc.pShmHdl = shmHdl;
         //const char* p = pShm->get_device().get_name();
-        headerLoc.varName = name;
+        headerLoc.varName = shmHdl->resolve_namespace(name);
         /// constructing shared header
         int ret = ERROR;
         try {
-            pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->find<char> ( name.c_str() ).first;
+            pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->find<char> ( headerLoc.varName.c_str() ).first;
             if ( pHeaderShm != NULL ) { /// already exists
                 headerLoc.tstamp = pHeaderShm->tstamp;
                 headerLoc.creator = false;
                 updateTimestampLocal();
                 ret = OK_NEW_HEADER;
             } else {
-                pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->construct<T> ( name.c_str() ) ();
+                pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->construct<T> ( headerLoc.varName.c_str() ) ();
                 headerLoc.creator = true;
                 ScopedLock myLock ( pHeaderShm->mutex );
                 pHeaderShm->tstamp = bp::microsec_clock::local_time();
@@ -179,7 +179,6 @@ protected:
                 pHeaderShm->condition.notify_all();
                 pHeaderShm->array_size = 0;
                 pHeaderShm->header_size = headerSize;
-                headerLoc.varName = name;
                 updateTimestamps();
                 setType ( type_name, type_hash );
                 ret = OK_USED_EXITING;
