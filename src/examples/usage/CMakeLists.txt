@@ -13,3 +13,6 @@ target_link_libraries(shmfw-example_usage_raw ${Boost_LIBRARIES} rt)
 add_executable(shmfw-example_usage_allocator main_usage_allocator.cpp )
 target_link_libraries(shmfw-example_usage_allocator ${Boost_LIBRARIES} rt)
 
+add_executable(shmfw-example_usage_container_of_container main_usage_container_of_container.cpp )
+target_link_libraries(shmfw-example_usage_container_of_container ${Boost_LIBRARIES} rt)
+
