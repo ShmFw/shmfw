@@ -486,7 +486,9 @@ public:
         case ShmFw::Header::CONTAINER_DEQUE:
             return "Deque";
         case ShmFw::Header::CONTAINER_IMAGE:
-            return "iImage";
+            return "Image";
+        case ShmFw::Header::CONTAINER_ALLOC:
+            return "Alloc";
         default:
             return "NA";
         }

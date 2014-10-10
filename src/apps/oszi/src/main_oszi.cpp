@@ -28,8 +28,8 @@ Prarmeters readArgs ( int argc, char **argv ) {
 	( "capture_images", "records images into a temp folder" )
     ( "config_oszi,o", po::value<std::string> ( &params.config_oszi )->default_value ( "oszi.cfg" ), "Oszi config" )
     ( "variable_name,v", po::value<std::string> ( &params.variable_name )->default_value ( "oszi" ), "shared variable name" )
-    ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( DEFAULT_SEGMENT_NAME ), "shared memory segment name" )
-    ( "shm_memory_size,s", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( DEFAULT_SEGMENT_SIZE ), "shared memory segment size" );
+    ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value (ShmFw:: DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
+    ( "shm_memory_size,s", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" );
 
     po::variables_map vm;
     try {

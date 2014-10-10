@@ -18,7 +18,7 @@ using namespace mrpt::poses;
 using namespace std;
 
 int main() {
-    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( DEFAULT_SEGMENT_NAME, DEFAULT_SEGMENT_SIZE );
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( ShmFw::DEFAULT_SEGMENT_NAME(), ShmFw::DEFAULT_SEGMENT_SIZE() );
     ShmFw::Var<CPoint3D> l("L",shmHdl);
     ShmFw::Var<CPose2D> r("R",shmHdl);
     ShmFw::Var<CPose3D> c("C",shmHdl);

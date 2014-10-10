@@ -21,7 +21,7 @@ using namespace mrpt::math;
 using namespace std;
 
 int main() {
-    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( DEFAULT_SEGMENT_NAME, DEFAULT_SEGMENT_SIZE );
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( ShmFw::DEFAULT_SEGMENT_NAME(), ShmFw::DEFAULT_SEGMENT_SIZE() );
     ShmFw::Vector<CPoint3D> points("mrpt_points",shmHdl);
     ShmFw::Vector<CPoint3D> transformed("mrpt_points_transformed",shmHdl);
     ShmFw::Var<CPose3D> P("mrpt_pose",shmHdl);

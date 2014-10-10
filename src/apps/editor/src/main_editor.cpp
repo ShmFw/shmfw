@@ -70,13 +70,14 @@ Prarmeters readArgs ( int argc, char **argv ) {
     ( "help", "get this help message" )
     ( "info,i", "show shm info" )
     ( "rowview,r", "row view of containers instead of ; split" )
+    ( "context", "show variable context" )
     ( "timeout,t", po::value<unsigned int> ( &params.timeout )->default_value ( 100 ), "update cycle time in ms, on 0 autoupdate off" )
     ( "dummy", "creates a dummy variable with the variable_names as name" )
     ( "dummy_type", po::value<std::string> ( &params.dummy_type )->default_value ( "double" ) , "defines the type of the dummy variable (double, float, int)" )
     ( "dummy_value", po::value<std::string> ( &params.dummy_value )->default_value ( "0" ) , "defines the value of the dummy variable" )
     ( "variable_name,n", po::value<std::vector<std::string> > ( &params.variable_names ), "shared variable names" )
-    ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( DEFAULT_SEGMENT_NAME ), "shared memory segment name" )
-    ( "shm_memory_size", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( DEFAULT_SEGMENT_SIZE ), "shared memory segment size" );
+    ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
+    ( "shm_memory_size", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" );
 
     po::variables_map vm;
     try {
@@ -145,19 +146,29 @@ void printVariable ( const Prarmeters &param, std::vector < ShmFw::HandlerObject
         clrtoeol();
     }
     int row = firstRow;
+    unsigned int header_string_max = 30;
+    unsigned int value_string_max = cols - header_string_max - 5;
     for ( size_t i = 0; i < objects.size(); i++ ) {
         if ( i == activeParameter ) attron ( COLOR_PAIR ( 2 ) );
         else attron ( COLOR_PAIR ( 1 ) );
         if ( param.info ) {
-            mvprintw ( row++, 0, "%15s = %s, %s", objects[i]->name().c_str(), objects[i]->timestamp().c_str(), ( objects[i]->locked() ? "locked  " : "unlocked" ) );
+            mvprintw ( row++, 0, "%25s = %s, %s", objects[i]->name().c_str(), objects[i]->timestamp().c_str(), ( objects[i]->locked() ? "locked  " : "unlocked" ) );
         }
-        if( param.rowview ){
-	  for(uint32_t r = 0; r < objects[i]->size(); r++){
-	    mvprintw ( row++, 0, "%15s[%2d] =%s %s", objects[i]->name().c_str(), r, ( objects[i]->locked() ? "*" : " " ), objects[i]->value(r).c_str() );
-	  }
-	} else {
-	  mvprintw ( row++, 0, "%15s =%s %s", objects[i]->name().c_str(), ( objects[i]->locked() ? "*" : " " ), objects[i]->value().c_str() );
-	}
+
+        mvprintw ( row, 0, "%25s = %s", objects[i]->name().c_str(), ( objects[i]->locked() ? "*" : " " ) );
+        if ( param.rowview ) {
+            row++;
+	    unsigned int value_string_max = cols - 5;
+            for ( uint32_t r = 0; r < objects[i]->size(); r++ ) {
+                std::string values_str = objects[i]->value ( r ).c_str();
+                if ( values_str.length() > value_string_max ) values_str = values_str.substr ( 0, value_string_max ) + " ...";
+                mvprintw ( row++, 1, "[%2d] = %s",  r, values_str.c_str() );
+            }
+        } else {
+            std::string values_str = objects[i]->value ().c_str();
+            if ( values_str.length() > value_string_max ) values_str = values_str.substr ( 0, value_string_max ) + " ...";
+            mvprintw ( row++, header_string_max, "%s",  values_str.c_str() );
+        }
     }
     mvprintw ( rows-2, cols-15, "updates: %d", counter++ );
 }
@@ -218,14 +229,14 @@ int main ( int argc, char *argv[] ) {
     char str[80];
     std::string step_size_str;
     activeParameter = 0;
-    bool auto_update = (params.timeout != 0);
+    bool auto_update = ( params.timeout != 0 );
     while ( params.close == false ) {           // Don't echo() while we do getch
         std::stringstream message;
         std::stringstream message_error;
         getmaxyx ( stdscr,rows,cols );
         printVariable ( params, objects, firstParameterRow, rows-3 );
-	if(auto_update) timeout ( params.timeout );
-	else timeout ( -1 );
+        if ( auto_update ) timeout ( params.timeout );
+        else timeout ( -1 );
         key = getch();
         if ( key == -1 ) continue;
         timeout ( -1 );
@@ -271,17 +282,17 @@ int main ( int argc, char *argv[] ) {
             message << "change triggerd!";
             break;
         case 'u':
-	    if(auto_update) auto_update = false;
+            if ( auto_update ) auto_update = false;
             message << "press 'a' to activeate auto update or 'u' for refresh!";
             break;
         case 'a':
-	    auto_update = !auto_update;
-	    if(auto_update && (params.timeout == 0)) params.timeout = 100;
-            message << "autoupdate: " << (auto_update?"on":"off") << "!";
+            auto_update = !auto_update;
+            if ( auto_update && ( params.timeout == 0 ) ) params.timeout = 100;
+            message << "autoupdate: " << ( auto_update?"on":"off" ) << "!";
             break;
         case 'd':
             params.rowview = !params.rowview;
-            message << "toggel info!";
+            message << "toggel rowview!";
             break;
         case 'i':
             params.info = !params.info;

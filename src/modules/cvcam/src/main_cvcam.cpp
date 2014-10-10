@@ -69,8 +69,8 @@ int program_options ( int argc, char* argv[], Prarmeters &params ) {
     ( "image_file,i", boost::program_options::value<std::string> ( &params.image_file )->default_value ( "" ), "image used instead of an device" )
     ( "width,w", boost::program_options::value<int> ( &params.width )->default_value ( 0 ), "image width, zero means auto" )
     ( "height,h", boost::program_options::value<int> ( &params.height )->default_value ( 0 ), "image height, zero means auto" )
-    ( "shm_memory_name,m", boost::program_options::value<std::string> ( &params.shm_memory_name )->default_value ( DEFAULT_SEGMENT_NAME ), "shared memory segment name" )
-    ( "shm_memory_size,s", boost::program_options::value<unsigned int> ( &params.shm_memory_size )->default_value ( DEFAULT_SEGMENT_SIZE ), "shared memory segment size" )
+    ( "shm_memory_name,m", boost::program_options::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
+    ( "shm_memory_size,s", boost::program_options::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" )
     ( "variable_name,v", boost::program_options::value<std::string > ( &params.variable_name )->default_value ( "cvcam" ), "shared variable" );
 
 

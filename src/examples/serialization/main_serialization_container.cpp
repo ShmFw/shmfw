@@ -16,7 +16,7 @@
 int main() {
   
     int N = 10;
-    boost::shared_ptr<ShmFw::Handler> shmHdl = ShmFw::Handler::create ( DEFAULT_SEGMENT_NAME, DEFAULT_SEGMENT_SIZE );
+    boost::shared_ptr<ShmFw::Handler> shmHdl = ShmFw::Handler::create ( ShmFw::DEFAULT_SEGMENT_NAME(), ShmFw::DEFAULT_SEGMENT_SIZE() );
     
     
     

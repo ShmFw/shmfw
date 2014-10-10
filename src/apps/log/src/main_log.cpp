@@ -80,8 +80,8 @@ Prarmeters readArgs ( int argc, char **argv ) {
     ( "file_level", po::value<int> ( &params.file_level )->default_value ( ShmFw::Message::NA ), "level of message to be stored" )
     ( "file,f", po::value<std::string> ( &params.log_file )->default_value ( "/tmp/log" ), "log file prefix, if empty it will print of cout" )
     ( "shm_log,l", po::value<std::string> ( &params.variable_name )->default_value ( "log" ), "shared variable name of the logger" )
-    ( "shm_memory_name", po::value<std::string> ( &params.shm_memory_name )->default_value ( LOG_SEGMENT_NAME ), "shared memory segment name" )
-    ( "shm_memory_size", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( LOG_SEGMENT_SIZE ), "shared memory segment size" );
+    ( "shm_memory_name", po::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_LOG_SEGMENT_NAME() ), "shared memory segment name" )
+    ( "shm_memory_size", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_LOG_SEGMENT_SIZE() ), "shared memory segment size" );
 
     po::variables_map vm;
     try {

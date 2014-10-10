@@ -47,11 +47,14 @@
 #include <shmfw/serialization/deque.h>
 #include <shmfw/objects/message.h>
 
-#define LOG_SEGMENT_NAME "ShmLog"
-#define LOG_SEGMENT_SIZE 2*MEGABYTE
-
 namespace ShmFw {
 
+inline std::string DEFAULT_LOG_SEGMENT_NAME() {
+    return "ShmFwLog";
+};
+inline unsigned int DEFAULT_LOG_SEGMENT_SIZE() {
+    return 16*1048576; //16MB;
+};
 
 class Log;
 /** Class to store log messages
@@ -181,7 +184,7 @@ protected:
 };
 
 #define SHMFW_INIT_LOG  \
-    ShmFw::HandlerPtr _shmHdlLog = ShmFw::Handler::create( LOG_SEGMENT_NAME, LOG_SEGMENT_SIZE );\
+    ShmFw::HandlerPtr _shmHdlLog = ShmFw::Handler::create( ShmFw::DEFAULT_LOG_SEGMENT_NAME(), ShmFw::DEFAULT_LOG_SEGMENT_SIZE() );\
     ShmFw::Log _log( _shmHdlLog , "log", false );
 #define SHMFW_LOG_SCREEN_OUPUT (screen) _log.screenOutput( screen );
 

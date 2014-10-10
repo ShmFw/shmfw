@@ -47,7 +47,7 @@ GZ_REGISTER_SENSOR_PLUGIN(GazeboShmLaser)
 GazeboShmLaser::GazeboShmLaser()
 : RayPlugin()
 {
-    shmHdl = ShmFw::Handler::create ( DEFAULT_SEGMENT_NAME, DEFAULT_SEGMENT_SIZE );
+    shmHdl = ShmFw::Handler::create ( ShmFw::DEFAULT_SEGMENT_NAME(), ShmFw::DEFAULT_SEGMENT_SIZE() );
     shmScan.reset(new ShmFw::Alloc<ShmFw::LaserScan>( "scan", shmHdl ));
     tstamp = boost::posix_time::microsec_clock::local_time();
 }

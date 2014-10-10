@@ -59,8 +59,8 @@ Prarmeters readArgs ( int argc, char **argv ) {
     ( "clear,c", "clears the shm first, default is no" )
     ( "file_to_load,f", po::value<std::string> ( &params.file_to_load )->default_value ( "" ), "load a image and places it into shared memory" )
     ( "reload,r", po::value< int > ( &params.reload )->default_value ( 100 ), "reload time in ms, 0 means reload on signal, -1 means relaod owns to load image into shm" )
-    ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( DEFAULT_SEGMENT_NAME ), "shared memory segment name" )
-    ( "shm_memory_size,s", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( DEFAULT_SEGMENT_SIZE ), "shared memory segment size" )
+    ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
+    ( "shm_memory_size,s", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" )
     ( "variable_name,v", po::value<std::string> ( &params.variable_name )->default_value ( "ImageMemory" ), "shared variable name" );
 
     po::variables_map vm;

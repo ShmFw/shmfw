@@ -35,7 +35,7 @@
 
 int main ( int argc, char *argv[] ) {
 
-    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create( DEFAULT_SEGMENT_NAME, DEFAULT_SEGMENT_SIZE );
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create( ShmFw::DEFAULT_SEGMENT_NAME(), ShmFw::DEFAULT_SEGMENT_SIZE() );
 
     ShmFw::Vector<double> a ( "data", shmHdl);
     std::cout << std::endl;
