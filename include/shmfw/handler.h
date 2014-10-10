@@ -311,15 +311,17 @@ public:
     const std::string &getNamespace() const {
         return namespace_;
     }
-    /** defines a namespace for shared memory varaibles constructed with this handler
-    * @param namespace name of segment to remove
+    /** Defines a namespace for shared memory varaibles constructed with this handler
+    * a "/" will allways present after calling this fnc
+    * @param namespace name prefix
     **/
     void setNamespace ( const std::string& ns ) {
         namespace_ = ns;
         boost::trim ( namespace_ );
         boost::trim_left_if ( namespace_, boost::is_any_of ( "/" ) );
         boost::trim_right_if ( namespace_, boost::is_any_of ( "/" ) );
-        namespace_ = namespace_ + "/";
+	if(namespace_.empty()) namespace_ = "/";
+	else namespace_ = "/" + namespace_ + "/";
     }
     /** adds the prefix to a name
     * @param name
