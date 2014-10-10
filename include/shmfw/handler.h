@@ -230,7 +230,7 @@ public:
         return ret;
     }
     /** Returns list with the names of the shared variables
-    * @param rNames vector which will be filled with the varibles
+    * @param rNames vector which will be filled with the variables
     * @param pTypes type of the variable
     * @param regExpressions examples "(.*)bmp",  "(.*)$"
     * @author Markus Bader

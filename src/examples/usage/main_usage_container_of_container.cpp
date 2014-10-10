@@ -68,7 +68,7 @@ int main ()
     * How to I resize or add new elements?
     **/
    //complex_data_vector0->resize(3);  
-   
+   //complex_data_vector0->insert(complex_data_vector0->end(), 3, complex_data(alloc_inst));
    
    return 0;
 }
