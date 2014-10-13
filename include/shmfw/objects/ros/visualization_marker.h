@@ -238,6 +238,11 @@ public:
     }
 #endif
 
+    VisualizationMarker& setArrow ( const std::string &_frame_id, const ShmFw::RGBA &_color, const ShmFw::Pose &_pose, double _length = 1, double _lifetime = 0 ) {
+        unsigned int _id = id;
+        std::string _ns = ns.c_str();
+        return setArrow ( _frame_id, _id, _ns, _color, _pose, _length, _lifetime );
+    }
     VisualizationMarker& setArrow ( const std::string &_frame_id, unsigned int _id, const std::string &_ns, const ShmFw::RGBA &_color, const ShmFw::Pose &_pose, double _length = 1, double _lifetime = 0 ) {
         clear();
         header.frame_id = _frame_id.c_str();
@@ -252,7 +257,12 @@ public:
         scale.y = scale.z = scale.x/20;
         lifetime = _lifetime;
         return *this;
-    } 
+    }
+    VisualizationMarker& setArrow ( const std::string &_frame_id, const ShmFw::RGBA &_color, const ShmFw::Point &_a, const ShmFw::Point &_b, double _lifetime = 0 ) {
+        unsigned int _id = id;
+        std::string _ns = ns.c_str();
+        return setArrow ( _frame_id, _id, _ns, _color, _a, _b, _lifetime );
+    }
     VisualizationMarker& setArrow ( const std::string &_frame_id, unsigned int _id, const std::string &_ns, const ShmFw::RGBA &_color, const ShmFw::Point &_a, const ShmFw::Point &_b, double _lifetime = 0 ) {
         clear();
         header.frame_id = _frame_id.c_str();
@@ -270,6 +280,11 @@ public:
         scale.y = length/15;
         lifetime = _lifetime;
         return *this;
+    }
+    VisualizationMarker& setLineList ( const std::string &_frame_id, const ShmFw::RGBA &_color, double _width = -1., double _lifetime = 0 ) {
+        unsigned int _id = id;
+        std::string _ns = ns.c_str();
+        return setLineList ( _frame_id, _id, _ns,_color, _width, _lifetime );
     }
     VisualizationMarker& setLineList ( const std::string &_frame_id, unsigned int _id, const std::string &_ns, const ShmFw::RGBA &_color, double _width = -1., double _lifetime = 0 ) {
         clear();
@@ -290,6 +305,11 @@ public:
         points.push_back ( b );
         return *this;
     }
+    VisualizationMarker& setLineStrip ( const std::string &_frame_id, const ShmFw::RGBA &_color, double _width = 0.1, double _lifetime = 0 ) {
+        unsigned int _id = id;
+        std::string _ns = ns.c_str();
+        return setLineStrip ( _frame_id, _id, _ns,_color, _width, _lifetime );
+    }
     VisualizationMarker& setLineStrip ( const std::string &_frame_id, unsigned int _id, const std::string &_ns, const ShmFw::RGBA &_color, double _width = 0.1, double _lifetime = 0 ) {
         clear();
         header.frame_id = _frame_id.c_str();
@@ -307,6 +327,11 @@ public:
         if ( type != MARKER_LINE_STRIP ) return *this;
         points.push_back ( a );
         return *this;
+    }
+    VisualizationMarker& setPoints ( const std::string &_frame_id, const ShmFw::RGBA &_color, double _width = 0.1, double _height = 0.1, double _lifetime = 0 ) {
+        unsigned int _id = id;
+        std::string _ns = ns.c_str();
+        return setPoints ( _frame_id, _id, _ns, _color, _width, _height, _lifetime );
     }
     VisualizationMarker& setPoints ( const std::string &_frame_id, unsigned int _id, const std::string &_ns, const ShmFw::RGBA &_color, double _width = 0.1, double _height = 0.1, double _lifetime = 0 ) {
         clear();
@@ -333,6 +358,11 @@ public:
         points.push_back ( a );
         colors.push_back ( _color );
         return *this;
+    }
+    VisualizationMarker& setText ( const std::string &_frame_id, const ShmFw::RGBA &_color, const std::string &_text, const ShmFw::Point &_p, double _height = 0.1, double _lifetime = 0 ) {
+        unsigned int _id = id;
+        std::string _ns = ns.c_str();
+        return setText ( _frame_id, _id, _ns, _color, _text, _p, _height, _lifetime );
     }
     VisualizationMarker& setText ( const std::string &_frame_id, unsigned int _id, const std::string &_ns, const ShmFw::RGBA &_color, const std::string &_text, const ShmFw::Point &_p, double _height = 0.1, double _lifetime = 0 ) {
         clear();
@@ -394,20 +424,19 @@ public:
     void resize ( size_t newsize ) {
         resize ( newsize, typename MarkerVector::value_type ( markers.get_allocator() ) );
     }
-    VisualizationMarker &add ( const std::string &ns, int id = -1 ) {
+    VisualizationMarker &set ( const std::string &ns, uint32_t id = 1) {
         MarkerVector::iterator it;
         for ( it = markers.begin(); it != markers.end(); it++ ) {
             if ( ns.compare ( it->ns.c_str() ) == 0 ) {
-		if((id == -1) || (id == (int) it->id)) {
-		  return *it;
-		} 
+                if ( id == it->id ) {
+                    return *it;
+                }
             }
         }
         markers.insert ( markers.end(), 1, MarkerVector::value_type ( markers.get_allocator() ) );
+        markers.back().ns = ns.c_str();
+        markers.back().id = id;
         return markers.back();
-    }
-    VisualizationMarker &operator() ( const std::string &ns, int _id = -1 ) {
-        return add ( ns, _id );
     }
 };
 };

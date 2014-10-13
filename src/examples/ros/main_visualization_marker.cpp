@@ -113,16 +113,16 @@ int main ( int argc, char *argv[] ) {
         markerArrow.itHasChanged();
 	markerArrow.unlock();
 	marker_array.lock();
-	marker_array->add("text").setText ("map",4,"text",ShmFw::RGBA::white(), "Hallo", ShmFw::Point(x0,y0, 0), 0.5, 1);
-	marker_array->add("Points").setPoints ("map",2,"Points",ShmFw::RGBA::basic_colors(5), 0.1, 0.1, 2);
-	marker_array->add("LineList").setLineList("map",2,"LineList",ShmFw::RGBA::basic_colors(6), 0.1, 1);
-	marker_array->add("LineStrip").setLineStrip("map",2,"LineStrip",ShmFw::RGBA::basic_colors(7), 0.1, 1);
+	marker_array->set("text", 1).setText ("map",ShmFw::RGBA::white(), "Hallo", ShmFw::Point(x0,y0, 0), 0.5, 1);
+	marker_array->set("Points", 1).setPoints ("map",ShmFw::RGBA::basic_colors(5), 0.1, 0.1, 2);
+	marker_array->set("LineList", 1).setLineList("map",ShmFw::RGBA::basic_colors(6), 0.1, 1);
+	marker_array->set("LineStrip", 1).setLineStrip("map",ShmFw::RGBA::basic_colors(7), 0.1, 1);
 	for(double d = 0; d < 1.; d=d + 0.1){
 	  ShmFw::Point p0 (cos ( alpha-d ) * r, sin ( alpha-d ) * r,0);
 	  ShmFw::Point p1 (cos ( alpha+d ) * r, sin ( alpha+d ) * r,0);
-	  marker_array->add("Points").addPointsElement(p0);
-	  marker_array->add("LineList").addLineListElement(ShmFw::Point(0,0,0), p0);
-	  marker_array->add("LineStrip").addLineStripElement(p1);
+	  marker_array->set("Points", 1).addPointsElement(p0);
+	  marker_array->set("LineList", 1).addLineListElement(ShmFw::Point(0,0,0), p0);
+	  marker_array->set("LineStrip", 1).addLineStripElement(p1);
 	}
 	marker_array.itHasChanged();
 	marker_array.unlock();
