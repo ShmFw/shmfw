@@ -120,9 +120,9 @@ int main ( int argc, char *argv[] ) {
 	for(double d = 0; d < 1.; d=d + 0.1){
 	  ShmFw::Point p0 (cos ( alpha-d ) * r, sin ( alpha-d ) * r,0);
 	  ShmFw::Point p1 (cos ( alpha+d ) * r, sin ( alpha+d ) * r,0);
-	  marker_array->set("Points", 1).addPointsElement(p0);
-	  marker_array->set("LineList", 1).addLineListElement(ShmFw::Point(0,0,0), p0);
-	  marker_array->set("LineStrip", 1).addLineStripElement(p1);
+	  marker_array->get("Points", 1).addPointsElement(p0);
+	  marker_array->get("LineList", 1).addLineListElement(ShmFw::Point(0,0,0), p0);
+	  marker_array->get("LineStrip", 1).addLineStripElement(p1);
 	}
 	marker_array.itHasChanged();
 	marker_array.unlock();

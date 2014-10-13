@@ -438,6 +438,17 @@ public:
         markers.back().id = id;
         return markers.back();
     }
+    VisualizationMarker &get ( const std::string &ns, uint32_t id = 1) {
+        MarkerVector::iterator it;
+        for ( it = markers.begin(); it != markers.end(); it++ ) {
+            if ( ns.compare ( it->ns.c_str() ) == 0 ) {
+                if ( id == it->id ) {
+                    return *it;
+                }
+            }
+        }
+        throw 0;
+    }
 };
 };
 };
