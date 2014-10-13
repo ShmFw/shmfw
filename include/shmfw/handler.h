@@ -327,9 +327,12 @@ public:
     * @param name
     * @return prefix + name
     **/
-    std::string resolve_namespace ( const std::string &name ) {
-        if ( namespace_.empty() ) return name;
-        return namespace_ + name;
+    std::string resolve_namespace ( const std::string &_name ) {
+        if ( namespace_.empty() ) return _name;
+        std::string n = _name;
+        boost::trim_left_if ( n, boost::is_any_of ( "/" ) );
+        boost::trim_right_if ( n, boost::is_any_of ( "/" ) );
+        return namespace_ + n;
     }
 private:
     Handler ( const Handler & ) {};

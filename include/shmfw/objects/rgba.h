@@ -93,23 +93,75 @@ public:
         r = src.r, g = src.g, b = src.b, a = src.a;
         return *this;
     }
-    static const RGBA green(){
+    /// http://www.rapidtables.com/web/color/RGB_Color.htm
+    static const RGBA basic_colors(int i){
+      switch(i){
+	case 0: return black();
+	case 1: return white();
+	case 2: return red();
+	case 3: return lime();
+	case 4: return blue();
+	case 5: return yellow();
+	case 6: return cyan();
+	case 7: return magenta();
+	case 8: return sivler();
+	case 9: return gray();
+	case 10: return maroon();
+	case 11: return olive();
+	case 12: return green();
+	case 13: return purple();
+	case 14: return teal();
+	case 15: return navy();
+      }
+      return black();
+    }
+    static const RGBA black(){
+      return RGBA(0,0,0,1);
+    }
+    static const RGBA white(){
+      return RGBA(1,1,1,1);
+    }
+    static const RGBA red(){
+      return RGBA(1,0,0,1);
+    }
+    static const RGBA lime(){
       return RGBA(0,1,0,1);
     }
     static const RGBA blue(){
       return RGBA(0,0,1,1);
     }
-    static const RGBA red(){
-      return RGBA(1,0,0,1);
-    }
     static const RGBA yellow(){
       return RGBA(1,1,0,1);
     }
-    static const RGBA white(){
-      return RGBA(1,1,1,1);
+    static const RGBA cyan(){
+      return RGBA(0,1,1,1);
     }
-    static const RGBA black(){
-      return RGBA(0,0,0,1);
+    static const RGBA magenta(){
+      return RGBA(1,0,1,1);
+    }
+    static const RGBA sivler(){
+      return RGBA(0.75,0.75,0.75,1);
+    }
+    static const RGBA gray(){
+      return RGBA(0.5,0.5,0.5,1);
+    }
+    static const RGBA maroon(){
+      return RGBA(0.5,0,0,1);
+    }
+    static const RGBA olive(){
+      return RGBA(0.5,0.5,0,1);
+    }
+    static const RGBA green(){
+      return RGBA(0,0.5,0,1);
+    }
+    static const RGBA purple(){
+      return RGBA(0.5,0,0.5,1);
+    }
+    static const RGBA teal(){
+      return RGBA(0,0.5,0.5,1);
+    }
+    static const RGBA navy(){
+      return RGBA(0,0,0.5,1);
     }
 protected:
     friend class boost::serialization::access;

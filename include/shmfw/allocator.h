@@ -89,21 +89,21 @@ public:
         if ( constructHeader<SharedHeaderAlloc> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;;
             header_shm = ( SharedHeaderAlloc * ) pHeaderShm;
             if ( pHeaderShm->array_size > 0 ) {
-                data_local.creator = false;
-            } else {
-                /// constructing shared data
-                try {
-                    ScopedLock myLock ( pHeaderShm->mutex );
-                        pHeaderShm->container = ShmFw::Header::CONTAINER_ALLOC;
-			Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
-                        pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct<T> ( bi::anonymous_instance )[size](a);
-                        data_local.creator = true;
-                        pHeaderShm->array_size = size;
-                    } catch ( ... ) {
-                        std::cerr << "Error when constructing shared data" << std::endl;
-                        return ERROR;
-                    }
+            data_local.creator = false;
+        } else {
+            /// constructing shared data
+            try {
+                ScopedLock myLock ( pHeaderShm->mutex );
+                    pHeaderShm->container = ShmFw::Header::CONTAINER_ALLOC;
+                    Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
+                    pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct<T> ( bi::anonymous_instance ) [size] ( a );
+                    data_local.creator = true;
+                    pHeaderShm->array_size = size;
+                } catch ( ... ) {
+                    std::cerr << "Error when constructing shared data" << std::endl;
+                    return ERROR;
                 }
+            }
         data_local.ptr = ( T * ) pHeaderShm->ptr.get();
         return OK;
     }
@@ -218,6 +218,38 @@ public:
     friend std::ostream &operator << ( std::ostream &os, const Alloc<T> &o ) {
         return os << *o.data_local.ptr;
     };
+    
+    template<class ForwardIt>
+    static ForwardIt next ( ForwardIt it, typename std::iterator_traits<ForwardIt>::difference_type n = 1 ) {
+        std::advance ( it, n );
+        return it;
+    }
+
+    template <typename V, typename Element /*= typename V::value_type*/>
+    static void resize ( V& vect, size_t newsize, Element const& element ) {
+        if ( vect.size() < newsize ) {
+            vect.insert (
+                vect.end(),
+                newsize - vect.size(),
+                element
+            );
+        } else {
+            vect.erase (
+                next ( vect.begin(), newsize ),
+                vect.end()
+            );
+        }
+    }
+
+    template <typename V>
+    static void resize ( V& vect, size_t newsize, typename V::allocator_type const& alloc_inst ) {
+        resize ( vect, newsize, typename V::value_type ( alloc_inst ) );
+    }
+
+    template <typename V>
+    static void resize ( V& vect, size_t newsize ) {
+        resize ( vect, newsize, typename V::value_type ( vect.get_allocator() ) );
+    }
 };
 };
 #endif //SHARED_MEM_CONTAINER_H

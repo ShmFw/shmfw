@@ -239,7 +239,7 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_ALLOC ( Points );
     RETURN_IF_TYPE_ALLOC ( ros::Header );
     RETURN_IF_TYPE_ALLOC ( ros::VisualizationMarker );
-    RETURN_IF_TYPE_ALLOC ( ros::VisualizationMarkers );
+    RETURN_IF_TYPE_ALLOC ( ros::VisualizationMarkerArray );
     return HandlerObjectPtr();
 }
 

@@ -252,7 +252,7 @@ public:
         scale.y = scale.z = scale.x/20;
         lifetime = _lifetime;
         return *this;
-    }
+    } 
     VisualizationMarker& setArrow ( const std::string &_frame_id, unsigned int _id, const std::string &_ns, const ShmFw::RGBA &_color, const ShmFw::Point &_a, const ShmFw::Point &_b, double _lifetime = 0 ) {
         clear();
         header.frame_id = _frame_id.c_str();
@@ -262,16 +262,16 @@ public:
         color = _color;
         type = MARKER_ARROW;
         action = ACTION_ADD;
-        points.resize(2);
-	_a.copyTo(points[0]);
-	_b.copyTo(points[1]);
-	double length = (_a.asVector() - _b.asVector()).norm();
+        points.resize ( 2 );
+        _a.copyTo ( points[0] );
+        _b.copyTo ( points[1] );
+        double length = ( _a.asVector() - _b.asVector() ).norm();
         scale.x = length/20;
         scale.y = length/15;
         lifetime = _lifetime;
         return *this;
     }
-    VisualizationMarker& setLineList ( const std::string &_frame_id, unsigned int _id, const std::string &_ns, const ShmFw::RGBA &_color, double width = -1., double _lifetime = 0 ) {
+    VisualizationMarker& setLineList ( const std::string &_frame_id, unsigned int _id, const std::string &_ns, const ShmFw::RGBA &_color, double _width = -1., double _lifetime = 0 ) {
         clear();
         header.frame_id = _frame_id.c_str();
         ns = _ns.c_str();
@@ -281,25 +281,16 @@ public:
         type = MARKER_LINE_LIST;
         action = ACTION_ADD;
         lifetime = _lifetime;
-        points.clear();
-	scale.x = width;
+        scale.x = _width;
         return *this;
     }
-    VisualizationMarker& addLineListElement ( const ShmFw::Point &a, const ShmFw::Point &b) {
+    VisualizationMarker& addLineListElement ( const ShmFw::Point &a, const ShmFw::Point &b ) {
+        if ( type != MARKER_LINE_LIST ) return *this;
         points.push_back ( a );
         points.push_back ( b );
         return *this;
     }
-    VisualizationMarker& addLineListElement ( const ShmFw::Point &b) {
-	if(points.size() == 0){
-	  points.push_back ( b );
-	}	
-	const ShmFw::Point &a = points.back();
-        points.push_back ( a );
-        points.push_back ( b );
-        return *this;
-    }
-    VisualizationMarker& setLineStrip ( const std::string &_frame_id, unsigned int _id, const std::string &_ns, const ShmFw::RGBA &_color, double width = 0.1, double _lifetime = 0 ) {
+    VisualizationMarker& setLineStrip ( const std::string &_frame_id, unsigned int _id, const std::string &_ns, const ShmFw::RGBA &_color, double _width = 0.1, double _lifetime = 0 ) {
         clear();
         header.frame_id = _frame_id.c_str();
         ns = _ns.c_str();
@@ -309,24 +300,67 @@ public:
         type = MARKER_LINE_STRIP;
         action = ACTION_ADD;
         lifetime = _lifetime;
-        points.clear();
-	scale.x = width;
+        scale.x = _width;
         return *this;
     }
-    VisualizationMarker& addLineStripElement ( const ShmFw::Point &a) {
+    VisualizationMarker& addLineStripElement ( const ShmFw::Point &a ) {
+        if ( type != MARKER_LINE_STRIP ) return *this;
         points.push_back ( a );
+        return *this;
+    }
+    VisualizationMarker& setPoints ( const std::string &_frame_id, unsigned int _id, const std::string &_ns, const ShmFw::RGBA &_color, double _width = 0.1, double _height = 0.1, double _lifetime = 0 ) {
+        clear();
+        header.frame_id = _frame_id.c_str();
+        ns = _ns.c_str();
+        id = _id;
+        valid = true;
+        color = _color;
+        type = MARKER_POINTS;
+        action = ACTION_ADD;
+        lifetime = _lifetime;
+        scale.x = _width;
+        scale.y = _height;
+        return *this;
+    }
+    VisualizationMarker& addPointsElement ( const ShmFw::Point &a ) {
+        if ( type != MARKER_POINTS ) return *this;
+        points.push_back ( a );
+        colors.push_back ( color );
+        return *this;
+    }
+    VisualizationMarker& addPointsElement ( const ShmFw::Point &a, const ShmFw::RGBA &_color ) {
+        if ( type != MARKER_POINTS ) return *this;
+        points.push_back ( a );
+        colors.push_back ( _color );
+        return *this;
+    }
+    VisualizationMarker& setText ( const std::string &_frame_id, unsigned int _id, const std::string &_ns, const ShmFw::RGBA &_color, const std::string &_text, const ShmFw::Point &_p, double _height = 0.1, double _lifetime = 0 ) {
+        clear();
+        header.frame_id = _frame_id.c_str();
+        ns = _ns.c_str();
+        id = _id;
+        valid = true;
+        color = _color;
+        type = MARKER_TEXT_VIEW_FACING;
+        action = ACTION_ADD;
+        lifetime = _lifetime;
+        text = _text.c_str();
+        scale.x = scale.y = scale.z = _height;
+        pose.position = _p;
+        //points.push_back (_p );
         return *this;
     }
 };
 
 typedef bi::allocator<VisualizationMarker, SegmentManager> VisualizationMarkerAllocator;
-class VisualizationMarkers {
+
+class VisualizationMarkerArray {
     typedef bi::vector<VisualizationMarker, VisualizationMarkerAllocator > MarkerVector;
 public:
-    VisualizationMarkers ( const VoidAllocator &void_alloc )
+    VisualizationMarkerArray ( const VoidAllocator &void_alloc )
         : markers ( void_alloc ) {
     }
-    VisualizationMarkers ( const VisualizationMarkers& o, const VoidAllocator &void_alloc )
+    VisualizationMarkerArray ( const VisualizationMarkerArray& o, const VoidAllocator &void_alloc )
         : markers ( o.markers, void_alloc ) {
     }
     MarkerVector markers;
@@ -341,12 +375,39 @@ public:
     }
     void getFromString ( const std::string &str ) {
     }
-    friend std::ostream& operator<< ( std::ostream &output, const VisualizationMarkers &o ) {
+    friend std::ostream& operator<< ( std::ostream &output, const VisualizationMarkerArray &o ) {
         output << o.getToString();
         return output;
     }
-    friend std::istream& operator>> ( std::istream &input, VisualizationMarkers &o ) {
+    friend std::istream& operator>> ( std::istream &input, VisualizationMarkerArray &o ) {
         return input;
+    }
+    void resize ( size_t newsize, VisualizationMarker const& element ) {
+        if ( markers.size() < newsize ) {
+            markers.insert ( markers.end(), newsize - markers.size(), element );
+        } else {
+            MarkerVector::iterator it = markers.begin();
+            std::advance ( it, newsize );
+            markers.erase ( it, markers.end() );
+        }
+    }
+    void resize ( size_t newsize ) {
+        resize ( newsize, typename MarkerVector::value_type ( markers.get_allocator() ) );
+    }
+    VisualizationMarker &add ( const std::string &ns, int id = -1 ) {
+        MarkerVector::iterator it;
+        for ( it = markers.begin(); it != markers.end(); it++ ) {
+            if ( ns.compare ( it->ns.c_str() ) == 0 ) {
+		if((id == -1) || (id == (int) it->id)) {
+		  return *it;
+		} 
+            }
+        }
+        markers.insert ( markers.end(), 1, MarkerVector::value_type ( markers.get_allocator() ) );
+        return markers.back();
+    }
+    VisualizationMarker &operator() ( const std::string &ns, int _id = -1 ) {
+        return add ( ns, _id );
     }
 };
 };
@@ -354,5 +415,6 @@ public:
 
 
 #endif //SHARED_MEM_ROS_VISUALIZATION_MARKER_H
+
 
 

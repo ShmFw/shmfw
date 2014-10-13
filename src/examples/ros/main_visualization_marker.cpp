@@ -46,6 +46,7 @@ struct Prarmeters {
     std::string shm_memory_name;
     unsigned int shm_memory_size;
     std::string variable_name;
+    std::string ns;
 };
 
 Prarmeters readArgs ( int argc, char **argv ) {
@@ -56,6 +57,7 @@ Prarmeters readArgs ( int argc, char **argv ) {
     desc.add_options()
     ( "help", "get this help message" )
     ( "clear,c", "clears the shared memory" )
+    ( "namespace,ns", po::value<std::string> ( &params.ns )->default_value ( "" ), "namespace" )
     ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
     ( "shm_memory_size,s", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" );
 
@@ -90,6 +92,7 @@ int main ( int argc, char *argv[] ) {
         std::cout << "Shared Memory " << params.shm_memory_name << " cleared" << std::endl;
     }
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
+    shmHdl->setNamespace(params.ns);
     srand ( time ( NULL ) );
 
     ShmFw::Alloc<ShmFw::ros::Header> h ( "header", shmHdl );
@@ -98,21 +101,36 @@ int main ( int argc, char *argv[] ) {
     double r = 2, da = M_PI/64;
     int i = 0;
     
+    ShmFw::Alloc<ShmFw::ros::VisualizationMarkerArray> marker_array ( "VisualizationMarkerArray", shmHdl );
+    
     ShmFw::Alloc<ShmFw::ros::VisualizationMarker> markerArrow ( "VisualizationMarker", shmHdl );
-    ShmFw::Alloc<ShmFw::ros::VisualizationMarker> markerLineList ( "VisualizationMarkerLineList", shmHdl );
-    ShmFw::Alloc<ShmFw::ros::VisualizationMarker> markerLineStrip ( "VisualizationMarkerLineStrip", shmHdl );
+    
     for ( double alpha = 0; true ; alpha += da, i++ ) {
         double x0 = cos ( alpha ) * r, y0 = sin ( alpha ) * r;
         double x1 = cos ( alpha ) * 2*r, y1 = sin ( alpha ) * 2*r;
-	markerArrow->setArrow("map",1,"markerArrow",ShmFw::RGBA::green(),ShmFw::Point ( x0,y0,0 ),ShmFw::Point ( x1,y1,0 ) );
+	markerArrow.lock();
+	markerArrow->setArrow("map",1,"markerArrow",ShmFw::RGBA::basic_colors(3),ShmFw::Point ( x0,y0,0 ),ShmFw::Point ( x1,y1,0 ) );
         markerArrow.itHasChanged();
-	markerLineList->setLineList("map",2,"markerLineList",ShmFw::RGBA::blue(), 0.1);
-	markerLineList->addLineListElement(ShmFw::Point(x0,y0,0), ShmFw::Point(x0,y0,r));
-	markerLineStrip->setLineList("map",3,"markerLineStrip",ShmFw::RGBA::red(),0.1);
-	markerLineStrip->addLineStripElement(ShmFw::Point(0,0,0));
-	markerLineStrip->addLineStripElement(ShmFw::Point(x0,y0,0));
+	markerArrow.unlock();
+	marker_array.lock();
+	marker_array->add("text").setText ("map",4,"text",ShmFw::RGBA::white(), "Hallo", ShmFw::Point(x0,y0, 0), 0.5, 1);
+	marker_array->add("Points").setPoints ("map",2,"Points",ShmFw::RGBA::basic_colors(5), 0.1, 0.1, 2);
+	marker_array->add("LineList").setLineList("map",2,"LineList",ShmFw::RGBA::basic_colors(6), 0.1, 1);
+	marker_array->add("LineStrip").setLineStrip("map",2,"LineStrip",ShmFw::RGBA::basic_colors(7), 0.1, 1);
+	for(double d = 0; d < 1.; d=d + 0.1){
+	  ShmFw::Point p0 (cos ( alpha-d ) * r, sin ( alpha-d ) * r,0);
+	  ShmFw::Point p1 (cos ( alpha+d ) * r, sin ( alpha+d ) * r,0);
+	  marker_array->add("Points").addPointsElement(p0);
+	  marker_array->add("LineList").addLineListElement(ShmFw::Point(0,0,0), p0);
+	  marker_array->add("LineStrip").addLineStripElement(p1);
+	}
+	marker_array.itHasChanged();
+	marker_array.unlock();
+	
 	usleep(1000*100);
     }
+    
+    
     exit ( 0 );
 
 }
