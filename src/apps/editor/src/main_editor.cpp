@@ -43,7 +43,8 @@
 SHMFW_INIT_LOG;
 
 #include <boost/program_options.hpp>
-#include <boost/thread.hpp>
+#include <boost/thread.hpp>    
+#include <boost/algorithm/string.hpp>
 
 size_t counter;
 size_t activeParameter;
@@ -162,11 +163,13 @@ void printVariable ( const Prarmeters &param, std::vector < ShmFw::HandlerObject
             for ( uint32_t r = 0; r < objects[i]->size(); r++ ) {
                 std::string values_str = objects[i]->value ( r ).c_str();
                 if ( values_str.length() > value_string_max ) values_str = values_str.substr ( 0, value_string_max ) + " ...";
+		boost::replace_all (values_str, "\n", ";");
                 mvprintw ( row++, 1, "[%2d] = %s",  r, values_str.c_str() );
             }
         } else {
             std::string values_str = objects[i]->value ().c_str();
             if ( values_str.length() > value_string_max ) values_str = values_str.substr ( 0, value_string_max ) + " ...";
+		boost::replace_all (values_str, "\n", ";");
             mvprintw ( row++, header_string_max, "%s",  values_str.c_str() );
         }
     }

@@ -28,6 +28,12 @@ ELSE (MRPT_FOUND)
 MESSAGE( STATUS "MRPT not found" )
 ENDIF(MRPT_FOUND)
 
+find_package( PkgConfig )
+pkg_check_modules( EIGEN3 REQUIRED eigen3 )
+include_directories( ${EIGEN3_INCLUDE_DIRS} )
+SET(USE_EIGEN 1)
+add_definitions( -DUSE_EIGEN )
+
 FIND_PACKAGE(OpenCV)
 IF(OpenCV_FOUND)
 MESSAGE( STATUS "Building OpenCV interface.  \n   -->: " ${OpenCV_INCLUDE_DIRS})

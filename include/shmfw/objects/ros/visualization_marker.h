@@ -132,10 +132,65 @@ public:
     std::string getToString() const {
         std::stringstream ss;
         ss << "[ " << header;
-        ss << ", " << ns;
-        ss << ", " << type;
-        ss << ", " << action;
-        ss << ", " << id << "]";
+        ss << ", ns: " << ns;
+        ss << ", id: " << id;
+        switch ( action ) {
+        case ACTION_NA:
+            ss << ", NA";
+            break;
+        case ACTION_ADD:
+            ss << ", ADD";
+            break;
+        case ACTION_DELETE:
+            ss << ", DELETE";
+            break;
+        }
+        switch ( type ) {
+        case MARKER_NA:
+            ss << ", NA";
+            break;
+        case MARKER_ARROW:
+            ss << ", ARROW";
+            ss << ", " << pose;
+            break;
+        case MARKER_CUBE:
+            ss << ", CUBE";
+            ss << ", " << pose;
+            break;
+        case MARKER_SPHERE:
+            ss << ", CUBE";
+            ss << ", " << pose;
+            break;
+        case MARKER_CYLINDER:
+            ss << ", CUBE";
+            ss << ", " << pose;
+            break;
+        case MARKER_LINE_STRIP:
+            ss << ", STRIP";
+            break;
+        case MARKER_LINE_LIST:
+            ss << ", LINES";
+            break;
+        case MARKER_CUBE_LIST:
+            ss << ", CUBES";
+            break;
+        case MARKER_SPHERE_LIST:
+            ss << ", SPHERES";
+            break;
+        case MARKER_POINTS:
+            ss << ", POINTS";
+            break;
+        case MARKER_TEXT_VIEW_FACING:
+            ss << ", TEXT";
+            break;
+        case MARKER_MESH_RESOURCE:
+            ss << ", MESH";
+            break;
+        case MARKER_TRIANGLE_LIST:
+            ss << ", TRIANGLE_LIST";
+            break;
+        }
+        ss << "]";
         return ss.str();
     }
     void getFromString ( const std::string &str ) {
@@ -424,7 +479,7 @@ public:
     void resize ( size_t newsize ) {
         resize ( newsize, typename MarkerVector::value_type ( markers.get_allocator() ) );
     }
-    VisualizationMarker &set ( const std::string &ns, uint32_t id = 1) {
+    VisualizationMarker &set ( const std::string &ns, uint32_t id = 1 ) {
         MarkerVector::iterator it;
         for ( it = markers.begin(); it != markers.end(); it++ ) {
             if ( ns.compare ( it->ns.c_str() ) == 0 ) {
@@ -438,7 +493,7 @@ public:
         markers.back().id = id;
         return markers.back();
     }
-    VisualizationMarker &get ( const std::string &ns, uint32_t id = 1) {
+    VisualizationMarker &get ( const std::string &ns, uint32_t id = 1 ) {
         MarkerVector::iterator it;
         for ( it = markers.begin(); it != markers.end(); it++ ) {
             if ( ns.compare ( it->ns.c_str() ) == 0 ) {

@@ -37,6 +37,14 @@ add_test(
     COMMAND shmfw-unittest_objects
 )
 
+add_executable(shmfw-unittest_eigen unittest_eigen.cpp)
+target_link_libraries(shmfw-unittest_eigen gtest ${Boost_LIBRARIES} rt shmfw)
+
+add_test(
+    NAME shmfw-unittest_eigen
+    COMMAND shmfw-unittest_eigen
+)
+
 IF(USE_MRPT)
 
 add_executable(shmfw-unittest_mrpt unittest_mrpt.cpp)

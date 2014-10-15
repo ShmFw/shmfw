@@ -59,6 +59,7 @@
 #include "shmfw/objects/twist.h"
 #include "shmfw/objects/waypoint.h"
 #include "shmfw/objects/mrpt.h"
+#include "shmfw/objects/eigen.h"
 
 #include "shmfw/objects/points.h"
 #include "shmfw/objects/ros/header.h"
@@ -166,6 +167,10 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_VAR ( mrpt::math::CQuaternion<double> );
     RETURN_IF_TYPE_VAR ( mrpt::math::CQuaternion<float> );
 #endif
+#ifdef USE_EIGEN
+    RETURN_IF_TYPE_VAR ( Eigen::Vector3d );
+    RETURN_IF_TYPE_VAR ( Eigen::Matrix3d );
+#endif
 
 #define RETURN_IF_TYPE_VECTOR( TYPE ) if(shmHeader.isType<ShmFw::Vector< TYPE > >()) return HandlerObjectPtr( new ShmFw::HandlerVector< TYPE >( name, shmHdl));
     RETURN_IF_TYPE_VECTOR ( float );
@@ -198,6 +203,10 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_VECTOR ( mrpt::poses::CPose3D );
     RETURN_IF_TYPE_VECTOR ( mrpt::math::CQuaternion<double> );
     RETURN_IF_TYPE_VECTOR ( mrpt::math::CQuaternion<float> );
+#endif
+#ifdef USE_EIGEN
+    RETURN_IF_TYPE_VECTOR ( Eigen::Vector3d );
+    RETURN_IF_TYPE_VECTOR ( Eigen::Matrix3d );
 #endif
 
 #define RETURN_IF_TYPE_DEQUE( TYPE ) if(shmHeader.isType<ShmFw::Deque< TYPE > >()) return HandlerObjectPtr( new ShmFw::HandlerDeque< TYPE >( name, shmHdl));
@@ -234,6 +243,11 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_DEQUE ( mrpt::math::CQuaternion<float> );
 #endif
 
+#ifdef USE_EIGEN
+    RETURN_IF_TYPE_DEQUE ( Eigen::Vector3d );
+    RETURN_IF_TYPE_DEQUE ( Eigen::Matrix3d );
+#endif
+    
 #define RETURN_IF_TYPE_ALLOC( TYPE ) if(shmHeader.isType<ShmFw::Alloc< TYPE > >()) return HandlerObjectPtr( new ShmFw::HandlerAlloc< TYPE >( name, shmHdl));
  
     RETURN_IF_TYPE_ALLOC ( Points );
