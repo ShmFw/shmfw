@@ -251,6 +251,7 @@ int main ( int argc, char *argv[] ) {
         case 'h':
             print_help ( rows, firstParameterRow );
             break;
+        case 3: //Ctrl-C
         case 27: //Esc
             params.close = true;
             break;

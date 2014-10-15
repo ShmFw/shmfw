@@ -168,8 +168,16 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_VAR ( mrpt::math::CQuaternion<float> );
 #endif
 #ifdef USE_EIGEN
+    RETURN_IF_TYPE_VAR ( Eigen::Vector2d );
     RETURN_IF_TYPE_VAR ( Eigen::Vector3d );
+    RETURN_IF_TYPE_VAR ( Eigen::Vector4d );
     RETURN_IF_TYPE_VAR ( Eigen::Matrix3d );
+    RETURN_IF_TYPE_VAR ( Eigen::Matrix4d );
+    RETURN_IF_TYPE_VAR ( Eigen::Vector2f );
+    RETURN_IF_TYPE_VAR ( Eigen::Vector3f );
+    RETURN_IF_TYPE_VAR ( Eigen::Vector4f );
+    RETURN_IF_TYPE_VAR ( Eigen::Matrix3f );
+    RETURN_IF_TYPE_VAR ( Eigen::Matrix4f );
 #endif
 
 #define RETURN_IF_TYPE_VECTOR( TYPE ) if(shmHeader.isType<ShmFw::Vector< TYPE > >()) return HandlerObjectPtr( new ShmFw::HandlerVector< TYPE >( name, shmHdl));
@@ -205,8 +213,16 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_VECTOR ( mrpt::math::CQuaternion<float> );
 #endif
 #ifdef USE_EIGEN
+    RETURN_IF_TYPE_VECTOR ( Eigen::Vector2d );
     RETURN_IF_TYPE_VECTOR ( Eigen::Vector3d );
+    RETURN_IF_TYPE_VECTOR ( Eigen::Vector4d );
     RETURN_IF_TYPE_VECTOR ( Eigen::Matrix3d );
+    RETURN_IF_TYPE_VECTOR ( Eigen::Matrix4d );
+    RETURN_IF_TYPE_VECTOR ( Eigen::Vector2f );
+    RETURN_IF_TYPE_VECTOR ( Eigen::Vector3f );
+    RETURN_IF_TYPE_VECTOR ( Eigen::Vector4f );
+    RETURN_IF_TYPE_VECTOR ( Eigen::Matrix3f );
+    RETURN_IF_TYPE_VECTOR ( Eigen::Matrix4f );
 #endif
 
 #define RETURN_IF_TYPE_DEQUE( TYPE ) if(shmHeader.isType<ShmFw::Deque< TYPE > >()) return HandlerObjectPtr( new ShmFw::HandlerDeque< TYPE >( name, shmHdl));
@@ -244,8 +260,16 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
 #endif
 
 #ifdef USE_EIGEN
+    RETURN_IF_TYPE_DEQUE ( Eigen::Vector2d );
     RETURN_IF_TYPE_DEQUE ( Eigen::Vector3d );
+    RETURN_IF_TYPE_DEQUE ( Eigen::Vector4d );
     RETURN_IF_TYPE_DEQUE ( Eigen::Matrix3d );
+    RETURN_IF_TYPE_DEQUE ( Eigen::Matrix4d );
+    RETURN_IF_TYPE_DEQUE ( Eigen::Vector2f );
+    RETURN_IF_TYPE_DEQUE ( Eigen::Vector3f );
+    RETURN_IF_TYPE_DEQUE ( Eigen::Vector4f );
+    RETURN_IF_TYPE_DEQUE ( Eigen::Matrix3f );
+    RETURN_IF_TYPE_DEQUE ( Eigen::Matrix4f );
 #endif
     
 #define RETURN_IF_TYPE_ALLOC( TYPE ) if(shmHeader.isType<ShmFw::Alloc< TYPE > >()) return HandlerObjectPtr( new ShmFw::HandlerAlloc< TYPE >( name, shmHdl));
@@ -297,5 +321,17 @@ HandlerObjectPtr HandlerObject::create ( const std::string &name, HandlerPtr &sh
     CREATE_TYPE_VAR ( mrpt::math::CQuaternion<float> );
 #endif
 
+#ifdef USE_EIGEN
+    CREATE_TYPE_VAR ( Eigen::Vector2d );
+    CREATE_TYPE_VAR ( Eigen::Vector3d );
+    CREATE_TYPE_VAR ( Eigen::Vector4d );
+    CREATE_TYPE_VAR ( Eigen::Matrix3d );
+    CREATE_TYPE_VAR ( Eigen::Matrix4d );
+    CREATE_TYPE_VAR ( Eigen::Vector2f );
+    CREATE_TYPE_VAR ( Eigen::Vector3f );
+    CREATE_TYPE_VAR ( Eigen::Vector4f );
+    CREATE_TYPE_VAR ( Eigen::Matrix3f );
+    CREATE_TYPE_VAR ( Eigen::Matrix4f );
+#endif
     return HandlerObjectPtr();
 }

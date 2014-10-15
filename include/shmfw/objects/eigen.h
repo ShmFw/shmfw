@@ -38,6 +38,7 @@
 namespace Eigen {  
 template<typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
 inline std::istream& operator>> ( std::istream &input, Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> &o ) {
+  
     return input;
 }
 }
