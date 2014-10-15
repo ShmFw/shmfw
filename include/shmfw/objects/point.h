@@ -39,7 +39,7 @@
 #include <boost/algorithm/string.hpp>
 
 namespace ShmFw {
-class Point : public ShmFw::BaseObject {
+class Point : public ShmFw::BaseObject{
 public:
     double x, y, z;
     Point(): x(0), y(0), z(0) {};
