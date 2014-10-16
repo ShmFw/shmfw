@@ -8,6 +8,7 @@
 #include <math.h>
 
 int main(int argc, char **argv) {
+  /*
     std::cout << "Hello, Figure!" << std::endl;
     
     std::vector<ShmFw::Vector2<double> > points;
@@ -23,5 +24,15 @@ int main(int argc, char **argv) {
     plot_scan.colour = ShmFw::Figure::getColour(ShmFw::Figure::RED);
     figure.render();
     cv::waitKey(-1);
+    */
+  
+    ShmFw::Figure figure;
+    
+    figure.getParam().setWindowSize(640, 480);
+    figure.getParam().setRange(5,-1, 5, -5);
+    figure.init();  
+    figure.render();
+    cv::waitKey(-1);
+    
     return 0;
 }
