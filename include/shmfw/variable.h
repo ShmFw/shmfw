@@ -44,6 +44,8 @@ namespace ShmFw {
 
 /// Exdented header (not used in our case)
 class SharedHeaderVar : private SharedHeader {
+public:
+    SharedHeaderVar(const VoidAllocator &void_alloc) : SharedHeader(void_alloc) {}
     friend class boost::serialization::access;
 };
 

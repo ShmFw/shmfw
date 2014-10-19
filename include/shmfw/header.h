@@ -61,14 +61,15 @@ namespace ShmFw {
 
 class SharedHeader {
 public:
-    SharedHeader()
+    SharedHeader(const VoidAllocator &void_alloc )
         : header_size ( 0 )
         , array_size ( 0 )
         , container ( 0 )
         , type_hash_code ( 0 )
         , user_flag ( false )
         , user_register ( 0 )
-        , tstamp ( bp::microsec_clock::local_time() ) {}
+        , tstamp ( bp::microsec_clock::local_time() ) 
+	, infoX(void_alloc) {}
     uint32_t header_size;                   /// reseved size for the header which can be bigger as sizeof(SharedHeader)
     uint32_t array_size;                    /// array size, a zero value will mark noninitilized element,
     uint8_t  container;                     /// container type @see CONTAINER_HEADER, CONTAINER_VARIABLE, CONTAINER_VECTOR, CONTAINER_DEQUE, ...
@@ -78,6 +79,7 @@ public:
     bool user_flag;                         /// flag for general usage
     uint32_t user_register;                 /// register for general usage
     bp::ptime tstamp;                       /// timestamp to tag the last change of the shared variable
+    CharString infoX;
     bi::offset_ptr<void> ptr;               /// offest pointer to the data
     bi::interprocess_mutex mutex;           /// mutex
     bi::interprocess_mutex condition_mutex; /// mutex used for wait condition calles
@@ -154,6 +156,7 @@ protected:
      **/
     template<typename T>
     int constructHeader ( const std::string &name, HandlerPtr &shmHdl, const char* type_name, size_t type_hash ) {
+	typedef bi::allocator<T, SegmentManager> Allocator;
         if ( name.length() > 0xFF - 1 ) throw std::runtime_error ( "Shm::Var::create()! name to long" );
         unsigned int headerSize = sizeof ( T );
         pHeaderShm = NULL;
@@ -163,14 +166,15 @@ protected:
         /// constructing shared header
         int ret = ERROR;
         try {
-            pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->find<char> ( headerLoc.varName.c_str() ).first;
+            //pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->find<char> ( headerLoc.varName.c_str() ).first;
             if ( pHeaderShm != NULL ) { /// already exists
                 headerLoc.tstamp = pHeaderShm->tstamp;
                 headerLoc.creator = false;
                 updateTimestampLocal();
                 ret = OK_NEW_HEADER;
             } else {
-                pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->construct<T> ( headerLoc.varName.c_str() ) ();
+                Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
+                pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->construct<T> ( headerLoc.varName.c_str() ) (a);
                 headerLoc.creator = true;
                 ScopedLock myLock ( pHeaderShm->mutex );
                 pHeaderShm->tstamp = bp::microsec_clock::local_time();
@@ -255,7 +259,7 @@ public:
         size_t type_hash_code = 0; 
 	const char *type_name = typeid ( Header ).name();
 #endif
-        if ( constructHeader<Header> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) exit ( 1 );
+        if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) exit ( 1 );
         }
     /** sets an info text
      **/

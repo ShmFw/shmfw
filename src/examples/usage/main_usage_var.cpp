@@ -87,20 +87,20 @@ int main ( int argc, char *argv[] ) {
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
     srand (time(NULL));
 
-    ShmFw::Var<double> a ( "a", shmHdl, 3 );
+    
+    
+    ShmFw::Var<double> a ( "a", shmHdl, 3);
     a.set ( 5.4 );
     std::cout << a.info();
     std::cout << a.human_readable() << std::endl;
     a() = 1.2;
     std::cout << a.human_readable() << std::endl;
-
     
     ShmFw::Var<ShmFw::Points> p;
     p.constructWithAllocator<ShmFw::Points>("b", shmHdl);
     ShmFw::Point p0(rand_01(), rand_01(), rand_01());
     p->points.push_back(p0);
     for(size_t i = 0; i < p->points.size(); i++) std::cout << i << ": " << p->points[i] << std::endl;
-    
     
     exit ( 0 );
 

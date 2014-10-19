@@ -41,6 +41,8 @@ namespace ShmFw {
 
 /// Exdented header (not used in our case)
 class SharedHeaderDeque : private SharedHeader {
+public:
+    SharedHeaderDeque(const VoidAllocator &void_alloc) : SharedHeader(void_alloc) {}
     friend class boost::serialization::access;
 };
 

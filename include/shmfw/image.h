@@ -42,6 +42,8 @@ class Image;
 
 /// Exdented header (not used in our case)
 class SharedHeaderImage : protected SharedHeader {
+public:
+    SharedHeaderImage(const VoidAllocator &void_alloc) : SharedHeader(void_alloc) {}
     friend class boost::serialization::access;
 public:
     int encoding;        /// encoding
