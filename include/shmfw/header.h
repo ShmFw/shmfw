@@ -66,6 +66,7 @@ public:
         , array_size ( 0 )
         , container ( 0 )
         , type_hash_code ( 0 )
+	, type_name(void_alloc) 
 	, info_text(void_alloc) 
         , user_flag ( false )
         , user_register ( 0 )
@@ -74,7 +75,7 @@ public:
     uint32_t array_size;                    /// array size, a zero value will mark noninitilized element,
     uint8_t  container;                     /// container type @see CONTAINER_HEADER, CONTAINER_VARIABLE, CONTAINER_VECTOR, CONTAINER_DEQUE, ...
     size_t type_hash_code;                  /// varaiable type hash code C++ (2011) @see std::type_info::hash_code
-    bi::offset_ptr<char> type_name;         /// varaiable type information @see std::type_info::name
+    CharString type_name;                   /// varaiable type information @see std::type_info::name
     CharString info_text;                   /// char array for general use @see info_text()
     bool user_flag;                         /// flag for general usage
     uint32_t user_register;                 /// register for general usage
@@ -211,13 +212,7 @@ private:
      * @see std::hypeid
      **/
     void setType ( const char *name, size_t hash_code ) {
-        size_t size_typename = strlen ( name );
-        try {
-            pHeaderShm->type_name = headerLoc.pShmHdl->getShm()->construct<char> ( bi::anonymous_instance ) [size_typename+1]();
-        } catch ( ... ) {
-            std::cerr << "Error when creating space for type_name" << std::endl;
-        }
-        strcpy ( pHeaderShm->type_name.get(), name );
+        pHeaderShm->type_name = name;
         pHeaderShm->type_hash_code = hash_code;
     }
 public:
@@ -262,8 +257,13 @@ public:
         }
     /** sets an info text
      **/
+    void info_text ( const char* text ) {
+        pHeaderShm->info_text = text;
+    }
+    /** sets an info text
+     **/
     void info_text ( const std::string &text ) {
-        pHeaderShm->info_text = text.c_str();
+        info_text ( text.c_str() );
     }
     /** returns info text
      * @return info
@@ -334,7 +334,7 @@ public:
         ss << " container: " << std::setw ( 10 ) << containerName();
         ss << " locked: " << ( locked ? "NO" : "YES" );
         ss << " hash: "<< std::setw ( 3 ) << pHeaderShm->type_hash_code;
-        ss << " type: "<< std::setw ( 0x1F ) << std::string ( pHeaderShm->type_name.get() );
+        ss << " type: "<< std::setw ( 0x1F ) << std::string ( pHeaderShm->type_name.c_str() );
         if ( locked ) unlock();
         return ss.str();
     }
@@ -497,16 +497,13 @@ public:
     virtual void destroy() const {
         char *p = ( char * ) pHeaderShm;
         headerLoc.pShmHdl->getShm()->destroy_ptr ( p );
-        if ( pHeaderShm->type_name ) {
-            headerLoc.pShmHdl->getShm()->destroy_ptr ( pHeaderShm->type_name.get() );
-        }
     };
     /** compares the variable type entries
      * @return true on equal
      **/
     template <class T1>
     bool isType () const {
-        const char* type_name_in_shm = pHeaderShm->type_name.get();
+        const char* type_name_in_shm = pHeaderShm->type_name.c_str();
         const char* type_name_request = typeid ( T1 ).name();
         bool result_name = ( strcmp ( type_name_in_shm, type_name_request ) == 0 );
 #if __cplusplus > 199711L
@@ -522,7 +519,7 @@ public:
      * @return true on equal
      **/
     bool isType ( const Header &header ) const {
-        bool result_name = ( strcmp ( pHeaderShm->type_name.get(), header.pHeaderShm->type_name.get() ) == 0 );
+        bool result_name = ( strcmp ( pHeaderShm->type_name.c_str(), header.pHeaderShm->type_name.c_str() ) == 0 );
 #if __cplusplus > 199711L
         bool result_hash_code = ( pHeaderShm->type_hash_code == header.pHeaderShm->type_hash_code );
 #else
@@ -537,7 +534,7 @@ public:
      * @return tpyeid.name();
      **/
     const char* type_name() const {
-        return pHeaderShm->type_name.get();
+        return pHeaderShm->type_name.c_str();
     }
     /** returns the variable tpye hash code
      * @see std::tpyeid.hash_code()

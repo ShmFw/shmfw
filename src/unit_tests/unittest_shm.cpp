@@ -398,7 +398,19 @@ TEST_F ( ShmTest, TestSerializeDequeXML ) {
     shmHdl->removeSegment();
 }
 
-TEST_F ( ShmTest, TestIntoTextShm ) {
+TEST_F ( ShmTest, TestTypeNameShm ) {
+    std::string name0 ( "v0" );
+    std::string name1 ( "v1" );
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
+    ShmFw::Var<int> a ( name0, shmHdl );
+    ShmFw::Var<int> b ( name1, shmHdl );
+    bool equal = a.isType<ShmFw::Var<int> >();
+    EXPECT_TRUE (equal );
+    shmHdl->removeSegment();
+}
+
+
+TEST_F ( ShmTest, TestInfoTextShm ) {
     std::string name ( "v0" );
     std::string infoA ( "hallo world" );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
@@ -411,7 +423,7 @@ TEST_F ( ShmTest, TestIntoTextShm ) {
     shmHdl->removeSegment();
 }
 
-TEST_F ( ShmTest, TestIntoTextSerialization ) {
+TEST_F ( ShmTest, TestInfoTextSerialization ) {
     std::string filename ( "v0.xml" );
     std::string name0 ( "v0" );
     std::string name1 ( "v1" );

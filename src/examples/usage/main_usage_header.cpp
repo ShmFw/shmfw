@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Software License Agreement (BSD License)                              *
- *   Copyright (C) 2014 by Markus Bader <markus.bader@tuwien.ac.at>        *
+ *   Copyright (C) 2012 by Markus Bader <markus.bader@tuwien.ac.at>        *
  *                                                                         *
  *   Redistribution and use in source and binary forms, with or without    *
  *   modification, are permitted provided that the following conditions    *
@@ -29,51 +29,66 @@
  *   WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE           *
  *   POSSIBILITY OF SUCH DAMAGE.                                           *
  ***************************************************************************/
-
-
-#ifndef  SHMFW_SERIALIZATION_HEADER_H
-#define SHMFW_SERIALIZATION_HEADER_H
-
+#include <iostream>
+#include <stdlib.h>
 
 #include <shmfw/header.h>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/nvp.hpp>
-#include <boost/date_time/posix_time/time_serialize.hpp>
+#include <shmfw/objects/points.h>
+#include <boost/program_options.hpp>
+#include <boost/thread.hpp>
 
-namespace boost {
-namespace serialization {
+struct Prarmeters {
+    bool clear;
+    std::string shm_memory_name;
+    unsigned int shm_memory_size;
+    std::string variable_name;
+};
 
-/// serialize function
-template<class archive> inline  void serialize ( archive &ar, ShmFw::SharedHeader &o, const unsigned int version ) {
-    std::string str;
-    unsigned int total_size = o.array_size + o.header_size;
-    ar & boost::serialization::make_nvp ( "total_size", total_size );
-    ar & boost::serialization::make_nvp ( "array_size", o.array_size );
-    ar & boost::serialization::make_nvp ( "container", o.container );
-    ar & boost::serialization::make_nvp ( "array_size", o.array_size );
-    ar & boost::serialization::make_nvp ( "tstamp", o.tstamp );
-    ar & boost::serialization::make_nvp ( "type_hash_code", o.type_hash_code );
-    if ( archive::is_saving::value ) {
-        str = o.type_name.c_str();
-        ar & boost::serialization::make_nvp ( "type_name", str );
-	str =  o.info_text.c_str();
-	ar & boost::serialization::make_nvp ( "info_text", str );
+Prarmeters readArgs ( int argc, char **argv ) {
+    namespace po = boost::program_options;
+
+    Prarmeters params;
+    po::options_description desc ( "Allowed Parameters" );
+    desc.add_options()
+    ( "help", "get this help message" )
+    ( "clear,c", "clears the shared memory" )
+    ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
+    ( "shm_memory_size,s", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" );
+
+    po::variables_map vm;
+    try {
+        po::store ( po::parse_command_line ( argc, argv, desc ), vm );
+    } catch ( const std::exception &ex ) {
+        std::cout << desc << std::endl;;
+        exit ( 1 );
     }
-    if ( archive::is_loading::value ) {
-        ar & boost::serialization::make_nvp ( "type_name", str );
-	o.type_name = str.c_str();
-	ar & boost::serialization::make_nvp ( "info_text", str );
-	o.info_text = str.c_str();
+    po::notify ( vm );
+
+    if ( vm.count ( "help" ) )  {
+        std::cout << desc << std::endl;
+        exit ( 1 );
     }
+    params.clear = ( vm.count ( "clear" ) > 0 );
+
+    return params;
 }
 
-template<class archive> inline  void serialize ( archive &ar, ShmFw::Header::LocalHeader & o, const unsigned int version ) {
-    std::string name ( o.varName );
-    ar & boost::serialization::make_nvp ( "varName", name );
+double rand_01(){
+  return ((double) rand()) / RAND_MAX;
 }
+int main ( int argc, char *argv[] ) {
 
 
-}; // namespace serialization
-}; // namespace boost
+    Prarmeters params = readArgs ( argc, argv );
+    if ( params.clear ) {
+        ShmFw::Handler::removeSegment ( params.shm_memory_name );
+        std::cout << "Shared Memory " << params.shm_memory_name << " cleared" << std::endl;
+    }
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
+    srand (time(NULL));
 
-#endif // SHMFW_SERIALIZATION_HEADER_H
+    ShmFw::Header( "h", shmHdl);
+    
+    exit ( 0 );
+
+}
