@@ -82,9 +82,11 @@ public:
      **/
     int construct ( const std::string &name, HandlerPtr &shmHdl, unsigned int size = 1 ) {
 #if __cplusplus > 199711L
-        size_t type_hash_code = typeid ( Var<T> ).hash_code() ); const char *type_name = typeid ( Var<T> ).name();
+        size_t type_hash_code = typeid ( Var<T> ).hash_code(); 
+	const char *type_name = typeid ( Var<T> ).name();
 #else
-        size_t type_hash_code = 0; const char *type_name = typeid ( Var<T> ).name();
+        size_t type_hash_code = 0; 
+	const char *type_name = typeid ( Var<T> ).name();
 #endif
         if ( constructHeader<SharedHeaderVar> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;;
             if ( size < 1 ) throw std::runtime_error ( "Size must be bigger as 0" );
@@ -118,9 +120,11 @@ public:
     int constructWithAllocator ( const std::string &name, HandlerPtr &shmHdl, size_t size = 1 ) {
     typedef bi::allocator<TA, SegmentManager> Allocator;
 #if __cplusplus > 199711L
-        size_t type_hash_code = typeid ( Var<TA> ).hash_code() ); const char *type_name = typeid ( Var<TA> ).name();
+        size_t type_hash_code = typeid ( Var<TA> ).hash_code(); 
+	const char *type_name = typeid ( Var<TA> ).name();
 #else
-        size_t type_hash_code = 0; const char *type_name = typeid ( Var<TA> ).name();
+        size_t type_hash_code = 0; 
+	const char *type_name = typeid ( Var<TA> ).name();
 #endif
         if ( constructHeader<SharedHeaderVar> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;;
             header_shm = ( SharedHeaderVar * ) pHeaderShm;

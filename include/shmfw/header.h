@@ -199,7 +199,7 @@ private:
         const char *name = typeid ( T ).name();
         size_t hash_code = 0;
 #if __cplusplus > 199711L
-        hash_code = typeid ( T ).hash_code() );
+        hash_code = typeid ( T ).hash_code();
 #endif
         setType ( name, hash_code );
     }
@@ -249,9 +249,11 @@ public:
     Header ( const std::string &name, HandlerPtr shmHdl, unsigned int headerSize = 0 )
         : pHeaderShm ( NULL ) {
 #if __cplusplus > 199711L
-        size_t type_hash_code = typeid ( Header ).hash_code() ); const char *type_name = typeid ( Header ).name();
+        size_t type_hash_code = typeid ( Header ).hash_code(); 
+	const char *type_name = typeid ( Header ).name();
 #else
-        size_t type_hash_code = 0; const char *type_name = typeid ( Header ).name();
+        size_t type_hash_code = 0; 
+	const char *type_name = typeid ( Header ).name();
 #endif
         if ( constructHeader<Header> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) exit ( 1 );
         }

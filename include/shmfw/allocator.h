@@ -82,7 +82,8 @@ public:
      **/
     int construct ( const std::string &name, HandlerPtr &shmHdl, size_t size = 1 ) {
 #if __cplusplus > 199711L
-        size_t type_hash_code = typeid ( Alloc<T> ).hash_code() ); const char *type_name = typeid ( Alloc<T> ).name();
+        size_t type_hash_code = typeid ( Alloc<T> ).hash_code(); 
+	const char *type_name = typeid ( Alloc<T> ).name();
 #else
         size_t type_hash_code = 0; const char *type_name = typeid ( Alloc<T> ).name();
 #endif

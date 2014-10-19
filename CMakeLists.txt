@@ -1,6 +1,6 @@
 cmake_minimum_required ( VERSION 2.6 )
 project(ShmFw)
-
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 include(PCHSupport.cmake)
 
 MESSAGE( STATUS "CMAKE_BUILD_TYPE:              " ${CMAKE_BUILD_TYPE} )

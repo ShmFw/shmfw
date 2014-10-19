@@ -82,9 +82,11 @@ public:
      **/
     int construct ( const std::string &name, HandlerPtr &shmHdl ) {
 #if __cplusplus > 199711L
-        size_t type_hash_code = typeid ( Deque<T> ).hash_code() ); const char *type_name = typeid ( Deque<T> ).name();
+        size_t type_hash_code = typeid ( Deque<T> ).hash_code(); 
+	const char *type_name = typeid ( Deque<T> ).name();
 #else
-        size_t type_hash_code = 0; const char *type_name = typeid ( Deque<T> ).name();
+        size_t type_hash_code = 0; 
+	const char *type_name = typeid ( Deque<T> ).name();
 #endif
         if ( constructHeader<SharedHeaderDeque> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
             header_shm = ( SharedHeaderDeque * ) pHeaderShm;

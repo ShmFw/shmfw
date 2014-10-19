@@ -111,7 +111,8 @@ public:
      **/
     int construct ( const std::string &name, HandlerPtr &shmHdl ) {
 #if __cplusplus > 199711L
-        size_t type_hash_code = typeid ( Image ).hash_code() ); const char *type_name = typeid ( Image ).name();
+        size_t type_hash_code = typeid ( Image ).hash_code(); 
+	const char *type_name = typeid ( Image ).name();
 #else
         size_t type_hash_code = 0; const char *type_name = typeid ( Image ).name();
 #endif
@@ -143,9 +144,11 @@ public:
      **/
     int construct ( const std::string &name, HandlerPtr &shmHdl, int width, int height, int channels, int depth, int encoding, bool update = false ) {
 #if __cplusplus > 199711L
-        size_t type_hash_code = typeid ( Image ).hash_code() ); const char *type_name = typeid ( Image ).name();
+        size_t type_hash_code = typeid ( Image ).hash_code(); 
+	const char *type_name = typeid ( Image ).name();
 #else
-        size_t type_hash_code = 0; const char *type_name = typeid ( Image ).name();
+        size_t type_hash_code = 0; 
+	const char *type_name = typeid ( Image ).name();
 #endif
         if ( constructHeader<SharedHeaderImage> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
             header_shm = ( SharedHeaderImage * ) pHeaderShm;
