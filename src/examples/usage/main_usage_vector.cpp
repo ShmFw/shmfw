@@ -91,7 +91,7 @@ int main ( int argc, char *argv[] ) {
     for ( int i = 0; i < 10; i++ ) {
         a.push_back ( rand_01() );
     }
-    std::cout << a.info() << std::endl;
+    std::cout << a.info_shm() << std::endl;
     std::cout << a.human_readable() << std::endl;
 
 

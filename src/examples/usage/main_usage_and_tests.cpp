@@ -111,17 +111,16 @@ int main ( int argc, char *argv[] ) {
 
     ShmFw::Var<double> a ( "a", shmHdl, 3 );
     a.set ( 5.4 );
-    std::cout << a.info();
+    std::cout << a.info_shm();
     std::cout << a.human_readable() << std::endl;
     a() = 1.2;
     std::cout << a.human_readable() << std::endl;
-
 
     ShmFw::Var<double> aa ( "a", shmHdl, 3 );
     std::cout << a.human_readable() << std::endl;
 
     ShmFw::Vector<double> b ( "b", shmHdl );
-    std::cout << b.info();
+    std::cout << b.info_shm();
     b().push_back ( 5 );
     b().push_back ( 3 );
     b[0] = 0.3;

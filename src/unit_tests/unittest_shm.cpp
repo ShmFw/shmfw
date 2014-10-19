@@ -398,6 +398,35 @@ TEST_F ( ShmTest, TestSerializeDequeXML ) {
     shmHdl->removeSegment();
 }
 
+TEST_F ( ShmTest, TestIntoTextShm ) {
+    std::string name ( "v0" );
+    std::string infoA ( "hallo world" );
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
+    ShmFw::Var<int> a ( name, shmHdl );
+    a.info_text(infoA);
+    ShmFw::Var<int> b ( name, shmHdl );
+    std::string infoB = b.info_text();
+    int idx = infoB.compare(infoA);
+    EXPECT_EQ ( idx, 0 );
+    shmHdl->removeSegment();
+}
+
+TEST_F ( ShmTest, TestIntoTextSerialization ) {
+    std::string filename ( "v0.xml" );
+    std::string name0 ( "v0" );
+    std::string name1 ( "v1" );
+    std::string infoA ( "hallo world" );
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
+    ShmFw::Var<int> a ( name0, shmHdl );
+    ShmFw::Var<int> b ( name1, shmHdl );
+    a.info_text(infoA);
+    ShmFw::write ( filename, a, ShmFw::FORMAT_XML );
+    ShmFw::read ( filename, b, ShmFw::FORMAT_XML );
+    std::string infoB = b.info_text();
+    int idx = infoB.compare(infoA);
+    EXPECT_EQ ( idx, 0 );
+    shmHdl->removeSegment();
+}
 
 TEST_F ( ShmTest, file_postix ) {
     EXPECT_TRUE ( ShmFw::FORMAT_NA == ShmFw::file_postix ( "" ) );

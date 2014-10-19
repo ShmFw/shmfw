@@ -66,20 +66,19 @@ public:
         , array_size ( 0 )
         , container ( 0 )
         , type_hash_code ( 0 )
+	, info_text(void_alloc) 
         , user_flag ( false )
         , user_register ( 0 )
-        , tstamp ( bp::microsec_clock::local_time() ) 
-	, infoX(void_alloc) {}
+        , tstamp ( bp::microsec_clock::local_time() ) {}
     uint32_t header_size;                   /// reseved size for the header which can be bigger as sizeof(SharedHeader)
     uint32_t array_size;                    /// array size, a zero value will mark noninitilized element,
     uint8_t  container;                     /// container type @see CONTAINER_HEADER, CONTAINER_VARIABLE, CONTAINER_VECTOR, CONTAINER_DEQUE, ...
     size_t type_hash_code;                  /// varaiable type hash code C++ (2011) @see std::type_info::hash_code
     bi::offset_ptr<char> type_name;         /// varaiable type information @see std::type_info::name
-    bi::offset_ptr<char> info_text;         /// char array for general use @see info_text()
+    CharString info_text;                   /// char array for general use @see info_text()
     bool user_flag;                         /// flag for general usage
     uint32_t user_register;                 /// register for general usage
     bp::ptime tstamp;                       /// timestamp to tag the last change of the shared variable
-    CharString infoX;
     bi::offset_ptr<void> ptr;               /// offest pointer to the data
     bi::interprocess_mutex mutex;           /// mutex
     bi::interprocess_mutex condition_mutex; /// mutex used for wait condition calles
@@ -166,7 +165,7 @@ protected:
         /// constructing shared header
         int ret = ERROR;
         try {
-            //pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->find<char> ( headerLoc.varName.c_str() ).first;
+            pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->find<char> ( headerLoc.varName.c_str() ).first;
             if ( pHeaderShm != NULL ) { /// already exists
                 headerLoc.tstamp = pHeaderShm->tstamp;
                 headerLoc.creator = false;
@@ -263,27 +262,14 @@ public:
         }
     /** sets an info text
      **/
-    void info_text ( const char *text ) {
-        size_t size_typename = strlen ( text );
-        try {
-            if ( pHeaderShm->info_text ) {
-                headerLoc.pShmHdl->getShm()->destroy_ptr ( pHeaderShm->info_text.get() );
-            }
-        } catch ( ... ) {
-            std::cerr << "Error when destroyint share space for info string" << std::endl;
-        }
-        try {
-            pHeaderShm->info_text = headerLoc.pShmHdl->getShm()->construct<char> ( bi::anonymous_instance ) [size_typename+1]();
-        } catch ( ... ) {
-            std::cerr << "Error when creating space for type_name" << std::endl;
-        }
-        strcpy ( pHeaderShm->type_name.get(), text );
+    void info_text ( const std::string &text ) {
+        pHeaderShm->info_text = text.c_str();
     }
     /** returns info text
      * @return info
      **/
-    const char* info_text() {
-        return pHeaderShm->info_text.get();
+    std::string info_text() const{
+        return pHeaderShm->info_text.c_str();
     }
     /**
      * Shared variable name
@@ -341,7 +327,7 @@ public:
      * @param type on true it will also print type informaion
      * @return returns info string
      **/
-    std::string info ( bool type = false ) {
+    std::string info_shm ( bool type = false ) {
         std::stringstream ss;
         bool locked = try_lock();
         ss << std::setw ( 20 ) << name() << ": " << pHeaderShm->tstamp;
@@ -511,9 +497,6 @@ public:
     virtual void destroy() const {
         char *p = ( char * ) pHeaderShm;
         headerLoc.pShmHdl->getShm()->destroy_ptr ( p );
-        if ( pHeaderShm->info_text ) {
-            headerLoc.pShmHdl->getShm()->destroy_ptr ( pHeaderShm->info_text.get() );
-        }
         if ( pHeaderShm->type_name ) {
             headerLoc.pShmHdl->getShm()->destroy_ptr ( pHeaderShm->type_name.get() );
         }

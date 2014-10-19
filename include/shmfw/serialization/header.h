@@ -56,13 +56,13 @@ template<class archive> inline  void serialize ( archive &ar, ShmFw::SharedHeade
     if ( archive::is_saving::value ) {
         str = std::string ( o.type_name.get() );
         ar & boost::serialization::make_nvp ( "type_name", str );
-        if ( o.info_text ) str = std::string ( o.info_text.get() );
-        else str.clear();
-        ar & boost::serialization::make_nvp ( "info_text", str );
+	str =  o.info_text.c_str();
+	ar & boost::serialization::make_nvp ( "info_text", str );
     }
     if ( archive::is_loading::value ) {
         ar & boost::serialization::make_nvp ( "type_name", str ); ///@ToDo
-        ar & boost::serialization::make_nvp ( "info_text", str ); ///@ToDo
+	ar & boost::serialization::make_nvp ( "info_text", str );
+	o.info_text = str.c_str();
     }
 }
 
