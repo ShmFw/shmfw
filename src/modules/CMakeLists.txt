@@ -3,11 +3,6 @@ IF(MODULE_COM )
 add_subdirectory(com)
 ENDIF(MODULE_COM )
 
-SET(MODULE_IMAGEVIEW 1 CACHE BOOL "image view modul" )
-IF(MODULE_IMAGEVIEW )
-add_subdirectory(image_view)
-ENDIF(MODULE_IMAGEVIEW )
-
 SET(MODULE_V4LCAM 0 CACHE BOOL "v4l modul" )
 IF(MODULE_V4LCAM )
 add_subdirectory(v4lcam)

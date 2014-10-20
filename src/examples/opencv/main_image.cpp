@@ -32,12 +32,13 @@
 
 #include <iostream>
 #include <stdlib.h>
-#include <signal.h>
 
 
 #include <opencv/highgui.h>
 #include <boost/program_options.hpp>
-#include <shmfw/opencv/bridge.h>
+#include <shmfw/objects/image.h>
+#include <shmfw/allocator.h>
+#include <shmfw/serialization/io_file.h>
 
 namespace bi = boost::interprocess;
 namespace po = boost::program_options;
@@ -81,51 +82,35 @@ Prarmeters readArgs ( int argc, char **argv ) {
     return params;
 }
 
-bool loop_program = true;
-
-void terminate ( int param ) {
-    std::cout << "Program was trying to abort or terminate." << std::endl;
-    loop_program = false;
-}
-
 int main ( int argc, char **argv ) {
-    signal ( SIGABRT,	terminate );
-    signal ( SIGTERM,	terminate );
     Prarmeters params = readArgs ( argc, argv );
     if ( params.clear ) {
         ShmFw::Handler::removeSegment ( params.shm_memory_name );
         std::cout << "Shared Memory " << params.shm_memory_name << " cleared" << std::endl;
-        exit ( 1 );
     }
     if ( !params.file_to_load.empty() ) {
         ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
         if ( !params.file_to_load.empty() ) {
-            IplImage *img = cvLoadImage ( params.file_to_load.c_str(), 1 );
-            ShmFw::Image shmImg ( params.variable_name, shmHdl, img->width, img->height, img->nChannels, img->depth / 8, ShmFw::Image::BGR8 );
-            shmImg.copyToShm ( img->imageData );
+            cv::Mat img = cvLoadImage ( params.file_to_load.c_str(), 1 );
+	    ShmFw::Alloc<ShmFw::Image> shm_image( params.variable_name, shmHdl );
+	    shm_image->copyFrom(img);
+	    cv::Mat des;
+	    shm_image->toCvMat(des);
+            cv::imshow ( params.variable_name.c_str(), des );
+            cv::waitKey ( -1 );
         }
     }
     if ( !params.variable_name.empty() ) {
-
         ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
-        for ( unsigned int i = 0, timeoutCounter = 0; ( params.reload >= 0 ) && loop_program; i++ ) {
-            ShmFw::Image shmImg = ShmFw::Image ( params.variable_name, shmHdl );
-
-            if ( i == 0 ) std::cout << shmImg.human_readable() << std::endl;
-
-            if ( shmImg.timed_wait ( 1000 ) == false ) {
-                std::cout << std::setw ( 4 ) << timeoutCounter++ << ": waited 1000 ms" << std::endl;
-            }
-
+        for ( unsigned int i = 0; params.reload >= 0; i++ ) {
+            ShmFw::Alloc<ShmFw::Image> shm_image( params.variable_name, shmHdl );
             if ( params.reload == 0 ) {
-                shmImg.wait();
+                shm_image.wait();
             }
-
-            cv::Mat img = ShmFw::toCvMat ( shmImg );
-            cv::namedWindow ( params.variable_name.c_str(), CV_WINDOW_AUTOSIZE );
-
+            if ( i == 0 ) std::cout << shm_image.human_readable() << std::endl;
+            cv::Mat img;
+	    shm_image->toCvMat ( img );
             cv::imshow ( params.variable_name.c_str(), img );
-
             if ( params.reload == 0 ) cv::waitKey ( 10 );
             else if ( cv::waitKey ( params.reload ) >= 0 ) params.reload = -1;
         }

@@ -37,8 +37,7 @@
 #include <shmfw/objects/vector3.h>
 
 namespace ShmFw {
-
-
+  
 /** 4D Vector **/
 template<typename T = float>
 class Vector4 {

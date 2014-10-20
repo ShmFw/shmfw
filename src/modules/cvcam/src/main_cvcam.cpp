@@ -39,7 +39,8 @@
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
-#include <shmfw/opencv/bridge.h>
+#include <shmfw/objects/image.h>
+#include <shmfw/allocator.h>
 
 #include "shmfw/log.h"
 
@@ -64,13 +65,13 @@ int program_options ( int argc, char* argv[], Prarmeters &params ) {
     desc.add_options() //
     ( "help", "get this help message" ) //
     ( "cfg", boost::program_options::value<std::string> ( &params.configFile ), "Config file" ) //
-    ( "imshow", "opens a highgui window and shows the images" ) //
+    ( "imshow,s", "opens a highgui window and shows the images" ) //
     ( "device,d", boost::program_options::value<int> ( &params.device )->default_value ( 0 ), "device" )
     ( "image_file,i", boost::program_options::value<std::string> ( &params.image_file )->default_value ( "" ), "image used instead of an device" )
     ( "width,w", boost::program_options::value<int> ( &params.width )->default_value ( 0 ), "image width, zero means auto" )
     ( "height,h", boost::program_options::value<int> ( &params.height )->default_value ( 0 ), "image height, zero means auto" )
-    ( "shm_memory_name,m", boost::program_options::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
-    ( "shm_memory_size,s", boost::program_options::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" )
+    ( "shm_memory_name", boost::program_options::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
+    ( "shm_memory_size", boost::program_options::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" )
     ( "variable_name,v", boost::program_options::value<std::string > ( &params.variable_name )->default_value ( "cvcam" ), "shared variable" );
 
 
@@ -154,20 +155,19 @@ int main ( int argc, char *argv[] ) {
     }
 
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
-    ShmFw::Image shmImg;
-    ShmFw::construct ( shmImg, params.variable_name, shmHdl, imgSrc );
+    ShmFw::Alloc<ShmFw::Image> shmImg ( params.variable_name, shmHdl );
     shmImg.unlock();
-    cv::Mat shmMat = ShmFw::toCvMat ( shmImg );
+    cv::Mat shmMat;
+    shmImg->copyFrom(imgSrc);
+    shmImg->toCvMat ( shmMat );
     do {
+        shmImg.lock();
         if ( cap.isOpened() ) {
-            cap >> imgSrc;
+            cap >> shmMat;
         }
-        if ( imgSrc.empty() ) {
+        if ( shmMat.empty() ) {
             continue;
         }
-        shmImg.lock();
-        //ShmFw::copy(imgSrc, shmImg);
-        imgSrc.copyTo ( shmMat );
         shmImg.unlock();
         shmImg.itHasChanged();
         if ( params.imshow ) {

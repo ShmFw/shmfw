@@ -34,7 +34,7 @@
 #ifndef SHMFW_SERIALIZATION_IMAGE_H
 #define SHMFW_SERIALIZATION_IMAGE_H
 
-#include <shmfw/image.h>
+#include <shmfw/objects/image.h>
 #include <shmfw/serialization/header.h>
 #include <boost/serialization/binary_object.hpp>
 #include <shmfw/serialization/interprocess_vector.hpp>
@@ -44,19 +44,13 @@ namespace boost {
 namespace serialization {
 
 /// serialize function
-template<class Archive> inline  void serialize ( Archive &ar, ShmFw::SharedHeaderImage &o, const unsigned int version ) {
+template<class Archive> inline  void serialize ( Archive &ar, ShmFw::Image &o, const unsigned int version ) {
     ar & boost::serialization::make_nvp ( "SharedHeader", boost::serialization::base_object<ShmFw::SharedHeader> ( o ) );
     ar & boost::serialization::make_nvp ( "encoding", o.encoding );
     ar & boost::serialization::make_nvp ( "width",  o.width );
     ar & boost::serialization::make_nvp ( "height",  o.height );
     ar & boost::serialization::make_nvp ( "depth",  o.depth );
     ar & boost::serialization::make_nvp ( "channels",  o.channels );
-}
-
-/// serialize function
-template<class archive>  void serialize ( archive &ar, ShmFw::Image &o, const unsigned int version ) {
-    ar & boost::serialization::make_nvp ( "SharedHeaderImage", o.shared_header() );
-    ar & boost::serialization::make_nvp ( "data", boost::serialization::make_binary_object ( ( char* )  o.data(),  o.imageSize( ) ));
 }
 }; // namespace serialization
 }; // namespace boost
