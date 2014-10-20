@@ -345,8 +345,7 @@ public:
         size_t  start = str.find_first_of ( bracketOpen );
         if ( start == std::string::npos ) return false;
         size_t end = str.find_first_of ( bracketClose, start );
-        if ( end == std::string::npos ) return false;
-	
+        if ( end == std::string::npos ) return false;	
         std::string tmp = str.substr ( start+1, end-start-1 );
         boost::erase_all ( tmp, " " );
         std::vector<std::string> values;
