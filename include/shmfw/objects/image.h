@@ -44,7 +44,7 @@
 #include <boost/interprocess/containers/string.hpp>
 #include <shmfw/objects/point.h>
 #include <shmfw/handler.h>
-#include <opencv/cv.h>
+#include <opencv2/core/core.hpp>
 
 #define CLIP_TO_UCHAR(x)  (( x > 0xFF ) ? 0xFF : ( x < 0x00) ? 0x00 : x )
 #define YCr_TO_RED(Y, Cr)  (Y + Cr + (Cr >> 2) + (Cr >> 3) + (Cr >> 5))
@@ -92,6 +92,17 @@ public:
         copyFrom ( p );
     }
 
+    bool operator == ( const Image& o ) const {
+        bool equal_header = ( encoding == o.encoding &&  width == o.width && height == o.height &&
+                              depth == o.depth && channels == o.channels && widthStep == o.widthStep &&
+                              pixelStep == o.pixelStep && data.size() == o.data.size() );
+        if ( equal_header == false ) return false;
+        for ( size_t i = 0; i < data.size(); i++ ) {
+            if ( data[i] != o.data[i] ) return false;
+        }
+        return true;
+    }
+
     std::string getToString() const {
         std::stringstream ss;
         return ss.str();
@@ -104,9 +115,6 @@ public:
     }
     friend std::istream& operator>> ( std::istream &input, Image &o ) {
         return input;
-    }
-    bool operator == ( const Image& o ) const {
-        return true;
     }
     Image &operator = ( const Image& o ) {
         copyFrom ( o );

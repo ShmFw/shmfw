@@ -10,7 +10,7 @@ TEST_F ( ObjectTest, serializePoint ) {
     ShmFw::write(filename, p1);
     ShmFw::read (filename, p2);
     // std::cout << "var1: " << var1 << ", var2: " << var2 << std::endl;
-    EXPECT_EQ ( p1, p1 );
+    EXPECT_EQ ( p1, p2 );
 }
 TEST_F ( ObjectTest, copyToFromPoint ) {
     ShmFw::Point a(rand(), rand(), rand()), c;

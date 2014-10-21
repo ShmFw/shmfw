@@ -33,7 +33,6 @@
 #ifndef SHARED_MEM_MRPT
 #define SHARED_MEM_MRPT
 
-#ifdef USE_MRPT
 #include <shmfw/objects/point2d.h>
 #include <shmfw/objects/point.h>
 #include <shmfw/objects/pose2d.h>
@@ -245,6 +244,5 @@ inline ShmFw::Pose& operator<< ( ShmFw::Pose &des, const mrpt::poses::CPose3D &s
     return des;
 }
 
-#endif //USE_MRPT
 #endif //SHARED_MEM_MRPT
 

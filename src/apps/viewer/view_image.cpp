@@ -36,7 +36,7 @@
 
 
 #include <shmfw/objects/image.h>
-#include <opencv/highgui.h>
+#include <opencv2/highgui/highgui.hpp>
 #include <shmfw/allocator.h>
 #include <boost/program_options.hpp>
 
@@ -100,7 +100,7 @@ int main ( int argc, char **argv ) {
     if ( !params.file_to_load.empty() ) {
         ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
         if ( !params.file_to_load.empty() ) {
-            IplImage *img = cvLoadImage ( params.file_to_load.c_str(), 1 );
+	    cv::Mat img = cv::imread(params.file_to_load.c_str(), CV_LOAD_IMAGE_COLOR);
 	    ShmFw::Alloc<ShmFw::Image> shmImg( params.variable_name, shmHdl );
 	    shmImg->copyFrom(img, ShmFw::Image::BGR8);
         }

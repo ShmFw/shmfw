@@ -10,7 +10,7 @@ TEST_F ( ObjectTest, convertPose2DtoPose3D ) {
     p1.write ( filename );
     p2.read ( filename );
     // std::cout << "var1: " << var1 << ", var2: " << var2 << std::endl;
-    EXPECT_EQ ( p1, p1 );
+    EXPECT_EQ ( p1, p2 );
 }
 
 TEST_F ( ObjectTest, serializePose ) {
@@ -21,7 +21,7 @@ TEST_F ( ObjectTest, serializePose ) {
     p1.write ( filename );
     p2.read ( filename );
     // std::cout << "var1: " << var1 << ", var2: " << var2 << std::endl;
-    EXPECT_EQ ( p1, p1 );
+    EXPECT_EQ ( p1, p2 );
 }
 TEST_F ( ObjectTest, serializePoseStamped ) {
     std::string filename ( "unittestPoseStamped.xml" );
@@ -42,7 +42,7 @@ TEST_F ( ObjectTest, serializePose2D ) {
     p1.write ( filename );
     p2.read ( filename );
     // std::cout << "var1: " << var1 << ", var2: " << var2 << std::endl;
-    EXPECT_EQ ( p1, p1 );
+    EXPECT_EQ ( p1, p2 );
 }
 TEST_F ( ObjectTest, serializePose2DStamped ) {
     std::string filename ( "unittestPose2DStamped.xml" );

@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Software License Agreement (BSD License)                              *
- *   Copyright (C) 2014 by Markus Bader <markus.bader@tuwien.ac.at>        *
+ *   Copyright (C) 2012 by Markus Bader <markus.bader@tuwien.ac.at>        *
  *                                                                         *
  *   Redistribution and use in source and binary forms, with or without    *
  *   modification, are permitted provided that the following conditions    *
@@ -30,28 +30,18 @@
  *   POSSIBILITY OF SUCH DAMAGE.                                           *
  ***************************************************************************/
 
+#ifndef SHARED_MEM_OBJECTS_OPENCV_H
+#define SHARED_MEM_OBJECTS_OPENCV_H
 
-#ifndef SHMFW_SERIALIZATION_IMAGE_H
-#define SHMFW_SERIALIZATION_IMAGE_H
-
-#include <shmfw/objects/image.h>
-#include <shmfw/serialization/header.h>
-#include <boost/serialization/binary_object.hpp>
-#include <shmfw/serialization/interprocess_vector.hpp>
-
-
-namespace boost {
-namespace serialization {
-
-/// serialize function
-template<class Archive> inline  void serialize ( Archive &ar, ShmFw::Image &o, const unsigned int version ) {
-    ar & boost::serialization::make_nvp ( "SharedHeader", boost::serialization::base_object<ShmFw::SharedHeader> ( o ) );
-    ar & boost::serialization::make_nvp ( "encoding", o.encoding );
-    ar & boost::serialization::make_nvp ( "width",  o.width );
-    ar & boost::serialization::make_nvp ( "height",  o.height );
-    ar & boost::serialization::make_nvp ( "depth",  o.depth );
-    ar & boost::serialization::make_nvp ( "channels",  o.channels );
+#include <opencv2/core/core.hpp>
+namespace cv{
+inline bool operator== ( const RotatedRect &a, const RotatedRect &b ) {
+    return ((a.center == b.center) && (a.size == b.size) && (a.angle == b.angle));
 }
-}; // namespace serialization
-}; // namespace boost
-#endif // SHMFW_SERIALIZATION_IMAGE_H
+inline bool operator!= ( const RotatedRect &a, const RotatedRect &b ) {
+    return ((a.center != b.center) && (a.size != b.size) && (a.angle != b.angle));
+}
+};
+
+#endif //SHARED_MEM_OBJECTS_OPENCV_H
+

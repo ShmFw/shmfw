@@ -56,3 +56,11 @@ add_test(
 )
 
 ENDIF(USE_MRPT)
+
+add_executable(shmfw-unittest_opencv unittest_opencv.cpp)
+target_link_libraries(shmfw-unittest_opencv gtest ${Boost_LIBRARIES} ${OpenCV_LIBRARIES} rt)
+
+add_test(
+    NAME shmfw-unittest_opencv
+    COMMAND shmfw-unittest_opencv
+)
