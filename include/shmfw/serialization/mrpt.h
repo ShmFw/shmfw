@@ -54,17 +54,18 @@ template<class Archive> inline  void serialize ( Archive &ar, mrpt::poses::CPoin
     ar & boost::serialization::make_nvp ( "x", o.m_coords[0] );
     ar & boost::serialization::make_nvp ( "y", o.m_coords[1] );
 }
-template <class Archive>
-void save ( Archive & ar, const mrpt::poses::CPose2D &o, const unsigned int version ) {
+template<class Archive> inline  void serialize ( Archive &ar, mrpt::poses::CPoint3D &o, const unsigned int version ) {
     ar & boost::serialization::make_nvp ( "x", o.m_coords[0] );
     ar & boost::serialization::make_nvp ( "y", o.m_coords[1] );
-    ar & boost::serialization::make_nvp ( "phi", o.phi());
+    ar & boost::serialization::make_nvp ( "z", o.m_coords[2] );
 }
-template <class Archive>
-void load ( Archive & ar, mrpt::poses::CPose2D &o, const unsigned int version ) {
-    ar & boost::serialization::make_nvp ( "x", o.m_coords[0] );
-    ar & boost::serialization::make_nvp ( "y", o.m_coords[1] );
-    ar & boost::serialization::make_nvp ( "phi", o.phi());
+template <class Archive> void save ( Archive & ar, const mrpt::poses::CPose2D &o, const unsigned int version ) {
+    ar & boost::serialization::make_nvp ( "position", (const mrpt::poses::CPoint2D &) o);
+    ar & boost::serialization::make_nvp ( "orientation", o.phi());
+}
+template <class Archive> void load ( Archive & ar, mrpt::poses::CPose2D &o, const unsigned int version ) {
+    ar & boost::serialization::make_nvp ( "position", (mrpt::poses::CPoint2D &) o);
+    ar & boost::serialization::make_nvp ( "orientation", o.phi());
 }
 template<class Archive> inline  void serialize ( Archive &ar, mrpt::poses::CPose2D &o, const unsigned int version ) {
     split_free ( ar,o,version );
