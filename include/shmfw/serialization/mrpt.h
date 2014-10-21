@@ -35,7 +35,6 @@
 #define SHMFW_SERIALIZATION_MRPT_H
 
 
-#ifdef USE_MRPT
 #include <mrpt/math/CQuaternion.h>
 #include <mrpt/poses/CPoint3D.h>
 #include <mrpt/poses/CPoint2D.h>
@@ -45,6 +44,7 @@
 
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/nvp.hpp>
+#include <boost/serialization/split_free.hpp>
 
 namespace boost {
 namespace serialization {
@@ -54,8 +54,23 @@ template<class Archive> inline  void serialize ( Archive &ar, mrpt::poses::CPoin
     ar & boost::serialization::make_nvp ( "x", o.m_coords[0] );
     ar & boost::serialization::make_nvp ( "y", o.m_coords[1] );
 }
+template <class Archive>
+void save ( Archive & ar, const mrpt::poses::CPose2D &o, const unsigned int version ) {
+    ar & boost::serialization::make_nvp ( "x", o.m_coords[0] );
+    ar & boost::serialization::make_nvp ( "y", o.m_coords[1] );
+    ar & boost::serialization::make_nvp ( "phi", o.phi());
+}
+template <class Archive>
+void load ( Archive & ar, mrpt::poses::CPose2D &o, const unsigned int version ) {
+    ar & boost::serialization::make_nvp ( "x", o.m_coords[0] );
+    ar & boost::serialization::make_nvp ( "y", o.m_coords[1] );
+    ar & boost::serialization::make_nvp ( "phi", o.phi());
+}
+template<class Archive> inline  void serialize ( Archive &ar, mrpt::poses::CPose2D &o, const unsigned int version ) {
+    split_free ( ar,o,version );
+}
+
 
 }; // namespace serialization
 }; // namespace boost
-#endif //USE_MRPT
 #endif // SHMFW_SERIALIZATION_MRPT_H

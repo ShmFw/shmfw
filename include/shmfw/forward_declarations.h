@@ -44,6 +44,7 @@ namespace ShmFw {
   template <class> class Vector3;
   template <class> class Vector4;
   template <class> class Matrix3x3;
+  class Image;
   class LaserScan;
   class Points;
   class Marker;

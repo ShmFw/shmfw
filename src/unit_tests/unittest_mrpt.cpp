@@ -1,6 +1,8 @@
 
 #include "shmfw/variable.h"
 #include "shmfw/objects/mrpt.h"
+#include "shmfw/serialization/mrpt.h"
+#include "shmfw/serialization/io_file.h"
 #include <mrpt/utils/bits.h>
 #include "gtest/gtest.h"
 #include <time.h>
@@ -149,6 +151,16 @@ TEST_F ( MrptTest, Assignment_Pose3D ) {
     d << c;
     // std::cout << b << std::endl << d << std::endl;
     EXPECT_EQ ( true, b.equal ( d, 0.1f ) ) << "Should be equal";
+}
+
+TEST_F ( MrptTest, serializeCPose2D ) {
+    std::string filename ( "CPose2D.xml" );
+    mrpt::poses::CPose2D a(rand(),rand(), randAngle()), b;
+    ShmFw::write(filename, a);
+    ShmFw::read (filename, b);
+    std::cout  << a << std::endl;
+    std::cout  << b << std::endl;
+    EXPECT_EQ ( a, b );
 }
 
 
