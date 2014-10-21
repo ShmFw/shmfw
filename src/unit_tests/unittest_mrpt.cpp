@@ -158,8 +158,21 @@ TEST_F ( MrptTest, serializeCPose2D ) {
     mrpt::poses::CPose2D a(rand(),rand(), randAngle()), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
-    std::cout  << a << std::endl;
-    std::cout  << b << std::endl;
+    EXPECT_EQ ( a, b );
+}
+
+TEST_F ( MrptTest, serializeCPoint2D ) {
+    std::string filename ( "CPoint2D.xml" );
+    mrpt::poses::CPoint2D a(rand(),rand()), b;
+    ShmFw::write(filename, a);
+    ShmFw::read (filename, b);
+    EXPECT_EQ ( a, b );
+}
+TEST_F ( MrptTest, serializeCPoint3D ) {
+    std::string filename ( "CPoint3D.xml" );
+    mrpt::poses::CPoint3D a(rand(),rand(),rand()), b;
+    ShmFw::write(filename, a);
+    ShmFw::read (filename, b);
     EXPECT_EQ ( a, b );
 }
 
