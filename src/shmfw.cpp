@@ -57,7 +57,7 @@
 #include "shmfw/objects/parameterentry.h"
 #include "shmfw/objects/rgb.h"
 #include "shmfw/objects/twist.h"
-#include "shmfw/objects/waypoint.h"
+#include "shmfw/objects/model_state.h"
 #include "shmfw/objects/mrpt.h"
 #include "shmfw/objects/eigen.h"
 
@@ -158,7 +158,7 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_VAR ( Pose2DAGV );
     RETURN_IF_TYPE_VAR ( RouteSegment );
     RETURN_IF_TYPE_VAR ( Twist );
-    RETURN_IF_TYPE_VAR ( WayPoint );
+    RETURN_IF_TYPE_VAR ( ModelState );
 #ifdef USE_MRPT
     RETURN_IF_TYPE_VAR ( mrpt::poses::CPoint2D );
     RETURN_IF_TYPE_VAR ( mrpt::poses::CPoint3D );
@@ -203,7 +203,7 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_VECTOR ( Pose2DAGV );
     RETURN_IF_TYPE_VECTOR ( RouteSegment );
     RETURN_IF_TYPE_VECTOR ( Twist );
-    RETURN_IF_TYPE_VECTOR ( WayPoint );
+    RETURN_IF_TYPE_VECTOR ( ModelState );
 #ifdef USE_MRPT
     RETURN_IF_TYPE_VECTOR ( mrpt::poses::CPoint2D );
     RETURN_IF_TYPE_VECTOR ( mrpt::poses::CPoint3D );
@@ -248,7 +248,7 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_DEQUE ( Pose2DAGV );
     RETURN_IF_TYPE_DEQUE ( RouteSegment );
     RETURN_IF_TYPE_DEQUE ( Twist );
-    RETURN_IF_TYPE_DEQUE ( WayPoint );
+    RETURN_IF_TYPE_DEQUE ( ModelState );
 
 #ifdef USE_MRPT
     RETURN_IF_TYPE_DEQUE ( mrpt::poses::CPoint2D );
@@ -311,7 +311,7 @@ HandlerObjectPtr HandlerObject::create ( const std::string &name, HandlerPtr &sh
     CREATE_TYPE_VAR ( Pose2D );
     CREATE_TYPE_VAR ( Pose2DAGV );
     CREATE_TYPE_VAR ( Twist );
-    CREATE_TYPE_VAR ( WayPoint );
+    CREATE_TYPE_VAR ( ModelState );
 #ifdef USE_MRPT
     CREATE_TYPE_VAR ( mrpt::poses::CPoint2D );
     CREATE_TYPE_VAR ( mrpt::poses::CPoint3D );

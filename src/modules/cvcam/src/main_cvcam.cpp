@@ -155,7 +155,7 @@ int main ( int argc, char *argv[] ) {
     }
 
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
-    ShmFw::Alloc<ShmFw::Image> shmImg ( params.variable_name, shmHdl );
+    ShmFw::Alloc<ShmFw::ImageShm> shmImg ( params.variable_name, shmHdl );
     shmImg.unlock();
     cv::Mat shmMat;
     shmImg->copyFrom(imgSrc);

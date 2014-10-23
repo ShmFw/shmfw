@@ -55,8 +55,9 @@ namespace ShmFw {
   class Pose2DAGV;
   class Quaternion;
   class Twist;
+  class Twist2D;
   class RouteSegment;
-  class WayPoint;
+  class ModelState;
   class Handler;
 };
 

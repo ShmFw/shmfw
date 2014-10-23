@@ -45,73 +45,91 @@ struct Prarmeters {
     std::string shm_memory_name;
     unsigned int shm_memory_size;
     std::string variable_name;
+    bool show_container;
+    bool show_lock;
+    bool show_timestamp;
+    bool show_type;
     bool show_context;
 };
 
-Prarmeters readArgs(int argc, char **argv)
-{
+Prarmeters readArgs ( int argc, char **argv ) {
     Prarmeters params;
-    po::options_description desc("Allowed Parameters");
+    po::options_description desc ( "Allowed Parameters" );
     desc.add_options()
-    ("help", "get this help message")
-    ("clear,c", "clears the shared memory")
-    ("context", "show variable context")
-    ("shm_memory_name,m", po::value<std::string>(&params.shm_memory_name)->default_value(ShmFw::DEFAULT_SEGMENT_NAME()), "shared memory segment name")
-    ("shm_memory_size,s", po::value<unsigned int>(&params.shm_memory_size)->default_value(ShmFw::DEFAULT_SEGMENT_SIZE()), "shared memory segment size")
-    ("variable_name,v", po::value<std::string>(&params.variable_name), "shared variable name");
+    ( "help", "get this help message" )
+    ( "clear,c", "clears the shared memory" )
+    ( "timestamp,t", "show variable timestamp" )
+    ( "context", "show variable context" )
+    ( "type", "show variable type" )
+    ( "lock,l", "toggel variable lock" )
+    ( "container", "toggel variable container type" )
+    ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
+    ( "shm_memory_size,s", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" )
+    ( "variable_name,v", po::value<std::string> ( &params.variable_name ), "shared variable name" );
 
     po::variables_map vm;
     try {
-        po::store(po::parse_command_line(argc, argv, desc), vm);
-    } catch(const std::exception &ex) {
+        po::store ( po::parse_command_line ( argc, argv, desc ), vm );
+    } catch ( const std::exception &ex ) {
         std::cout << desc << std::endl;;
-        exit(1);
+        exit ( 1 );
     }
-    po::notify(vm);
+    po::notify ( vm );
 
-    if(vm.count("help"))  {
+    if ( vm.count ( "help" ) )  {
         std::cout << desc << std::endl;
-        exit(1);
+        exit ( 1 );
     }
-    params.clear = (vm.count("clear") > 0);
-    params.show_context = (vm.count("context") > 0);
+    params.clear = ( vm.count ( "clear" ) > 0 );
+    params.show_context = ( vm.count ( "context" ) > 0 );
+    params.show_type = ( vm.count ( "type" ) > 0 );
+    params.show_timestamp = ( vm.count ( "timestamp" ) > 0 );
+    params.show_lock = !( vm.count ( "lock" ) > 0 );
+    params.show_container = !( vm.count ( "container" ) > 0 );
 
     return params;
 }
 
-int main(int argc, char **argv)
-{
-    Prarmeters params = readArgs(argc, argv);
-    if(params.clear) {
-        ShmFw::Handler::removeSegment(params.shm_memory_name);
+int main ( int argc, char **argv ) {
+    Prarmeters params = readArgs ( argc, argv );
+    if ( params.clear ) {
+        ShmFw::Handler::removeSegment ( params.shm_memory_name );
         std::cout << "Shared Memory " << params.shm_memory_name << " cleared" << std::endl;
     }
     std::vector<std::string> varNames;
     std::vector < ShmFw::HandlerObjectPtr > objects;
-    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create(params.shm_memory_name, params.shm_memory_size);
-    shmHdl->listNames(varNames);
-    for(unsigned int i = 0; i < varNames.size(); i++) {
-        ShmFw::Header shmHeader(shmHdl, varNames[i]);
-        std::cout << std::setw ( 3 ) << i << ": " << std::setw ( 30 ) << varNames[i] << " = ";
-        std::cout << std::setw ( 12 ) << shmHeader.containerName();
-        std::cout << ( shmHeader.locked() ? ", locked  " : ", unlocked" );
-	std::cout << " : ";
-	if(params.show_context){
-	  if((shmHeader.container() == ShmFw::Header::CONTAINER_VARIABLE) || 
-	    (shmHeader.container() == ShmFw::Header::CONTAINER_VECTOR) ){
-	      ShmFw::HandlerObjectPtr objects = ShmFw::HandlerObject::open(varNames[i], shmHdl);
-	      if(objects){
-		std::cout << objects->value();
-	      } else {
-		std::cout << "?";
-	      }
-	  } else {
-	      std::cout << "-";
-	  }
-	} else {
-	  std::cout << shmHeader.timestampShm() ;
-	}
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
+    shmHdl->listNames ( varNames );
+    for ( unsigned int i = 0; i < varNames.size(); i++ ) {
+        ShmFw::Header shmHeader ( shmHdl, varNames[i] );
+        std::cout << std::setw ( 3 ) << i << ": " << std::setw ( 30 ) << varNames[i];
+        if ( params.show_container ) {
+            std::cout << ", " << std::setw ( 12 ) << shmHeader.containerName();
+        }
+        if ( params.show_context ) {
+            std::cout << ( shmHeader.locked() ? ", locked  " : ", unlocked" );
+        }
+        if ( params.show_context ) {
+            if ( ( shmHeader.container() == ShmFw::Header::CONTAINER_VARIABLE ) ||
+                    ( shmHeader.container() == ShmFw::Header::CONTAINER_VECTOR ) ) {
+                ShmFw::HandlerObjectPtr objects = ShmFw::HandlerObject::open ( varNames[i], shmHdl );
+                if ( objects ) {
+                    std::cout << " = " << objects->value();
+                } else {
+                    std::cout << "?";
+                }
+            } else {
+                std::cout << " = unsupported container";
+            }
+        }
+        if ( params.show_type ) {
+            std::cout << ", " << std::setw ( 8 )  << shmHeader.type_hash_code() << " : ";
+            std::cout << shmHeader.type_name();
+        }
+        if ( params.show_timestamp ) {
+            std::cout << ", " << shmHeader.timestampShm() ;
+        }
         std::cout << std::endl;
     }
-    exit(0);
+    exit ( 0 );
 }

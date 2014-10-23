@@ -53,22 +53,25 @@
 
 namespace ShmFw {
 
+enum image_encodings {
+    IMAGE_ENCODING_NA = 0,
+    IMAGE_ENCODING_MONO8 = 0x10, IMAGE_ENCODING_MONO16, IMAGE_ENCODING_MONO32F, IMAGE_ENCODING_MONO64F,
+    IMAGE_ENCODING_RGB8 = 0x20, IMAGE_ENCODING_RGBA8, IMAGE_ENCODING_RGB16, IMAGE_ENCODING_RGBA16,
+    IMAGE_ENCODING_BGR8 = 0x30, IMAGE_ENCODING_BGRA8, IMAGE_ENCODING_BGR16, IMAGE_ENCODING_BGRA16,
+    IMAGE_ENCODING_YUV8 = 0x40, IMAGE_ENCODING_YUV16, IMAGE_ENCODING_YUV422
+};
+
+template <typename T>
+using BoundShmemAllocator = boost::interprocess::allocator<T, boost::interprocess::managed_shared_memory::segment_manager>;
+
 /**
  * @note this class can only be used in combination with ShmFw::Alloc
  **/
-namespace bi = boost::interprocess;
+template <template<typename...> class Allocator>
 class Image {
-    typedef bi::allocator<uint8_t, SegmentManager> Allocator;
-    typedef bi::vector<uint8_t, Allocator > VectorData;
+    typedef boost::interprocess::vector<uint8_t,    Allocator<uint8_t>    > VectorUInt8;
 
 public:
-    enum image_encodings {
-        NA = 0,
-        MONO8 = 0x10, MONO16, MONO32F, MONO64F,
-        RGB8 = 0x20, RGBA8, RGB16, RGBA16,
-        BGR8 = 0x30, BGRA8, BGR16, BGRA16,
-        YUV8 = 0x40, YUV16, YUV422
-    };
     int encoding;        /// encoding
     int width;           /// width = columns
     int height;          /// height = rows
@@ -76,14 +79,14 @@ public:
     int channels;        /// channels  in bytes
     int widthStep;       /// Size of aligned image row in bytes.  width*channels*depth
     int pixelStep;       /// Size of aligned pixel row in bytes.  channels*depth
-    VectorData data;
+    VectorUInt8 data;
 
     void updateStepValues() {
         pixelStep =  channels * depth;
         widthStep = width * pixelStep;
     }
 
-    Image ( const VoidAllocator &void_alloc )
+    Image ( const Allocator<void>& void_alloc = {} )
         : data ( void_alloc )
     {}
 
@@ -149,32 +152,32 @@ public:
     }
     void copyTo ( cv::Mat& des ) const {
         switch ( encoding ) {
-        case MONO8:
+        case IMAGE_ENCODING_MONO8:
             des.create ( height, width, CV_8U );
             break;
-        case MONO16:
+        case IMAGE_ENCODING_MONO16:
             des.create ( height, width, CV_16U );
             break;
-        case MONO32F:
+        case IMAGE_ENCODING_MONO32F:
             des.create ( height, width, CV_32F );
             break;
-        case MONO64F:
+        case IMAGE_ENCODING_MONO64F:
             des.create ( height, width, CV_64F );
             break;
-        case RGB8:
-        case BGR8:
-        case YUV8:
+        case IMAGE_ENCODING_RGB8:
+        case IMAGE_ENCODING_BGR8:
+        case IMAGE_ENCODING_YUV8:
             des.create ( height, width, CV_8UC3 );
             break;
-        case RGBA8:
-        case BGRA8:
+        case IMAGE_ENCODING_RGBA8:
+        case IMAGE_ENCODING_BGRA8:
             des.create ( height, width, CV_8UC4 );
             break;
-        case YUV16:
+        case IMAGE_ENCODING_YUV16:
             des.create ( height, width, CV_16UC3 );
             break;
-        case RGBA16:
-        case BGRA16:
+        case IMAGE_ENCODING_RGBA16:
+        case IMAGE_ENCODING_BGRA16:
             des.create ( height, width, CV_16UC4 );
             break;
         }
@@ -213,30 +216,30 @@ public:
     }
     static int cvType ( int encoding ) {
         switch ( encoding ) {
-        case ShmFw::Image::NA:
-        case ShmFw::Image::MONO8:
+        case ShmFw::IMAGE_ENCODING_NA:
+        case ShmFw::IMAGE_ENCODING_MONO8:
             return CV_8UC1;
-        case ShmFw::Image::MONO16:
+        case ShmFw::IMAGE_ENCODING_MONO16:
             return CV_16UC1;
-        case ShmFw::Image::MONO32F:
+        case ShmFw::IMAGE_ENCODING_MONO32F:
             return CV_32FC1;
-        case ShmFw::Image::MONO64F:
+        case ShmFw::IMAGE_ENCODING_MONO64F:
             return CV_64FC1;
-        case ShmFw::Image::RGB8:
-        case ShmFw::Image::BGR8:
-        case ShmFw::Image::YUV8:
+        case ShmFw::IMAGE_ENCODING_RGB8:
+        case ShmFw::IMAGE_ENCODING_BGR8:
+        case ShmFw::IMAGE_ENCODING_YUV8:
             return CV_8UC3;
-        case ShmFw::Image::RGB16:
-        case ShmFw::Image::BGR16:
-        case ShmFw::Image::YUV16:
+        case ShmFw::IMAGE_ENCODING_RGB16:
+        case ShmFw::IMAGE_ENCODING_BGR16:
+        case ShmFw::IMAGE_ENCODING_YUV16:
             return CV_16UC3;
-        case ShmFw::Image::RGBA8:
-        case ShmFw::Image::BGRA8:
+        case ShmFw::IMAGE_ENCODING_RGBA8:
+        case ShmFw::IMAGE_ENCODING_BGRA8:
             return CV_8UC4;
-        case ShmFw::Image::RGBA16:
-        case ShmFw::Image::BGRA16:
+        case ShmFw::IMAGE_ENCODING_RGBA16:
+        case ShmFw::IMAGE_ENCODING_BGRA16:
             return CV_16UC4;
-        case ShmFw::Image::YUV422:
+        case ShmFw::IMAGE_ENCODING_YUV422:
             return CV_8UC2;
         default:
             return CV_8UC1;
@@ -245,19 +248,19 @@ public:
     static int getEncoding ( int cv_type ) {
         switch ( cv_type ) {
         case CV_8UC1:
-            return ShmFw::Image::MONO8;
+            return ShmFw::IMAGE_ENCODING_MONO8;
         case CV_16UC1:
-            return ShmFw::Image::MONO16;
+            return ShmFw::IMAGE_ENCODING_MONO16;
         case CV_32FC1:
-            return ShmFw::Image::MONO32F;
+            return ShmFw::IMAGE_ENCODING_MONO32F;
         case CV_64FC1:
-            return ShmFw::Image::MONO64F;
+            return ShmFw::IMAGE_ENCODING_MONO64F;
         case CV_8UC3:
-            return ShmFw::Image::BGR8;
+            return ShmFw::IMAGE_ENCODING_BGR8;
         case CV_16UC3:
-            return ShmFw::Image::BGR16;
+            return ShmFw::IMAGE_ENCODING_BGR16;
         default:
-            return ShmFw::Image::NA;
+            return ShmFw::IMAGE_ENCODING_NA;
         };
     };
 
@@ -330,6 +333,12 @@ protected:
         ar & make_nvp ( "data", data );
     }
 };
+
+// Variant to use on the heap:
+using ImageHeap  = Image<std::allocator>;
+// Variant to use in shared memory:
+using ImageShm = Image<BoundShmemAllocator>;
+
 
 };
 

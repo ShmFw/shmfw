@@ -101,15 +101,15 @@ int main ( int argc, char **argv ) {
         ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
         if ( !params.file_to_load.empty() ) {
 	    cv::Mat img = cv::imread(params.file_to_load.c_str(), CV_LOAD_IMAGE_COLOR);
-	    ShmFw::Alloc<ShmFw::Image> shmImg( params.variable_name, shmHdl );
-	    shmImg->copyFrom(img, ShmFw::Image::BGR8);
+	    ShmFw::Alloc<ShmFw::ImageShm> shmImg( params.variable_name, shmHdl );
+	    shmImg->copyFrom(img, ShmFw::IMAGE_ENCODING_BGR8);
         }
     }
     if ( !params.variable_name.empty() ) {
 
         ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
         for ( unsigned int i = 0, timeoutCounter = 0; ( params.reload >= 0 ) && loop_program; i++ ) {
-	    ShmFw::Alloc<ShmFw::Image> shmImg( params.variable_name, shmHdl );
+	    ShmFw::Alloc<ShmFw::ImageShm> shmImg( params.variable_name, shmHdl );
 
             if ( i == 0 ) std::cout << shmImg.human_readable() << std::endl;
 

@@ -29,8 +29,8 @@
  *   WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE           *
  *   POSSIBILITY OF SUCH DAMAGE.                                           *
  ***************************************************************************/
-#ifndef SHARED_MEM_OBJECTS_WAYPOINT_H
-#define SHARED_MEM_OBJECTS_WAYPOINT_H
+#ifndef SHARED_MEM_OBJECTS_MODEL_STATE_H
+#define SHARED_MEM_OBJECTS_MODEL_STATE_H
 
 
 #include <shmfw/objects/pose.h>
@@ -39,15 +39,15 @@
 
 namespace ShmFw {
 
-class WayPoint : public ShmFw::BaseObject {
+class ModelState : public ShmFw::BaseObject {
 public:
     Pose pose;
     Twist twist;
-    WayPoint() : pose(), twist() {};
-    WayPoint ( const WayPoint &w ) : pose ( w.pose ), twist ( w.twist ) {};
-    WayPoint ( const Pose &p, const Twist &v ) : pose ( p ), twist ( v ) {};
-    WayPoint ( const Pose &p ) : pose ( p ), twist () {};
-    WayPoint ( const Pose2D &p, double z = 0) : pose ( p, z ), twist () {};
+    ModelState() : pose(), twist() {};
+    ModelState ( const ModelState &w ) : pose ( w.pose ), twist ( w.twist ) {};
+    ModelState ( const Pose &p, const Twist &v ) : pose ( p ), twist ( v ) {};
+    ModelState ( const Pose &p ) : pose ( p ), twist () {};
+    ModelState ( const Pose2D &p, double z = 0) : pose ( p, z ), twist () {};
     std::string getToString ( ) const {
         char buf[0x1FF];
         sprintf ( buf, "[[[%4.2lf, %4.2lf, %4.2lf], [%4.3lf, %4.3lf, %4.3lf, %4.3lf]], [[%4.2lf, %4.2lf, %4.2lf], [%4.2lf, %4.2lf, %4.2lf]]]",
@@ -68,17 +68,17 @@ public:
 	          &twist.angular.x,    &twist.angular.y,    &twist.angular.z ) == EOF) return false; 
 	return true;
     }
-    friend std::ostream& operator<< ( std::ostream &output, const WayPoint &o ) {
+    friend std::ostream& operator<< ( std::ostream &output, const ModelState &o ) {
         output << o.getToString();
         return output;
     }
-    friend std::istream& operator>> ( std::istream &input, WayPoint &o ) {
+    friend std::istream& operator>> ( std::istream &input, ModelState &o ) {
         std::string str;
         getline ( input, str );
         o.setFromString ( str );
         return input;
     }
-    bool operator == ( const WayPoint& o ) const {
+    bool operator == ( const ModelState& o ) const {
         return pose == o.pose && twist == o.twist;
     }
     void setValues ( const Pose &p, const Twist &v ) {
@@ -94,7 +94,7 @@ public:
      * @param src data source
      **/
     template<typename T2>
-    WayPoint& copyFrom ( const T2 &src) {
+    ModelState& copyFrom ( const T2 &src) {
         pose.copyFrom(src.pose);
         twist.copyFrom(src.twist);
         return *this;
@@ -119,5 +119,5 @@ protected:
 
 
 };
-#endif //SHARED_MEM_OBJECTS_WAYPOINT_H
+#endif //SHARED_MEM_OBJECTS_MODEL_STATE_H
 

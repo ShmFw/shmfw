@@ -30,3 +30,5 @@ doc
 *.exe
 *.out
 *.app
+
+*.kate-swp

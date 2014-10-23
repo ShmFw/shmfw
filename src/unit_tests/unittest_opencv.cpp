@@ -145,9 +145,9 @@ TEST_F ( OpenCVTest, shmImage ) {
     std::string shm_name ( "image_maxi" );
     std::string image_filename = std::string ( getenv ( "SHMFW" ) ) + "/res/maxi.jpg";
     cv::Mat imgA = cv::imread(image_filename, CV_LOAD_IMAGE_COLOR);
-    ShmFw::Alloc<ShmFw::Image> a( shm_name, shmHdl );
-    a->copyFrom(imgA, ShmFw::Image::BGR8);
-    ShmFw::Alloc<ShmFw::Image> b( shm_name, shmHdl );
+    ShmFw::Alloc<ShmFw::ImageShm> a( shm_name, shmHdl );
+    a->copyFrom(imgA, ShmFw::IMAGE_ENCODING_BGR8);
+    ShmFw::Alloc<ShmFw::ImageShm> b( shm_name, shmHdl );
     cv::Mat imgShm;
     b->toCvMat(imgShm);
     cv::putText(imgShm, "shmImage", cv::Point(0, imgShm.rows/2), cv::FONT_HERSHEY_COMPLEX,1, cv::Scalar(0xFF,0xFF,0xFF),1);
@@ -168,9 +168,9 @@ TEST_F ( OpenCVTest, serializeImage ) {
     std::string shm_name ( "image_maxi" );
     std::string image_filename = std::string ( getenv ( "SHMFW" ) ) + "/res/maxi.jpg";
     cv::Mat imgA = cv::imread(image_filename, CV_LOAD_IMAGE_COLOR);
-    ShmFw::Alloc<ShmFw::Image> a( shm_name, shmHdl );
-    ShmFw::Alloc<ShmFw::Image> b( shm_name, shmHdl );
-    a->copyFrom(imgA, ShmFw::Image::BGR8);    
+    ShmFw::Alloc<ShmFw::ImageShm> a( shm_name, shmHdl );
+    ShmFw::Alloc<ShmFw::ImageShm> b( shm_name, shmHdl );
+    a->copyFrom(imgA, ShmFw::IMAGE_ENCODING_BGR8);    
     ShmFw::write(filename, a());
     ShmFw::read (filename, b());
     EXPECT_EQ ( a(), b() );

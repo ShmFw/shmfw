@@ -506,10 +506,11 @@ public:
         const char* type_name_in_shm = pHeaderShm->type_name.c_str();
         const char* type_name_request = typeid ( T1 ).name();
         bool result_name = ( strcmp ( type_name_in_shm, type_name_request ) == 0 );
-#if __cplusplus > 199711L
-        bool result_hash_code = ( pHeaderShm->type_hash_code == typeid ( T1 ).hash_code() );
-#else
         bool result_hash_code = true;
+#if __cplusplus > 199711L
+        if(pHeaderShm->type_hash_code != 0){
+	  result_hash_code = ( pHeaderShm->type_hash_code == typeid ( T1 ).hash_code() );
+	}
 #endif
         return result_name && result_hash_code;
     }
@@ -520,10 +521,11 @@ public:
      **/
     bool isType ( const Header &header ) const {
         bool result_name = ( strcmp ( pHeaderShm->type_name.c_str(), header.pHeaderShm->type_name.c_str() ) == 0 );
-#if __cplusplus > 199711L
-        bool result_hash_code = ( pHeaderShm->type_hash_code == header.pHeaderShm->type_hash_code );
-#else
         bool result_hash_code = true;
+#if __cplusplus > 199711L
+        if((pHeaderShm->type_hash_code != 0) && (header.pHeaderShm->type_hash_code !=0)){
+	  result_hash_code = ( pHeaderShm->type_hash_code == header.pHeaderShm->type_hash_code );
+	}
 #endif
         return result_name && result_hash_code;
     }

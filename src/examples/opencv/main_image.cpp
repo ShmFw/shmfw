@@ -91,7 +91,7 @@ int main ( int argc, char **argv ) {
         ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
         if ( !params.file_to_load.empty() ) {
 	    cv::Mat img = cv::imread(params.file_to_load, CV_LOAD_IMAGE_COLOR);
-	    ShmFw::Alloc<ShmFw::Image> shm_image( params.variable_name, shmHdl );
+	    ShmFw::Alloc<ShmFw::ImageShm> shm_image( params.variable_name, shmHdl );
 	    shm_image->copyFrom(img);
 	    cv::Mat des;
 	    shm_image->toCvMat(des);
@@ -102,7 +102,7 @@ int main ( int argc, char **argv ) {
     if ( !params.variable_name.empty() ) {
         ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
         for ( unsigned int i = 0; params.reload >= 0; i++ ) {
-            ShmFw::Alloc<ShmFw::Image> shm_image( params.variable_name, shmHdl );
+            ShmFw::Alloc<ShmFw::ImageShm> shm_image( params.variable_name, shmHdl );
             if ( params.reload == 0 ) {
                 shm_image.wait();
             }
