@@ -75,7 +75,6 @@ typedef bi::allocator<CharString, bi::managed_shared_memory::segment_manager> St
 typedef boost::shared_ptr<StringAllocator> StringAllocatorPtr;
 typedef boost::shared_ptr<std::stringstream> StringStreamPtr;
 
-
 inline bp::ptime now() {
     return bp::microsec_clock::local_time();
 }

@@ -61,8 +61,6 @@ enum image_encodings {
     IMAGE_ENCODING_YUV8 = 0x40, IMAGE_ENCODING_YUV16, IMAGE_ENCODING_YUV422
 };
 
-template <typename T>
-using BoundShmemAllocator = boost::interprocess::allocator<T, boost::interprocess::managed_shared_memory::segment_manager>;
 
 /**
  * @note this class can only be used in combination with ShmFw::Alloc
@@ -334,10 +332,13 @@ protected:
     }
 };
 
+template <typename T>
+using AllocatorShm = boost::interprocess::allocator<T, boost::interprocess::managed_shared_memory::segment_manager>;
+
 // Variant to use on the heap:
 using ImageHeap  = Image<std::allocator>;
 // Variant to use in shared memory:
-using ImageShm = Image<BoundShmemAllocator>;
+using ImageShm = Image<AllocatorShm>;
 
 
 };
