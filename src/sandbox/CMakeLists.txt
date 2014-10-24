@@ -1,7 +1,16 @@
+SET(SANDBOX 1 CACHE BOOL "sanbox" )
+IF(SANDBOX)
+FILE (GLOB FOLDERS "${CMAKE_CURRENT_SOURCE_DIR}/*")
 
-set(CURSES_NEED_NCURSES TRUE)
-find_package(Curses REQUIRED)
-message(${CURSES_LIBRARY})
+foreach(FOLDER ${FOLDERS})
+    if(IS_DIRECTORY ${FOLDER})
+      if(${FOLDER} MATCHES "(.*)svn") 
+      else()
+        MESSAGE( STATUS "Add sandbox folder: ${FOLDER}")
+        add_subdirectory(${FOLDER})
+      endif()
+    endif()
+endforeach()
 
-add_executable(shmfw-sandbox sandbox.cpp )
-target_link_libraries(shmfw-sandbox  ${Boost_LIBRARIES} rt ${CURSES_LIBRARY})
+
+ENDIF(SANDBOX)
