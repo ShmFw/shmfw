@@ -61,13 +61,13 @@ namespace ShmFw {
 
 class SharedHeader {
 public:
-    SharedHeader(const VoidAllocator &void_alloc )
+    SharedHeader ( const VoidAllocator &void_alloc )
         : header_size ( 0 )
         , array_size ( 0 )
         , container ( 0 )
         , type_hash_code ( 0 )
-	, type_name(void_alloc) 
-	, info_text(void_alloc) 
+        , type_name ( void_alloc )
+        , info_text ( void_alloc )
         , user_flag ( false )
         , user_register ( 0 )
         , tstamp ( bp::microsec_clock::local_time() ) {}
@@ -86,6 +86,16 @@ public:
     bi::interprocess_condition condition;   /// used for wait and notify condition calles
 };
 
+///local header to to manage changes
+class LocalHeader {
+public:
+    std::string varName;            /// name of the shared varaible
+    HandlerPtr pShmHdl;             /// smart pointer to the shared memory segment header
+    bool creator;                   /// ture if this process created the the shared varaible
+    bp::ptime tstamp;               /// time stamp of the last local access to this variable
+    void *ptr;                      /// pointer to the shared memory variable
+};
+
 /// Common header of all shared memory segments
 class Header {
     friend class boost::serialization::access;
@@ -102,13 +112,6 @@ public:
     static const int CONTAINER_IMAGE    = 4;
     static const int CONTAINER_ALLOC  = 5;
 
-///local header to to manage changes
-    struct LocalHeader {
-        std::string varName;            /// name of the shared varaible
-        HandlerPtr pShmHdl;             /// smart pointer to the shared memory segment header
-        bool creator;                   /// ture if this process created the the shared varaible
-        bp::ptime tstamp;               /// time stamp of the last local access to this variable
-    };
 
 /// Local data
     template<typename T>
@@ -133,7 +136,7 @@ protected:
     int findHeader ( const std::string &name, HandlerPtr &shmHdl ) {
         headerLoc.creator = false;
         headerLoc.pShmHdl = shmHdl;
-        headerLoc.varName = shmHdl->resolve_namespace(name);
+        headerLoc.varName = shmHdl->resolve_namespace ( name );
         try {
             pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->find<char> ( headerLoc.varName.c_str() ).first;
             if ( pHeaderShm == NULL ) {
@@ -156,13 +159,13 @@ protected:
      **/
     template<typename T>
     int constructHeader ( const std::string &name, HandlerPtr &shmHdl, const char* type_name, size_t type_hash ) {
-	typedef bi::allocator<T, SegmentManager> Allocator;
+        typedef bi::allocator<T, SegmentManager> Allocator;
         if ( name.length() > 0xFF - 1 ) throw std::runtime_error ( "Shm::Var::create()! name to long" );
         unsigned int headerSize = sizeof ( T );
         pHeaderShm = NULL;
         headerLoc.pShmHdl = shmHdl;
         //const char* p = pShm->get_device().get_name();
-        headerLoc.varName = shmHdl->resolve_namespace(name);
+        headerLoc.varName = shmHdl->resolve_namespace ( name );
         /// constructing shared header
         int ret = ERROR;
         try {
@@ -174,7 +177,7 @@ protected:
                 ret = OK_NEW_HEADER;
             } else {
                 Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
-                pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->construct<T> ( headerLoc.varName.c_str() ) (a);
+                pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->construct<T> ( headerLoc.varName.c_str() ) ( a );
                 headerLoc.creator = true;
                 ScopedLock myLock ( pHeaderShm->mutex );
                 pHeaderShm->tstamp = bp::microsec_clock::local_time();
@@ -247,14 +250,14 @@ public:
     Header ( const std::string &name, HandlerPtr shmHdl, unsigned int headerSize = 0 )
         : pHeaderShm ( NULL ) {
 #if __cplusplus > 199711L
-        size_t type_hash_code = typeid ( Header ).hash_code(); 
-	const char *type_name = typeid ( Header ).name();
+        size_t type_hash_code = typeid ( Header ).hash_code();
+        const char *type_name = typeid ( Header ).name();
 #else
-        size_t type_hash_code = 0; 
-	const char *type_name = typeid ( Header ).name();
+        size_t type_hash_code = 0;
+        const char *type_name = typeid ( Header ).name();
 #endif
         if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) exit ( 1 );
-        }
+    }
     /** sets an info text
      **/
     void info_text ( const char* text ) {
@@ -268,7 +271,7 @@ public:
     /** returns info text
      * @return info
      **/
-    std::string info_text() const{
+    std::string info_text() const {
         return pHeaderShm->info_text.c_str();
     }
     /**
@@ -508,9 +511,9 @@ public:
         bool result_name = ( strcmp ( type_name_in_shm, type_name_request ) == 0 );
         bool result_hash_code = true;
 #if __cplusplus > 199711L
-        if(pHeaderShm->type_hash_code != 0){
-	  result_hash_code = ( pHeaderShm->type_hash_code == typeid ( T1 ).hash_code() );
-	}
+        if ( pHeaderShm->type_hash_code != 0 ) {
+            result_hash_code = ( pHeaderShm->type_hash_code == typeid ( T1 ).hash_code() );
+        }
 #endif
         return result_name && result_hash_code;
     }
@@ -523,9 +526,9 @@ public:
         bool result_name = ( strcmp ( pHeaderShm->type_name.c_str(), header.pHeaderShm->type_name.c_str() ) == 0 );
         bool result_hash_code = true;
 #if __cplusplus > 199711L
-        if((pHeaderShm->type_hash_code != 0) && (header.pHeaderShm->type_hash_code !=0)){
-	  result_hash_code = ( pHeaderShm->type_hash_code == header.pHeaderShm->type_hash_code );
-	}
+        if ( ( pHeaderShm->type_hash_code != 0 ) && ( header.pHeaderShm->type_hash_code !=0 ) ) {
+            result_hash_code = ( pHeaderShm->type_hash_code == header.pHeaderShm->type_hash_code );
+        }
 #endif
         return result_name && result_hash_code;
     }

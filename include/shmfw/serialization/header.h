@@ -67,7 +67,7 @@ template<class archive> inline  void serialize ( archive &ar, ShmFw::SharedHeade
     }
 }
 
-template<class archive> inline  void serialize ( archive &ar, ShmFw::Header::LocalHeader & o, const unsigned int version ) {
+template<class archive> inline  void serialize ( archive &ar, ShmFw::LocalHeader & o, const unsigned int version ) {
     std::string name ( o.varName );
     ar & boost::serialization::make_nvp ( "varName", name );
 }
