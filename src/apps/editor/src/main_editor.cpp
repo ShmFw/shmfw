@@ -191,7 +191,7 @@ int main ( int argc, char *argv[] ) {
 
     std::vector < ShmFw::HandlerObjectPtr > objects;
     if ( params.variable_names.size() == 0 ) {
-        shmHdl->listNames ( params.variable_names );
+        shmHdl->listNames ( params.variable_names, false );
     }
 
     for ( size_t i = 0; i < params.variable_names.size(); i++ ) {

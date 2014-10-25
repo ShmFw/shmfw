@@ -68,12 +68,13 @@ public:
     }
 
     /**
-     * @param name name of the variable
-     * @param shmHdl pointer to the shared memory segment
+     * @param name name of the shared header element in the memory segment
+     * @param shmHdl pointer to the shared memory segment handler
+     * @param name_data name of the data element in the memory segment on empty it will be the .name
      * @pre the ShmPtr poitner must be created first
      * @see ShmFw::createSegment
      **/
-    int construct ( const std::string &name, HandlerPtr &shmHdl ) {
+    int construct ( const std::string &name, HandlerPtr &shmHdl, const std::string &name_data = std::string() ) {
 #if __cplusplus > 199711L
         size_t type_hash_code = typeid ( Deque<T> ).hash_code();
         const char *type_name = typeid ( Deque<T> ).name();
@@ -88,7 +89,11 @@ public:
                 ScopedLock myLock ( pHeaderShm->mutex );
                 pHeaderShm->container = ShmFw::Header::CONTAINER_DEQUE;
                 Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
-                pHeaderShm->data = headerLoc.pShmHdl->getShm()->construct< DequeShm > ( bi::anonymous_instance ) ( a );
+                //pHeaderShm->data = headerLoc.pShmHdl->getShm()->construct< DequeShm > ( bi::anonymous_instance ) ( a );
+	        std::string name_data_shm;
+		if(name_data.empty()) name_data_shm = "." + headerLoc.varName;
+		else name_data_shm = name_data;
+		pHeaderShm->data =  headerLoc.pShmHdl->getShm()->find_or_construct<DequeShm> (name_data_shm.c_str()) (a);
             } catch ( ... ) {
                 std::cerr << "Error when constructing shared data" << std::endl;
                 return ERROR;

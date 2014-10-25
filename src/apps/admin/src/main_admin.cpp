@@ -45,6 +45,7 @@ struct Prarmeters {
     std::string shm_memory_name;
     unsigned int shm_memory_size;
     std::string variable_name;
+    bool show_hidden;
     bool show_container;
     bool show_lock;
     bool show_timestamp;
@@ -62,6 +63,7 @@ Prarmeters readArgs ( int argc, char **argv ) {
     ( "context", "show variable context" )
     ( "type", "show variable type" )
     ( "lock,l", "toggel variable lock" )
+    ( "hidden", "show hidden variables" )
     ( "container", "toggel variable container type" )
     ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
     ( "shm_memory_size,s", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" )
@@ -86,6 +88,7 @@ Prarmeters readArgs ( int argc, char **argv ) {
     params.show_timestamp = ( vm.count ( "timestamp" ) > 0 );
     params.show_lock = !( vm.count ( "lock" ) > 0 );
     params.show_container = !( vm.count ( "container" ) > 0 );
+    params.show_hidden = vm.count ( "hidden" ) > 0;
 
     return params;
 }
@@ -99,7 +102,7 @@ int main ( int argc, char **argv ) {
     std::vector<std::string> varNames;
     std::vector < ShmFw::HandlerObjectPtr > objects;
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
-    shmHdl->listNames ( varNames );
+    shmHdl->listNames ( varNames, params.show_hidden);
     for ( unsigned int i = 0; i < varNames.size(); i++ ) {
         ShmFw::Header shmHeader ( shmHdl, varNames[i] );
         std::cout << std::setw ( 3 ) << i << ": " << std::setw ( 30 ) << varNames[i];

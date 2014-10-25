@@ -230,31 +230,19 @@ public:
     }
     /** Returns list with the names of the shared variables
     * @param rNames vector which will be filled with the variables
-    * @param pTypes type of the variable
-    * @param regExpressions examples "(.*)bmp",  "(.*)$"
+    * @param list_hidden on true it will also list names starting with a . 
     * @author Markus Bader
     **/
-    void listNames ( std::vector< std::string> &rNames, std::string regx = "" ) {
+    void listNames ( std::vector< std::string> &rNames, bool list_hidden ) {
         try {
             typedef bi::managed_shared_memory::const_named_iterator const_named_it;
             const_named_it named_beg = pShm_->named_begin();
             const_named_it named_end = pShm_->named_end();
             for ( ; named_beg != named_end; ++named_beg ) {
                 const bi::managed_shared_memory::char_type *name = named_beg->name();
-                if ( regx.empty() ) {
+                std::string entryName ( name );
+                if ( list_hidden || (entryName.find_first_of ( "." ) != 0 )) {
                     rNames.push_back ( name );
-                } else {
-                    /*
-                    static const boost::regex expression ( regx.c_str() );
-                    if (boost::regex_match ( name, expression ) ) {
-                    rNames.push_back(name);
-                    if (pTypes)  pTypes->push_back(pHeader->getVarType());
-                    }
-                    */
-                    std::string entryName ( name );
-                    if ( entryName.find ( regx ) != entryName.npos )  {
-                        rNames.push_back ( name );
-                    }
                 }
             }
         }    catch ( ... ) {
@@ -262,13 +250,12 @@ public:
             std::cerr << "exception ShmManager::listNames()";
         }
     }
-
     /** Returns list with the names of the shared variables
     * @param rName search name
     * @return pointer ot the shared variable or NULL if it was not found
     * @author Markus Bader
     */
-    void *findName ( const std::string &rNames, std::string prefix = "" ) {
+    void *findName ( const std::string &rNames, const std::string &prefix = "" ) {
         void *value = NULL;
         std::string full_name = "";
 
@@ -319,8 +306,8 @@ public:
         boost::trim ( namespace_ );
         boost::trim_left_if ( namespace_, boost::is_any_of ( "/" ) );
         boost::trim_right_if ( namespace_, boost::is_any_of ( "/" ) );
-	if(namespace_.empty()) namespace_ = "/";
-	else namespace_ = "/" + namespace_ + "/";
+        if ( namespace_.empty() ) namespace_ = "/";
+        else namespace_ = "/" + namespace_ + "/";
     }
     /** adds the prefix to a name
     * @param name

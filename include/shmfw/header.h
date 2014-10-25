@@ -72,7 +72,7 @@ public:
 ///local header to to manage changes
 class LocalHeader {
 public:
-    std::string varName;            /// name of the shared varaible
+    std::string varName;            /// name of the shared header in the shared memory segment
     HandlerPtr pShmHdl;             /// smart pointer to the shared memory segment header
     bool creator;                   /// ture if this process created the the shared varaible
     bp::ptime tstamp;               /// time stamp of the last local access to this variable
