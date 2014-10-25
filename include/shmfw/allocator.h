@@ -81,7 +81,7 @@ public:
         size_t type_hash_code = 0;
         const char *type_name = typeid ( Alloc<T> ).name();
 #endif
-        if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
+        if ( constructHeader ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
         if ( headerLoc.creator ) {
             /// constructing shared data
             try {

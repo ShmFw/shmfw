@@ -147,9 +147,8 @@ protected:
      * @pre the ShmPtr poitner must be created first
      * @see ShmFw::createSegment
      **/
-    template<typename T>
     int constructHeader ( const std::string &name, HandlerPtr &shmHdl, const char* type_name, size_t type_hash ) {
-        typedef bi::allocator<T, SegmentManager> Allocator;
+        typedef bi::allocator<SharedHeader, SegmentManager> Allocator;
         pHeaderShm = NULL;
         headerLoc.pShmHdl = shmHdl;
         //const char* p = pShm->get_device().get_name();
@@ -157,7 +156,7 @@ protected:
         /// constructing shared header
         int ret = ERROR;
         try {
-            pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->find<char> ( headerLoc.varName.c_str() ).first;
+            pHeaderShm = headerLoc.pShmHdl->getShm()->find<SharedHeader> ( headerLoc.varName.c_str() ).first;
             if ( pHeaderShm != NULL ) { /// already exists
                 headerLoc.tstamp = pHeaderShm->tstamp;
                 headerLoc.creator = false;
@@ -165,7 +164,7 @@ protected:
                 ret = OK_NEW_HEADER;
             } else {
                 Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
-                pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->construct<T> ( headerLoc.varName.c_str() ) ( a );
+                pHeaderShm = headerLoc.pShmHdl->getShm()->construct<SharedHeader> ( headerLoc.varName.c_str() ) ( a );
                 headerLoc.creator = true;
                 ScopedLock myLock ( pHeaderShm->mutex );
                 pHeaderShm->tstamp = bp::microsec_clock::local_time();
@@ -242,7 +241,7 @@ public:
         size_t type_hash_code = 0;
         const char *type_name = typeid ( Header ).name();
 #endif
-        if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) exit ( 1 );
+        if ( constructHeader ( name, shmHdl, type_name, type_hash_code ) == ERROR ) exit ( 1 );
     }
     /** sets an info text
      **/
