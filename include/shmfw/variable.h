@@ -219,7 +219,7 @@ public:
      * destroies the shared memory
      **/
     virtual void destroy() const {
-        headerLoc.pShmHdl->getShm()->destroy_ptr ( headerLoc.ptr );
+        headerLoc.pShmHdl->getShm()->destroy_ptr ( ptr() );
         Header::destroy();
     };
 

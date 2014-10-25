@@ -35,20 +35,6 @@
 #define SHARED_MEM_HEADER_H
 
 #include <shmfw/handler.h>
-
-/*
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/binary_object.hpp>
-#include <boost/date_time/posix_time/time_serialize.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/xml_oarchive.hpp>
-#include <boost/archive/xml_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/archive_exception.hpp>
-*/
-
 #include <boost/iostreams/stream_buffer.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/back_inserter.hpp>
@@ -90,7 +76,6 @@ public:
     HandlerPtr pShmHdl;             /// smart pointer to the shared memory segment header
     bool creator;                   /// ture if this process created the the shared varaible
     bp::ptime tstamp;               /// time stamp of the last local access to this variable
-    void *ptr;                      /// pointer to the shared memory variable
 };
 
 /// Common header of all shared memory segments
@@ -174,7 +159,6 @@ protected:
                 updateTimestamps();
                 setType ( type_name, type_hash );
                 ret = OK_USED_EXITING;
-
             }
         } catch ( ... ) {
             std::cerr << "Error when constructing shared header" << std::endl;
