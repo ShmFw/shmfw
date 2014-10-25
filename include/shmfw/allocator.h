@@ -48,7 +48,6 @@ template<typename T>
 class Alloc : public Header {
     friend class boost::serialization::access;
     typedef bi::allocator<T, SegmentManager> Allocator;
-    LocalData<T>  data_local;     /// local data
 public:
 
 
@@ -89,59 +88,69 @@ public:
                 ScopedLock myLock ( pHeaderShm->mutex );
                 pHeaderShm->container = ShmFw::Header::CONTAINER_ALLOC;
                 Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
-                pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct<T> ( bi::anonymous_instance ) [1] ( a );
-                data_local.creator = true;
+                pHeaderShm->data = headerLoc.pShmHdl->getShm()->construct<T> ( bi::anonymous_instance ) [1] ( a );
             } catch ( ... ) {
                 std::cerr << "Error when constructing shared data" << std::endl;
                 return ERROR;
             }
         }
-        data_local.ptr = ( T * ) pHeaderShm->ptr.get();
         return OK;
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared object by index
-     * it is faster as [], but does not check the index > size
-     * @n index
-     * @return ref to shared data
-     **/
-    T &operator() ( unsigned int n ) const {
-        return data_local.ptr[n];
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared object
-     * @return ref to shared data
-     **/
-    T &operator() () const {
-        return *data_local.ptr;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a pointer to the shared object
      * @return ref to shared data
      **/
-    T *ptr() const {
-        return data_local.ptr;
+    T *ptr()  {
+        return (T*) pHeaderShm->data.get();
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     * returns a pointer to the shared object
+     * @return ref to shared data
+     **/
+    const T *ptr() const {
+        return (T*) pHeaderShm->data.get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared object
      * @return ref to shared data
      **/
     T &ref() {
-        return *data_local.ptr;
+        return *ptr();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared object
      * @return ref to shared data
      **/
-    T &ref() const {
-        return *data_local.ptr;
+    const T &ref() const {
+        return *ptr();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared object
      * @return ref to shared data
      **/
-    T *operator-> () const {
-        return data_local.ptr;
+    T &operator() () {
+        return ref();
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     * returns a reference to the shared object
+     * @return ref to shared data
+     **/
+    const T &operator() () const {
+        return ref();
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     * returns a reference to the shared object
+     * @return ref to shared data
+     **/
+    T *operator-> () {
+        return ptr();
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     * returns a reference to the shared object
+     * @return ref to shared data
+     **/
+    const T *operator-> () const {
+        return ptr();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * Returns a human readable string to show the context
@@ -156,7 +165,7 @@ public:
      * destroies the shared memory
      **/
     virtual void destroy() const {
-        headerLoc.pShmHdl->getShm()->destroy_ptr ( data_local.ptr );
+        headerLoc.pShmHdl->getShm()->destroy_ptr ( ptr() );
         Header::destroy();
     };
 
@@ -179,7 +188,7 @@ public:
      * overloads the << and calls the varalible overloades operator
      **/
     friend std::ostream &operator << ( std::ostream &os, const Alloc<T> &o ) {
-        return os << *o.data_local.ptr;
+        return os << o.ref();
     };
 
     template<class ForwardIt>

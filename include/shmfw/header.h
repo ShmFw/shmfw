@@ -69,6 +69,7 @@ public:
         , user_flag ( false )
         , user_register ( 0 )
         , tstamp ( bp::microsec_clock::local_time() ) {}
+    bi::offset_ptr<void> data;              /// offest pointer to the data
     uint8_t  container;                     /// container type @see CONTAINER_HEADER, CONTAINER_VARIABLE, CONTAINER_VECTOR, CONTAINER_DEQUE, ...
     size_t type_hash_code;                  /// varaiable type hash code C++ (2011) @see std::type_info::hash_code
     CharString type_name;                   /// varaiable type information @see std::type_info::name
@@ -76,10 +77,10 @@ public:
     bool user_flag;                         /// flag for general usage
     uint32_t user_register;                 /// register for general usage
     bp::ptime tstamp;                       /// timestamp to tag the last change of the shared variable
-    bi::offset_ptr<void> ptr;               /// offest pointer to the data
     bi::interprocess_mutex mutex;           /// mutex
     bi::interprocess_mutex condition_mutex; /// mutex used for wait condition calles
     bi::interprocess_condition condition;   /// used for wait and notify condition calles
+
 };
 
 ///local header to to manage changes
@@ -90,18 +91,6 @@ public:
     bool creator;                   /// ture if this process created the the shared varaible
     bp::ptime tstamp;               /// time stamp of the last local access to this variable
     void *ptr;                      /// pointer to the shared memory variable
-    
-    template<typename T>
-    inline T &set(const T& src){
-      T& des = *((T*) ptr);
-      des = src;
-      return des;
-    }
-    template<typename T>
-    inline T &get() const{
-      T& des = *((T*) ptr);
-      return des;
-    }
 };
 
 /// Common header of all shared memory segments
@@ -119,14 +108,6 @@ public:
     static const int CONTAINER_DEQUE    = 3;
     static const int CONTAINER_IMAGE    = 4;
     static const int CONTAINER_ALLOC  = 5;
-
-
-/// Local data
-    template<typename T>
-    struct LocalData {
-        bool creator;           /// true if shared memory variable was crated by this process
-        T *ptr;                 /// pointer to the shared memory variable
-    };
 
 protected:
     ///header which is placed in the shared memory
@@ -161,8 +142,8 @@ protected:
     /** Constructs the shared header
      * @param name name of the variable
      * @param shmHdl pointer to the shared memory segment Handler
-     * @param type_name 
-     * @param type_hash 
+     * @param type_name
+     * @param type_hash
      * @pre the ShmPtr poitner must be created first
      * @see ShmFw::createSegment
      **/

@@ -46,7 +46,6 @@ namespace ShmFw {
 template<typename T>
 class Var : public Header {
     friend class boost::serialization::access;
-    T *pData;
 public:
 
 
@@ -86,13 +85,12 @@ public:
             try {
                 ScopedLock myLock ( pHeaderShm->mutex );
                 pHeaderShm->container = ShmFw::Header::CONTAINER_VARIABLE;
-                pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct<T> ( bi::anonymous_instance ) [1]();
+                pHeaderShm->data = headerLoc.pShmHdl->getShm()->construct<T> ( bi::anonymous_instance ) [1]();
             } catch ( ... ) {
                 std::cerr << "Error when constructing shared data" << std::endl;
                 return ERROR;
             }
         }
-        pData = ( T* ) pHeaderShm->ptr.get();
         return OK;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
@@ -100,28 +98,28 @@ public:
      * @return ref to shared data
      **/
     T *ptr() {
-        return pData;
+        return (T*) pHeaderShm->data.get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a pointer to the shared object
      * @return ref to shared data
      **/
     const T *ptr() const {
-        return pData;
+        return (T*) pHeaderShm->data.get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared object
      * @return ref to shared data
      **/
     T &ref() {
-        return *pData;
+        return *ptr();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared object
      * @return ref to shared data
      **/
     const T &ref() const {
-        return *pData;
+        return *ptr();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * operator to set the shared memory
@@ -130,8 +128,8 @@ public:
      * @return ref to shared data
      **/
     T &operator = ( const T &source ) {
-        *pData = source;
-        return *pData;
+        ref() = source;
+        return ref();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * operator to set the shared memory
@@ -140,29 +138,36 @@ public:
      * @return ref to shared data
      **/
     T &operator = ( const Var<T> &v ) {
-        *pData = v.ref();
-        return *pData;
+        ref() = v.ref();
+        return ref();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared object
      * @return ref to shared data
      **/
     const T &operator() () const {
-        return *pData;
+        return ref();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared object
      * @return ref to shared data
      **/
     T &operator() () {
-        return *pData;
+        return ref();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared object
      * @return ref to shared data
      **/
-    T *operator-> () const {
-        return pData;
+    T *operator-> () {
+        return ptr();
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     * returns a reference to the shared object
+     * @return ref to shared data
+     **/
+    const T *operator-> () const {
+        return ptr();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * Returns a human readable string to show the context
@@ -170,7 +175,7 @@ public:
      **/
     virtual std::string human_readable() const {
         std::stringstream ss;
-        ss << name() << " = " << *pData;
+        ss << name() << " = " << ref();
         return ss.str();
     };
     /** SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
@@ -179,7 +184,7 @@ public:
      **/
     void set ( const T &source ) {
         lock();
-        *pData = source;
+        ref() = source;
         unlock();
         itHasChanged();
     }
@@ -189,7 +194,7 @@ public:
      **/
     void get ( T &destination ) {
         lock();
-        destination = *pData;
+        destination = ref();
         unlock();
         updateTimestampLocal();
     }

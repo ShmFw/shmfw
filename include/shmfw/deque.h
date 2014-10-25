@@ -49,7 +49,6 @@ public:
     typedef typename Allocator::size_type size_type;
 
 protected:
-    LocalData<DequeShm>  data_local;                /// local data
 public:
 
     /** Default constructor
@@ -89,71 +88,83 @@ public:
                 ScopedLock myLock ( pHeaderShm->mutex );
                 pHeaderShm->container = ShmFw::Header::CONTAINER_DEQUE;
                 Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
-                pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct< DequeShm > ( bi::anonymous_instance ) ( a );
-                data_local.creator = true;
+                pHeaderShm->data = headerLoc.pShmHdl->getShm()->construct< DequeShm > ( bi::anonymous_instance ) ( a );
             } catch ( ... ) {
                 std::cerr << "Error when constructing shared data" << std::endl;
                 return ERROR;
             }
         }
-        data_local.ptr = ( DequeShm * ) pHeaderShm->ptr.get();
         return OK;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared vector
+     * returns a pointer to the shared object
      * @return ref to shared data
      **/
-    const DequeShm &operator() () const {
-        return *data_local.ptr;
+    DequeShm *ptr() {
+        return (DequeShm*) pHeaderShm->data.get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared vector
+     * returns a pointer to the shared object
      * @return ref to shared data
      **/
-    DequeShm &operator() () {
-        return *data_local.ptr;
+    const DequeShm *ptr() const {
+        return (DequeShm*) pHeaderShm->data.get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared vector
      * @return ref to shared data
      **/
     const DequeShm &ref() const {
-        return *data_local.ptr;
+        return *ptr();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared vector
      * @return ref to shared data
      **/
     DequeShm &ref() {
-        return *data_local.ptr;
+        return *ptr();
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     * returns a reference to the shared vector
+     * @return ref to shared data
+     **/
+    const DequeShm &operator() () const {
+        return ref();
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     * returns a reference to the shared vector
+     * @return ref to shared data
+     **/
+    DequeShm &operator() () {
+        return ref();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared vector object by index
      * @return ref to shared data
      **/
     const T &operator [] ( size_type n ) const {
-        return ( *data_local.ptr ) [n];
+        return ref() [n];
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared vector object by index
      * @return ref to shared data
      **/
     T &operator [] ( size_type n ) {
-        return ( *data_local.ptr ) [n];
+        return ref() [n];
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared vector object by index
      * @return ref to shared data
      **/
     const T &at ( size_type n ) const {
-        return data_local.ptr->at ( n );
+        return ptr()->at ( n );
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared vector object by index
      * @return ref to shared data
      **/
     T &at ( size_type n ) {
-        return data_local.ptr->at ( n );
+        return ptr()->at ( n );
     }
     /** SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
      * copies data to the shared variable and updated the timestamps and locks the variable while accessing
@@ -172,9 +183,9 @@ public:
     template<typename T1>
     void set ( const T1 &src, bool locking ) {
         if ( locking ) lock();
-        data_local.ptr->resize ( src.size() );
+        ptr()->resize ( src.size() );
         for ( size_t i = 0; i < src.size(); i++ ) {
-            ( *data_local.ptr ) [i] = src[i];
+            ref() [i] = src[i];
         }
         if ( locking ) unlock();
         if ( locking ) itHasChanged();
@@ -196,7 +207,7 @@ public:
      **/
     void set ( const T &src, size_type n, bool locking ) {
         if ( locking ) lock();
-        ( *data_local.ptr ) [n] = src;
+        ref() [n] = src;
         if ( locking ) unlock();
         if ( locking ) itHasChanged();
     }
@@ -215,9 +226,9 @@ public:
      **/
     void get ( std::vector<T> &des, bool locking ) {
         if ( locking ) lock();
-        des.resize ( data_local.ptr->size() );
+        des.resize ( ptr()->size() );
         for ( unsigned int i = 0; i < des.size(); i++ ) {
-            des[i] = ( *data_local.ptr ) [i];
+            des[i] = ref() [i];
         }
         if ( locking ) unlock();
         if ( locking ) updateTimestampLocal();
@@ -239,7 +250,7 @@ public:
      **/
     void get ( T &des, size_type n, bool locking ) {
         if ( locking ) lock();
-        des = ( *data_local.ptr ) [n];
+        des = ref() [n];
         if ( locking ) unlock();
         if ( locking ) updateTimestampLocal();
     }
@@ -250,8 +261,8 @@ public:
     virtual std::string human_readable() const {
         std::stringstream ss;
         ss << name() << " = [";
-        for ( size_t i = 0; i < data_local.ptr->size(); i++ ) {
-            ss << ( ( i == 0 ) ? " " : ", " ) << std::setw ( 10 ) << data_local.ptr->at ( i );
+        for ( size_t i = 0; i < ptr()->size(); i++ ) {
+            ss << ( ( i == 0 ) ? " " : ", " ) << std::setw ( 10 ) << ptr()->at ( i );
         }
         ss << "]";
         return ss.str();
@@ -260,79 +271,79 @@ public:
      * @return vetor size
      **/
     size_t size() const {
-        return data_local.ptr->size();
+        return ptr()->size();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * @return Returns true if the vector contains no elements
      **/
     bool empty() const {
-        return data_local.ptr->empty();
+        return ptr()->empty();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * Inserts or erases elements at the end such that the size becomes n. New elements are default constructed.
      **/
     void resize ( size_t n ) {
-        data_local.ptr->resize ( n );
+        ptr()->resize ( n );
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * Inserts or erases elements at the end such that the size becomes n. New elements are default constructed.
      **/
     void resize ( size_t n, const T& v ) {
-        data_local.ptr->resize ( n, v );
+        ptr()->resize ( n, v );
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * Inserts a copy of x at the end of the vector.
      **/
     void push_front ( const T &src ) {
-        data_local.ptr->push_front ( src );
+        ptr()->push_front ( src );
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      *  Removes the first element in the deque container, effectively reducing its size by one.
      **/
     void pop_front() {
-        data_local.ptr->pop_front();
+        ptr()->pop_front();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      *  Returns a reference to the first element in the deque container.
      **/
     const T &front() const {
-        return data_local.ptr->front();
+        return ptr()->front();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      *  Returns a reference to the first element in the deque container.
      **/
     T &front() {
-        return data_local.ptr->front();
+        return ptr()->front();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * Inserts a copy of x at the end of the vector.
      **/
     void push_back ( const T &src ) {
-        data_local.ptr->push_back ( src );
+        ptr()->push_back ( src );
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * Removes the last element in the deque container, effectively reducing the container size by one.
      **/
     void pop_back() {
-        data_local.ptr->pop_back();
+        ptr()->pop_back();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      *  Returns a reference to the last element in the container.
      **/
     const T & back() const {
-        return data_local.ptr->back();
+        return ptr()->back();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      *  Returns a reference to the last element in the container.
      **/
     T & back() {
-        return data_local.ptr->back();
+        return ptr()->back();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      *  Erases all the elements of the deque..
      **/
     void clear() {
-        return data_local.ptr->clear();
+        return ptr()->clear();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * destroies the shared memory
@@ -350,7 +361,7 @@ public:
     bool operator == (const T1 &o ) const {
         if ( size() != o.size() ) return false;
 	//return (memcmp(&ref()[0], &o[0], size()) == 0);
-        for ( size_t i = 0; i < size(); i++ ) if ( ( *data_local.ptr ) [i] != o[i] ) return false;
+        for ( size_t i = 0; i < size(); i++ ) if ( ref() [i] != o[i] ) return false;
         return true;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
@@ -360,7 +371,7 @@ public:
     bool operator != (const T1 &o ) const {
         if ( size() != o.size() ) return true;
 	//return (memcmp(&ref()[0], &o[0], size()) != 0);
-        for ( size_t i = 0; i < size(); i++ ) if ( ( *data_local.ptr ) [i] != o[i] ) return true;
+        for ( size_t i = 0; i < size(); i++ ) if ( ref() [i] != o[i] ) return true;
         return false;
     }
 };
@@ -389,7 +400,7 @@ public:
      **/
     void push_back ( const std::string &str ) {
         CharString shmStr = headerLoc.pShmHdl->createString ( str );
-        data_local.ptr->push_back ( shmStr );
+        ptr()->push_back ( shmStr );
     }
 };
 
