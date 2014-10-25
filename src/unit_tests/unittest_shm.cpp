@@ -1,6 +1,8 @@
 
 #include "shmfw/variable.h"
 #include "shmfw/allocator.h"
+#include "shmfw/vector.h"
+#include "shmfw/deque.h"
 #include "shmfw/objects/points.h"
 #include "shmfw/objects/parameterentry.h"
 #include <boost/thread.hpp>
@@ -18,21 +20,21 @@
 
 template<typename T>
 void triggerItHasChanged ( ShmFw::HandlerPtr &shmHdl, std::string &name, int ms ) {
-    ShmFw::Var<T> shmVar ( name, shmHdl, 1 );
+    ShmFw::Var<T> shmVar ( name, shmHdl );
     usleep ( ms*1000 );
     shmVar.itHasChanged();
 }
 
 template<typename T>
 void triggerLock ( ShmFw::HandlerPtr &shmHdl, std::string &name, int ms ) {
-    ShmFw::Var<T> shmVar ( name, shmHdl, 1 );
+    ShmFw::Var<T> shmVar ( name, shmHdl );
     usleep ( ms*1000 );
     shmVar.lock();
 }
 
 template<typename T>
 void triggerUnLock ( ShmFw::HandlerPtr &shmHdl, std::string &name, int ms ) {
-    ShmFw::Var<T> shmVar ( name, shmHdl, 1 );
+    ShmFw::Var<T> shmVar ( name, shmHdl );
     usleep ( ms*1000 );
     shmVar.unlock();
 }
@@ -85,7 +87,71 @@ protected:
         return randf ( -10, 10 );
     }
 };
-TEST_F ( ShmTest, TestParameterEntry ) {
+
+TEST_F ( ShmTest, VarInt ) {
+    int var = rand();
+    std::string name("var0");
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
+    ShmFw::Var<int> a ( name, shmHdl );
+    a() = var;
+    EXPECT_EQ ( a, var );
+    ShmFw::Var<int> b ( name, shmHdl );
+    EXPECT_EQ ( b, var );
+    a() += 1;
+    EXPECT_NE ( b, var );
+    shmHdl->removeSegment();
+}
+
+
+TEST_F ( ShmTest, VectorInt ) {
+    std::vector<int> var(10000);
+    for(size_t i = 0; i < var.size(); i++) var[i] = rand();
+    std::string name("var0");
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
+    ShmFw::Vector<int> a ( name, shmHdl );
+    a.set(var);
+    EXPECT_EQ ( a, var );
+    ShmFw::Vector<int> b ( name, shmHdl );
+    EXPECT_EQ ( b, var );
+    a[0]+=1;
+    EXPECT_NE ( b, var );
+    shmHdl->removeSegment();
+}
+TEST_F ( ShmTest, DequeInt ) {
+    std::deque<int> var(10000);
+    for(size_t i = 0; i < var.size(); i++) var[i] = rand();
+    std::string name("var0");
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
+    ShmFw::Deque<int> a ( name, shmHdl );
+    a.set(var);
+    EXPECT_EQ ( a, var );
+    ShmFw::Deque<int> b ( name, shmHdl );
+    EXPECT_EQ ( b, var );
+    a[0]+=1;
+    EXPECT_NE ( b, var );
+    shmHdl->removeSegment();
+}
+
+TEST_F ( ShmTest, AllocPoints ) {  
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
+    ShmFw::Alloc<ShmFw::Points> a ( "var0", shmHdl ) ;
+    a->points.push_back(ShmFw::Point(rand_01(), rand_01(), rand_01()));
+    a->points.push_back(ShmFw::Point(rand_01(), rand_01(), rand_01()));
+    a().frame = "world";
+    ShmFw::Alloc<ShmFw::Points> b ( "var0", shmHdl ) ;
+    EXPECT_EQ (a(), b());
+    ShmFw::Alloc<ShmFw::Points> c ( "var1", shmHdl ) ;
+    c().copyFrom(b());
+    EXPECT_EQ (a(), c());
+    a->points[0].x = 3;
+    EXPECT_TRUE (a() == b());
+    EXPECT_FALSE (a() == c());
+    // std::cout << "a: " << a() << "c: " << c();
+    shmHdl->removeSegment();
+
+}
+
+TEST_F ( ShmTest, VarParameterEntry ) {
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
     ShmFw::Var<ShmFw::ParameterEntry<int> > a ( "a", shmHdl );
     a() = 10;
@@ -147,32 +213,13 @@ TEST_F ( ShmTest, TestParameterEntry ) {
     shmHdl->removeSegment();
 }
 
-TEST_F ( ShmTest, AllocPoints ) {
-  
-    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
-    ShmFw::Alloc<ShmFw::Points> a ( "var0", shmHdl ) ;
-    a->points.push_back(ShmFw::Point(rand_01(), rand_01(), rand_01()));
-    a->points.push_back(ShmFw::Point(rand_01(), rand_01(), rand_01()));
-    a().frame = "world";
-    ShmFw::Alloc<ShmFw::Points> b ( "var0", shmHdl ) ;
-    EXPECT_EQ (a(), b());
-    ShmFw::Alloc<ShmFw::Points> c ( "var1", shmHdl ) ;
-    c().copyFrom(b());
-    EXPECT_EQ (a(), c());
-    a->points[0].x = 3;
-    EXPECT_TRUE (a() == b());
-    EXPECT_FALSE (a() == c());
-    // std::cout << "a: " << a() << "c: " << c();
-    shmHdl->removeSegment();
-
-}
 TEST_F ( ShmTest, TestSharedLockPtr ) {
 
     /**
      * @ToDo
       std::string name("a");
       ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
-      ShmFw::Var<int> a ( name, shmHdl, 1 );
+      ShmFw::Var<int> a ( name, shmHdl );
       ShmFw::ScopedLockPtr lock;
       boost::thread t1 ( triggerItHasChanged<double>, shmHdl, name, 1000 );
       a.wait ( lock );
@@ -191,9 +238,9 @@ TEST_F ( ShmTest, TestClasses ) {
     std::string nameB ( "myVarB" );
     std::string nameC ( "myVarC" );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
-    ShmFw::Var<int> a ( nameA, shmHdl, 1 );
-    ShmFw::Var<double> b ( nameB, shmHdl, 1 );
-    ShmFw::Var<double> c ( nameC, shmHdl, 1 );
+    ShmFw::Var<int> a ( nameA, shmHdl);
+    ShmFw::Var<double> b ( nameB, shmHdl);
+    ShmFw::Var<double> c ( nameC, shmHdl);
     //std::cout << a.type_name() << std::endl;
     EXPECT_FALSE ( a.isType<ShmFw::Var<double> >() );
     EXPECT_TRUE ( a.isType<ShmFw::Var<int> >() );
@@ -207,9 +254,9 @@ TEST_F ( ShmTest, TestTypeName ) {
     std::string nameB ( "myVarB" );
     std::string nameC ( "myVarC" );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
-    ShmFw::Var<int> a ( nameA, shmHdl, 1 );
-    ShmFw::Var<double> b ( nameB, shmHdl, 1 );
-    ShmFw::Var<double> c ( nameC, shmHdl, 1 );
+    ShmFw::Var<int> a ( nameA, shmHdl );
+    ShmFw::Var<double> b ( nameB, shmHdl );
+    ShmFw::Var<double> c ( nameC, shmHdl );
     //std::cout << a.type_name() << std::endl;
     EXPECT_FALSE ( a.isType<ShmFw::Var<double> >() );
     EXPECT_TRUE ( a.isType<ShmFw::Var<int> >() );
@@ -222,9 +269,9 @@ TEST_F ( ShmTest, TestSimpleAssignment ) {
     srand ( time ( NULL ) );
     double v = rand() % 100;
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
-    ShmFw::Var<double> a ( name, shmHdl, 1 );
+    ShmFw::Var<double> a ( name, shmHdl );
     a = v;
-    ShmFw::Var<double> b ( name, shmHdl, 1 );
+    ShmFw::Var<double> b ( name, shmHdl );
     EXPECT_EQ ( 0, a()-v );
     EXPECT_EQ ( 0, b()-v );
     EXPECT_EQ ( 0, a()-b() );
@@ -233,14 +280,14 @@ TEST_F ( ShmTest, TestSimpleAssignment ) {
     double v2;
     b.get ( v2 );
     EXPECT_EQ ( v+1, v2 );
-    EXPECT_EQ ( v2, b[0] );
+    EXPECT_EQ ( v2, b() );
     shmHdl->removeSegment();
 }
 
 TEST_F ( ShmTest, TestLocks ) {
     std::string name ( "myVar" );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
-    ShmFw::Var<double> a ( name, shmHdl, 1 );
+    ShmFw::Var<double> a ( name, shmHdl );
     a.lock();
     boost::thread t1 ( triggerUnLock<double>, shmHdl, name, 5 );
     usleep ( 1000 );
@@ -252,12 +299,12 @@ TEST_F ( ShmTest, TestLocks ) {
 TEST_F ( ShmTest, TestChanged ) {
     std::string name ( "myVar" );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
-    ShmFw::Var<double> a ( name, shmHdl, 1 );
+    ShmFw::Var<double> a ( name, shmHdl );
     double v = 3;
     a = 3;
     EXPECT_EQ ( v, a() );
     EXPECT_FALSE ( a.hasChanged() );
-    ShmFw::Var<double> b ( name, shmHdl, 1 );
+    ShmFw::Var<double> b ( name, shmHdl );
     b = v + 1;
     b.itHasChanged();
     EXPECT_TRUE ( a.hasChanged ( ) );
@@ -270,7 +317,7 @@ TEST_F ( ShmTest, TestChanged ) {
 TEST_F ( ShmTest, TestSignals ) {
     std::string name ( "myVar" );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
-    ShmFw::Var<double> a ( name, shmHdl, 1 );
+    ShmFw::Var<double> a ( name, shmHdl );
     boost::thread t1 ( triggerItHasChanged<double>, shmHdl, name, 5 );
     EXPECT_FALSE ( a.timed_wait ( 1 ) );
     EXPECT_TRUE ( a.timed_wait ( 10 ) );
@@ -301,15 +348,14 @@ TEST_F ( ShmTest, TestSerializeXML ) {
     std::string name1 ( "myVar1" );
     std::string name2 ( "myVar2" );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
-    ShmFw::Var<double> a ( name1, shmHdl, 1 );
+    ShmFw::Var<double> a ( name1, shmHdl );
     unsigned int r = rand();
     a.set ( r );
     ShmFw::write ( filename,  a, ShmFw::FORMAT_XML );
-    ShmFw::Var<double> b ( name2, shmHdl, 1 );
+    ShmFw::Var<double> b ( name2, shmHdl );
     ShmFw::read ( filename,  b, ShmFw::FORMAT_XML );
     EXPECT_TRUE ( a() == b() );
     EXPECT_TRUE ( a.timestampShm() == b.timestampShm() );
-    EXPECT_TRUE ( a.size() == b.size() );
     shmHdl->removeSegment();
 }
 
@@ -318,8 +364,8 @@ TEST_F ( ShmTest, TestSerializeTXT ) {
     std::string name1 ( "myVar1" );
     std::string name2 ( "myVar2" );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
-    ShmFw::Var<double> a ( name1, shmHdl, 1 );
-    ShmFw::Var<double> b ( name2, shmHdl, 1 );
+    ShmFw::Var<double> a ( name1, shmHdl );
+    ShmFw::Var<double> b ( name2, shmHdl );
     unsigned int r = rand();
     a.set ( r );
     {
@@ -334,7 +380,6 @@ TEST_F ( ShmTest, TestSerializeTXT ) {
     }
     EXPECT_TRUE ( a() == b() );
     EXPECT_TRUE ( a.timestampShm() == b.timestampShm() );
-    EXPECT_TRUE ( a.size() == b.size() );
     shmHdl->removeSegment();
 }
 
@@ -343,8 +388,8 @@ TEST_F ( ShmTest, TestSerializeBinary ) {
     std::string name1 ( "myVar1" );
     std::string name2 ( "myVar2" );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
-    ShmFw::Var<double> a ( name1, shmHdl, 1 );
-    ShmFw::Var<double> b ( name2, shmHdl, 1 );
+    ShmFw::Var<double> a ( name1, shmHdl );
+    ShmFw::Var<double> b ( name2, shmHdl );
     unsigned int r = rand();
     a.set ( r );
     {
@@ -359,7 +404,6 @@ TEST_F ( ShmTest, TestSerializeBinary ) {
     }
     EXPECT_TRUE ( a() == b() );
     EXPECT_TRUE ( a.timestampShm() == b.timestampShm() );
-    EXPECT_TRUE ( a.size() == b.size() );
     shmHdl->removeSegment();
 }
 

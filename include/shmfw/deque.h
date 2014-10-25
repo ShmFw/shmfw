@@ -76,29 +76,26 @@ public:
      **/
     int construct ( const std::string &name, HandlerPtr &shmHdl ) {
 #if __cplusplus > 199711L
-        size_t type_hash_code = typeid ( Deque<T> ).hash_code(); 
-	const char *type_name = typeid ( Deque<T> ).name();
+        size_t type_hash_code = typeid ( Deque<T> ).hash_code();
+        const char *type_name = typeid ( Deque<T> ).name();
 #else
-        size_t type_hash_code = 0; 
-	const char *type_name = typeid ( Deque<T> ).name();
+        size_t type_hash_code = 0;
+        const char *type_name = typeid ( Deque<T> ).name();
 #endif
         if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
-            if ( pHeaderShm->array_size > 0 ) {
-            data_local.creator = false;
-        } else {
+        if ( headerLoc.creator ) {
             /// constructing shared data
             try {
                 ScopedLock myLock ( pHeaderShm->mutex );
-                    pHeaderShm->container = ShmFw::Header::CONTAINER_DEQUE;
-                    Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
-                    pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct< DequeShm > ( bi::anonymous_instance ) ( a );
-                    data_local.creator = true;
-                    pHeaderShm->array_size = 1;
-                } catch ( ... ) {
-                    std::cerr << "Error when constructing shared data" << std::endl;
-                    return ERROR;
-                }
+                pHeaderShm->container = ShmFw::Header::CONTAINER_DEQUE;
+                Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
+                pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct< DequeShm > ( bi::anonymous_instance ) ( a );
+                data_local.creator = true;
+            } catch ( ... ) {
+                std::cerr << "Error when constructing shared data" << std::endl;
+                return ERROR;
             }
+        }
         data_local.ptr = ( DequeShm * ) pHeaderShm->ptr.get();
         return OK;
     }
@@ -134,79 +131,81 @@ public:
      * returns a reference to the shared vector object by index
      * @return ref to shared data
      **/
-    const T &operator [] ( unsigned int n ) const {
+    const T &operator [] ( size_type n ) const {
         return ( *data_local.ptr ) [n];
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared vector object by index
      * @return ref to shared data
      **/
-    T &operator [] ( unsigned int n ) {
+    T &operator [] ( size_type n ) {
         return ( *data_local.ptr ) [n];
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared vector object by index
      * @return ref to shared data
      **/
-    const T &at ( unsigned int n ) const {
+    const T &at ( size_type n ) const {
         return data_local.ptr->at ( n );
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared vector object by index
      * @return ref to shared data
      **/
-    T &at ( unsigned int n ) {
+    T &at ( size_type n ) {
         return data_local.ptr->at ( n );
     }
     /** SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
      * copies data to the shared variable and updated the timestamps and locks the variable while accessing
      * @param src source vector
      **/
-    void set ( const std::vector<T> &src ) {
-        set(src, true);
+    template<typename T1>
+    void set ( const T1 &src ) {
+        set ( src, true );
     }
     /** CAN BE SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
-     * copies data to the shared variable 
+     * copies data to the shared variable
      * on locking is true it will also updated the timestamps and locks the variable while accessing
      * @param src source vector
      * @param locking on true it will lock and trigger a change otherwise the function is UNSAVE!!
      **/
-    void set ( const std::vector<T> &src, bool locking) {
-        if(locking) lock();
+    template<typename T1>
+    void set ( const T1 &src, bool locking ) {
+        if ( locking ) lock();
         data_local.ptr->resize ( src.size() );
-        for ( unsigned int i = 0; i < src.size(); i++ ) {
+        for ( size_t i = 0; i < src.size(); i++ ) {
             ( *data_local.ptr ) [i] = src[i];
         }
-        if(locking) unlock();
-        if(locking) itHasChanged();
+        if ( locking ) unlock();
+        if ( locking ) itHasChanged();
     }
     /** SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
      * copies data to the shared vector index and updated the timestamps and locks the variable while accessing
      * @param src source vector
      * @param n index
      **/
-    void set ( const T &src, unsigned int n ) {
-        set(src, n, true);
+    void set ( const T &src, size_type n ) {
+        set ( src, n, true );
     }
     /** CAN BE SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
-     * copies a data element to the shared variable 
+     * copies a data element to the shared variable
      * on locking is true it will also updated the timestamps and locks the variable while accessing
      * @param src source vector
      * @param n index
      * @param locking on true it will lock and trigger a change otherwise the function is UNSAVE!!
      **/
-    void set ( const T &src, unsigned int n, bool locking ) {
-        if(locking) lock();
+    void set ( const T &src, size_type n, bool locking ) {
+        if ( locking ) lock();
         ( *data_local.ptr ) [n] = src;
-        if(locking) unlock();
-        if(locking) itHasChanged();
+        if ( locking ) unlock();
+        if ( locking ) itHasChanged();
     }
     /** SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
      *  copies data form the shared variable into a local varaiable and sets local timestamps and locks the variable while accessing
      * @param des
      **/
     void get ( std::vector<T> &des ) {
-        get(des, true);
+        get ( des, true );
     }
     /** CAN BE SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
      *  copies data form the shared variable into a local varaiable
@@ -215,21 +214,21 @@ public:
      * @param locking on true it will lock and trigger a change otherwise the function is UNSAVE!!
      **/
     void get ( std::vector<T> &des, bool locking ) {
-        if(locking) lock();
+        if ( locking ) lock();
         des.resize ( data_local.ptr->size() );
         for ( unsigned int i = 0; i < des.size(); i++ ) {
             des[i] = ( *data_local.ptr ) [i];
         }
-        if(locking) unlock();
-        if(locking) updateTimestampLocal();
+        if ( locking ) unlock();
+        if ( locking ) updateTimestampLocal();
     }
     /** SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
      *  copies data element n form the shared vetor index into a local varaiable and will also updated the timestamps and locks the variable while accessing
      * @param des
      * @param n index
      **/
-    void get ( T &des, unsigned int n ) {
-        get(des, n, true);
+    void get ( T &des, size_type n ) {
+        get ( des, n, true );
     }
     /** SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
      *  copies data element n form the shared vetor index into a local varaiable
@@ -238,11 +237,11 @@ public:
      * @param n index
      * @param locking on true it will lock and trigger a change otherwise the function is UNSAVE!!
      **/
-    void get ( T &des, unsigned int n, bool locking  ) {
-        if(locking) lock();
+    void get ( T &des, size_type n, bool locking ) {
+        if ( locking ) lock();
         des = ( *data_local.ptr ) [n];
-        if(locking) unlock();
-        if(locking) updateTimestampLocal();
+        if ( locking ) unlock();
+        if ( locking ) updateTimestampLocal();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * Returns a human readable string to show the context
@@ -251,7 +250,7 @@ public:
     virtual std::string human_readable() const {
         std::stringstream ss;
         ss << name() << " = [";
-        for ( unsigned int i = 0; i < data_local.ptr->size(); i++ ) {
+        for ( size_t i = 0; i < data_local.ptr->size(); i++ ) {
             ss << ( ( i == 0 ) ? " " : ", " ) << std::setw ( 10 ) << data_local.ptr->at ( i );
         }
         ss << "]";
@@ -260,7 +259,7 @@ public:
     /** UNSAVE!! (user have to lock and to update timestamp)
      * @return vetor size
      **/
-    unsigned int size() const {
+    size_t size() const {
         return data_local.ptr->size();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
@@ -272,13 +271,13 @@ public:
     /** UNSAVE!! (user have to lock and to update timestamp)
      * Inserts or erases elements at the end such that the size becomes n. New elements are default constructed.
      **/
-    void resize ( unsigned int n ) {
+    void resize ( size_t n ) {
         data_local.ptr->resize ( n );
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * Inserts or erases elements at the end such that the size becomes n. New elements are default constructed.
      **/
-    void resize ( unsigned int n, const T& v ) {
+    void resize ( size_t n, const T& v ) {
         data_local.ptr->resize ( n, v );
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
@@ -344,6 +343,26 @@ public:
         // Header::destroy();
         std::cerr << "vector::destroy() -> kown to have problem!" << std::endl;
     };
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     *  @param o vector for comparison
+     **/
+    template<typename T1>
+    bool operator == (const T1 &o ) const {
+        if ( size() != o.size() ) return false;
+	//return (memcmp(&ref()[0], &o[0], size()) == 0);
+        for ( size_t i = 0; i < size(); i++ ) if ( ( *data_local.ptr ) [i] != o[i] ) return false;
+        return true;
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     *  @param o vector for comparison
+     **/
+    template<typename T1>
+    bool operator != (const T1 &o ) const {
+        if ( size() != o.size() ) return true;
+	//return (memcmp(&ref()[0], &o[0], size()) != 0);
+        for ( size_t i = 0; i < size(); i++ ) if ( ( *data_local.ptr ) [i] != o[i] ) return true;
+        return false;
+    }
 };
 
 class DequeStr : public ShmFw::Deque<ShmFw::CharString> {

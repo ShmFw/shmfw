@@ -73,16 +73,16 @@ public:
     }
     virtual std::string value(uint32_t i) const {
 	if( i > size()) return "Out of bound";
-	return v[i].getToString();	
+	return value();	
     }
     virtual uint32_t size() const {
-        return v.size();
+        return 1;
     }
     void value(const std::string &str) {
         v().getFromString(str);
     }
     int construct ( const std::string &name, HandlerPtr &shmHdl, unsigned int size = 1 ){
-      return v.construct(name, shmHdl, size);
+      return v.construct(name, shmHdl);
     }
 };
 

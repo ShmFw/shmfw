@@ -73,17 +73,17 @@ public:
       return boost::lexical_cast<std::string>(v());
     }
     virtual std::string value(uint32_t i) const {
-	if( i > size()) return "Out of bound";
-	return boost::lexical_cast<std::string>(v[i]);	
+	if( i > 0) return "Out of bound";
+	return value();	
     }
     virtual uint32_t size() const {
-        return v.size();
+        return 1;
     }
     void value(const std::string &str) {
         v() = boost::lexical_cast<T>(str);
     }
     int construct ( const std::string &name, HandlerPtr &shmHdl, unsigned int size = 1 ){
-      return v.construct(name, shmHdl, size);
+      return v.construct(name, shmHdl);
     }
 };
 

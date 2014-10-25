@@ -109,14 +109,14 @@ int main ( int argc, char *argv[] ) {
     }
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
 
-    ShmFw::Var<double> a ( "a", shmHdl, 3 );
+    ShmFw::Var<double> a ( "a", shmHdl);
     a.set ( 5.4 );
     std::cout << a.info_shm();
     std::cout << a.human_readable() << std::endl;
     a() = 1.2;
     std::cout << a.human_readable() << std::endl;
 
-    ShmFw::Var<double> aa ( "a", shmHdl, 3 );
+    ShmFw::Var<double> aa ( "a", shmHdl);
     std::cout << a.human_readable() << std::endl;
 
     ShmFw::Vector<double> b ( "b", shmHdl );
@@ -152,7 +152,7 @@ int main ( int argc, char *argv[] ) {
     std::cout << "pose2d_agv: " << pose2d_agv() << std::endl;
 
     try {
-        ShmFw::Var<double> c ( "c", shmHdl, 1 );
+        ShmFw::Var<double> c ( "c", shmHdl);
         c = 2;
         std::cout << "This will produces an error: " << c.human_readable()  << " = " << a.human_readable()  << std::endl;
         c = a;
@@ -163,14 +163,14 @@ int main ( int argc, char *argv[] ) {
 
     int testInt = std::rand() % 10;
     {
-        ShmFw::Var<int> xy ( "myInt", shmHdl,1 );
+        ShmFw::Var<int> xy ( "myInt", shmHdl);
         xy = testInt;
         ShmFw::write ( "test.xml", xy, ShmFw::FORMAT_XML );
         std::cout << "wrote: xy: " << xy.human_readable()  << std::endl;
     }
 
     {
-        ShmFw::Var<int> xy ( "Other", shmHdl,1 );
+        ShmFw::Var<int> xy ( "Other", shmHdl);
         std::cout << "goint to read xy: " << std::endl;
         ShmFw::read ( "test.xml", xy, ShmFw::FORMAT_XML );
         if ( xy() != testInt ) std::cout << "problem!"  << std::endl;

@@ -46,11 +46,7 @@ namespace serialization {
 /// serialize function
 template<class archive> inline  void serialize ( archive &ar, ShmFw::SharedHeader &o, const unsigned int version ) {
     std::string str;
-    unsigned int total_size = o.array_size + o.header_size;
-    ar & boost::serialization::make_nvp ( "total_size", total_size );
-    ar & boost::serialization::make_nvp ( "array_size", o.array_size );
     ar & boost::serialization::make_nvp ( "container", o.container );
-    ar & boost::serialization::make_nvp ( "array_size", o.array_size );
     ar & boost::serialization::make_nvp ( "tstamp", o.tstamp );
     ar & boost::serialization::make_nvp ( "type_hash_code", o.type_hash_code );
     if ( archive::is_saving::value ) {

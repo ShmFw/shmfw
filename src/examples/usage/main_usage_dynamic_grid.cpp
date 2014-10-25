@@ -96,7 +96,7 @@ int main ( int argc, char *argv[] ) {
 
     ShmFw::DynamicGrid<double> *grid1 = new ShmFw::DynamicGrid64FHeap;
     ShmFw::DynamicGrid64FHeap grid2;
-    ShmFw::Alloc<ShmFw::DynamicGrid64FShm> a ( "Grid", shmHdl, 3 );
+    ShmFw::Alloc<ShmFw::DynamicGrid64FShm> a ( "Grid", shmHdl);
     ShmFw::DynamicGrid<double> *grid3 = a.ptr();
 
     grid1->setSize ( 0, 50, 0, 40, 1, 0 );

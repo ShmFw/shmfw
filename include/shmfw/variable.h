@@ -46,7 +46,7 @@ namespace ShmFw {
 template<typename T>
 class Var : public Header {
     friend class boost::serialization::access;
-    LocalData<T>  data_local;         /// local data
+    T *pData;
 public:
 
 
@@ -58,168 +58,111 @@ public:
     /** Constructor
      * @param name name of the variable
      * @param shmHdl pointer to the shared memory segment handler
-     * @param size allows the cration of an array
      * @pre the ShmPtr poitner must be created first
      * @see ShmFw::createSegment
      * @see ShmFw::construct
      **/
-    Var ( const std::string &name, HandlerPtr &shmHdl, unsigned int size = 1 ) {
-        if ( construct ( name, shmHdl, size ) == ERROR ) exit ( 1 );
+    Var ( const std::string &name, HandlerPtr &shmHdl ) {
+        if ( construct ( name, shmHdl ) == ERROR ) exit ( 1 );
     }
     /**
      * @param name name of the variable
      * @param shmHdl pointer to the shared memory segment handler
-     * @param size allows the cration of an array
      * @pre the ShmPtr poitner must be created first
      * @see ShmFw::createSegment
      * @see ShmFw::construct
      **/
-    int construct ( const std::string &name, HandlerPtr &shmHdl, unsigned int size = 1 ) {
+    int construct ( const std::string &name, HandlerPtr &shmHdl ) {
 #if __cplusplus > 199711L
-        size_t type_hash_code = typeid ( Var<T> ).hash_code(); 
-	const char *type_name = typeid ( Var<T> ).name();
+        size_t type_hash_code = typeid ( Var<T> ).hash_code();
+        const char *type_name = typeid ( Var<T> ).name();
 #else
-        size_t type_hash_code = 0; 
-	const char *type_name = typeid ( Var<T> ).name();
-#endif
-        if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;;
-            if ( size < 1 ) throw std::runtime_error ( "Size must be bigger as 0" );
-            if ( pHeaderShm->array_size > 0 ) {
-                data_local.creator = false;
-            } else {
-                /// constructing shared data
-                try {
-                    ScopedLock myLock ( pHeaderShm->mutex );
-                        pHeaderShm->container = ShmFw::Header::CONTAINER_VARIABLE;
-                        pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct<T> ( bi::anonymous_instance ) [size]();
-                        data_local.creator = true;
-                        pHeaderShm->array_size = size;
-                    } catch ( ... ) {
-                        std::cerr << "Error when constructing shared data" << std::endl;
-                        return ERROR;
-                    }
-                }
-        data_local.ptr = ( T * ) pHeaderShm->ptr.get();
-        return OK;
-    }    
-    /**
-     * @param name name of the variable
-     * @param shmHdl pointer to the shared memory segment handler
-     * @pre the ShmPtr poitner must be created first
-     * @see ShmFw::createSegment
-     * @see ShmFw::construct
-     **/
-    template<typename TA>
-    int constructWithAllocator ( const std::string &name, HandlerPtr &shmHdl, size_t size = 1 ) {
-    typedef bi::allocator<TA, SegmentManager> Allocator;
-#if __cplusplus > 199711L
-        size_t type_hash_code = typeid ( Var<TA> ).hash_code(); 
-	const char *type_name = typeid ( Var<TA> ).name();
-#else
-        size_t type_hash_code = 0; 
-	const char *type_name = typeid ( Var<TA> ).name();
+        size_t type_hash_code = 0;
+        const char *type_name = typeid ( Var<T> ).name();
 #endif
         if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
-            if ( pHeaderShm->array_size > 0 ) {
-                data_local.creator = false;
-            } else {
-                /// constructing shared data
-                try {
-                    ScopedLock myLock ( pHeaderShm->mutex );
-                        pHeaderShm->container = ShmFw::Header::CONTAINER_VARIABLE;
-			Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
-                        pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct<TA> ( bi::anonymous_instance )[size](a);
-                        data_local.creator = true;
-                        pHeaderShm->array_size = size;
-                    } catch ( ... ) {
-                        std::cerr << "Error when constructing shared data" << std::endl;
-                        return ERROR;
-                    }
-                }
-        data_local.ptr = ( TA * ) pHeaderShm->ptr.get();
-        return OK;
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * operator to set the shared memory
-     * the timestamp will not be updated
-     * @param v value
-     * @return ref to shared data
-     **/
-    T &operator = ( const T &v ) const {
-        *data_local.ptr = v;
-        return *data_local.ptr;
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * operator to set the shared memory
-     * the timestamp will not be updated
-     * @param v value
-     * @return ref to shared data
-     **/
-    T &operator = ( const Var<T> &v ) const {
-        if ( size() != v.size() ) {
-            throw std::runtime_error ( "Shm::Var::=(Var<T>) miss matching size" );
-            return *data_local.ptr;
+        if ( headerLoc.creator ) {
+            /// constructing shared data
+            try {
+                ScopedLock myLock ( pHeaderShm->mutex );
+                pHeaderShm->container = ShmFw::Header::CONTAINER_VARIABLE;
+                pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct<T> ( bi::anonymous_instance ) [1]();
+            } catch ( ... ) {
+                std::cerr << "Error when constructing shared data" << std::endl;
+                return ERROR;
+            }
         }
-        if ( pHeaderShm->array_size == 1 ) *data_local.ptr = v();
-        else for ( unsigned int i = 0; i < pHeaderShm->array_size; i++ ) data_local.ptr[i] = v[i];
-        return *data_local.ptr;
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared object by index
-     * it is faster as [], but does not check the index > size
-     * @n index
-     * @return ref to shared data
-     **/
-    T &operator() ( unsigned int n ) const {
-        return data_local.ptr[n];
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared object
-     * @return ref to shared data
-     **/
-    T &operator() () const {
-        return *data_local.ptr;
+        pData = ( T* ) pHeaderShm->ptr.get();
+        return OK;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a pointer to the shared object
      * @return ref to shared data
      **/
-    T *ptr() const {
-        return data_local.ptr;
+    T *ptr() {
+        return pData;
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     * returns a pointer to the shared object
+     * @return ref to shared data
+     **/
+    const T *ptr() const {
+        return pData;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared object
      * @return ref to shared data
      **/
     T &ref() {
-        return *data_local.ptr;
+        return *pData;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared object
      * @return ref to shared data
      **/
-    T &ref() const {
-        return *data_local.ptr;
+    const T &ref() const {
+        return *pData;
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     * operator to set the shared memory
+     * the timestamp will not be updated
+     * @param source value
+     * @return ref to shared data
+     **/
+    T &operator = ( const T &source ) {
+        *pData = source;
+        return *pData;
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     * operator to set the shared memory
+     * the timestamp will not be updated
+     * @param v value
+     * @return ref to shared data
+     **/
+    T &operator = ( const Var<T> &v ) {
+        *pData = v.ref();
+        return *pData;
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     * returns a reference to the shared object
+     * @return ref to shared data
+     **/
+    const T &operator() () const {
+        return *pData;
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     * returns a reference to the shared object
+     * @return ref to shared data
+     **/
+    T &operator() () {
+        return *pData;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared object
      * @return ref to shared data
      **/
     T *operator-> () const {
-        return data_local.ptr;
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared object by index
-     * it is slower as (), band checks index > size
-     * @n index
-     * @return ref to shared data
-     **/
-    T &operator [] ( unsigned int n ) const {
-        if ( n < size() ) return data_local.ptr[n];
-        else {
-            throw std::runtime_error ( "Shm::Var::[] out of range" );
-            return *data_local.ptr;
-        }
+        return pData;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * Returns a human readable string to show the context
@@ -227,47 +170,39 @@ public:
      **/
     virtual std::string human_readable() const {
         std::stringstream ss;
-        if ( pHeaderShm->array_size > 1 ) {
-            ss << name() << " = [";
-            for ( unsigned int i = 0; i < pHeaderShm->array_size; i++ ) {
-                ss << ( ( i == 0 ) ? " " : ", " ) << std::setw ( 10 ) << data_local.ptr[i];
-            }
-            ss << "]";
-        } else {
-            ss << name() << " = " << data_local.ptr[0];
-        }
+        ss << name() << " = " << *pData;
         return ss.str();
     };
     /** SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
      * copies data to the shared variable and updated the timestamps and locks the variable while accessing
-     * @param src
+     * @param source
      **/
-    void set ( const T &src ) {
+    void set ( const T &source ) {
         lock();
-        *data_local.ptr = src;
+        *pData = source;
         unlock();
         itHasChanged();
     }
     /** SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
      *  copies data form the shared variable into a local varaiable and sets local timestamps and locks the variable while accessing
-     * @param des
+     * @param destination
      **/
-    void get ( T &des ) {
+    void get ( T &destination ) {
         lock();
-        des = *data_local.ptr;
+        destination = *pData;
         unlock();
         updateTimestampLocal();
     }
     /** SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
      *  copies data form the shared variable into a local varaiable and sets local timestamps and locks the variable while accessing
-     * @param des
+     * @param destination
      * @param ms to wait befor the function returns it the mutex is locked
      * @return If the thread acquires ownership of the mutex, returns true
      * @see timed_lock()
      **/
-    bool get ( T &des, int ms ) {
+    bool get ( T &destination, int ms ) {
         if ( timed_lock ( ms ) ) {
-            des = *data_local.ptr;
+            get ( destination );
             unlock();
             updateTimestampLocal();
             return true;
@@ -276,17 +211,10 @@ public:
         }
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns array size
-     * @return number off ellements allocated in shm
-     **/
-    unsigned int size() const {
-        return pHeaderShm->array_size;
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
      * destroies the shared memory
      **/
     virtual void destroy() const {
-        headerLoc.pShmHdl->getShm()->destroy_ptr ( data_local.ptr );
+        headerLoc.pShmHdl->getShm()->destroy_ptr ( headerLoc.ptr );
         Header::destroy();
     };
 
@@ -294,8 +222,22 @@ public:
      * overloads the << and calls the varalible overloades operator
      **/
     friend std::ostream &operator << ( std::ostream &os, const Var<T> &o ) {
-        return os << *o.data_local.ptr;
+        return os << o.ref();
     };
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     *  @param o vector for comparison
+     **/
+    template<typename T1>
+    bool operator == (const T1 &o ) const {
+	return (ref() == o);
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     *  @param o vector for comparison
+     **/
+    template<typename T1>
+    bool operator != (const T1 &o ) const {
+	return (ref() != o);
+    }
 };
 };
 #endif //SHARED_MEM_VARIABLE_H

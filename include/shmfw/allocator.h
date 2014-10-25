@@ -60,13 +60,12 @@ public:
     /** Constructor
      * @param name name of the variable
      * @param shmHdl pointer to the shared memory segment handler
-     * @param size allows the cration of an array
      * @pre the ShmPtr poitner must be created first
      * @see ShmFw::createSegment
      * @see ShmFw::construct
      **/
-    Alloc ( const std::string &name, HandlerPtr &shmHdl, size_t size = 1 ) {
-        if ( construct ( name, shmHdl, size ) == ERROR ) exit ( 1 );
+    Alloc ( const std::string &name, HandlerPtr &shmHdl) {
+        if ( construct ( name, shmHdl ) == ERROR ) exit ( 1 );
     }
     /**
      * @param name name of the variable
@@ -75,7 +74,7 @@ public:
      * @see ShmFw::createSegment
      * @see ShmFw::construct
      **/
-    int construct ( const std::string &name, HandlerPtr &shmHdl, size_t size = 1 ) {
+    int construct ( const std::string &name, HandlerPtr &shmHdl) {
 #if __cplusplus > 199711L
         size_t type_hash_code = typeid ( Alloc<T> ).hash_code();
         const char *type_name = typeid ( Alloc<T> ).name();
@@ -83,18 +82,15 @@ public:
         size_t type_hash_code = 0;
         const char *type_name = typeid ( Alloc<T> ).name();
 #endif
-        if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;;
-        if ( pHeaderShm->array_size > 0 ) {
-            data_local.creator = false;
-        } else {
+        if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
+        if ( headerLoc.creator ) {
             /// constructing shared data
             try {
                 ScopedLock myLock ( pHeaderShm->mutex );
                 pHeaderShm->container = ShmFw::Header::CONTAINER_ALLOC;
                 Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
-                pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct<T> ( bi::anonymous_instance ) [size] ( a );
+                pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct<T> ( bi::anonymous_instance ) [1] ( a );
                 data_local.creator = true;
-                pHeaderShm->array_size = size;
             } catch ( ... ) {
                 std::cerr << "Error when constructing shared data" << std::endl;
                 return ERROR;
@@ -148,42 +144,14 @@ public:
         return data_local.ptr;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared object by index
-     * it is slower as (), band checks index > size
-     * @n index
-     * @return ref to shared data
-     **/
-    T &operator [] ( unsigned int n ) const {
-        if ( n < size() ) return data_local.ptr[n];
-        else {
-            throw std::runtime_error ( "Shm::Alloc::[] out of range" );
-            return *data_local.ptr;
-        }
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
      * Returns a human readable string to show the context
      * @return string
      **/
     virtual std::string human_readable() const {
         std::stringstream ss;
-        if ( pHeaderShm->array_size > 1 ) {
-            ss << name() << " = [";
-            for ( unsigned int i = 0; i < pHeaderShm->array_size; i++ ) {
-                ss << ( ( i == 0 ) ? " " : ", " ) << std::setw ( 10 ) << data_local.ptr[i];
-            }
-            ss << "]";
-        } else {
-            ss << name() << " = " << data_local.ptr[0];
-        }
+        ss << name() << " = " << ref();
         return ss.str();
     };
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns array size
-     * @return number off ellements allocated in shm
-     **/
-    unsigned int size() const {
-        return pHeaderShm->array_size;
-    }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * destroies the shared memory
      **/
@@ -192,6 +160,21 @@ public:
         Header::destroy();
     };
 
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     *  @param o vector for comparison
+     **/
+    template<typename T1>
+    bool operator == (const T1 &o ) const {
+	return (ref() == o);
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     *  @param o vector for comparison
+     **/
+    template<typename T1>
+    bool operator != (const T1 &o ) const {
+	return (ref() != o);
+    }
+    
     /**
      * overloads the << and calls the varalible overloades operator
      **/

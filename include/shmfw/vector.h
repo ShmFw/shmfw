@@ -38,7 +38,7 @@
 #include <shmfw/serialization/interprocess_vector.hpp>
 
 namespace ShmFw {
-    
+
 /// Class to manage a shared vectors
 template<typename T>
 class Vector : public Header {
@@ -76,28 +76,26 @@ public:
      **/
     int construct ( const std::string &name, HandlerPtr &shmHdl ) {
 #if __cplusplus > 199711L
-        size_t type_hash_code = typeid ( Vector<T> ).hash_code(); 
-	const char *type_name = typeid ( Vector<T> ).name();
+        size_t type_hash_code = typeid ( Vector<T> ).hash_code();
+        const char *type_name = typeid ( Vector<T> ).name();
 #else
-        size_t type_hash_code = 0; const char *type_name = typeid ( Vector<T> ).name();
+        size_t type_hash_code = 0;
+        const char *type_name = typeid ( Vector<T> ).name();
 #endif
         if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
-            if ( pHeaderShm->array_size > 0 ) {
-            data_local.creator = false;
-        } else {
+        if ( headerLoc.creator ) {
             /// constructing shared data
             try {
                 ScopedLock myLock ( pHeaderShm->mutex );
-                    pHeaderShm->container = ShmFw::Header::CONTAINER_VECTOR;
-                    Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
-                    pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct< VectorShm > ( bi::anonymous_instance ) ( a );
-                    data_local.creator = true;
-                    pHeaderShm->array_size = 1;
-                } catch ( ... ) {
-                    std::cerr << "Error when constructing shared data" << std::endl;
-                    return ERROR;
-                }
+                pHeaderShm->container = ShmFw::Header::CONTAINER_VECTOR;
+                Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
+                pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct< VectorShm > ( bi::anonymous_instance ) ( a );
+                data_local.creator = true;
+            } catch ( ... ) {
+                std::cerr << "Error when constructing shared data" << std::endl;
+                return ERROR;
             }
+        }
         data_local.ptr = ( VectorShm * ) pHeaderShm->ptr.get();
         return OK;
     }
@@ -133,28 +131,28 @@ public:
      * returns a reference to the shared vector object by index
      * @return ref to shared data
      **/
-    const T &operator [] ( unsigned int n ) const {
+    const T &operator [] ( size_type n ) const {
         return ( *data_local.ptr ) [n];
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared vector object by index
      * @return ref to shared data
      **/
-    T &operator [] ( unsigned int n ) {
+    T &operator [] ( size_type n ) {
         return ( *data_local.ptr ) [n];
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared vector object by index
      * @return ref to shared data
      **/
-    const T &at ( unsigned int n ) const {
+    const T &at ( size_type n ) const {
         return data_local.ptr->at ( n );
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared vector object by index
      * @return ref to shared data
      **/
-    T &at ( unsigned int n ) {
+    T &at ( size_type n ) {
         return data_local.ptr->at ( n );
     }
     /** SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
@@ -164,7 +162,7 @@ public:
     void set ( const std::vector<T> &src ) {
         lock();
         data_local.ptr->resize ( src.size() );
-        for ( unsigned int i = 0; i < src.size(); i++ ) {
+        for ( size_t i = 0; i < src.size(); i++ ) {
             ( *data_local.ptr ) [i] = src[i];
         }
         unlock();
@@ -175,7 +173,7 @@ public:
      * @param src source vector
      * @param n index
      **/
-    void set ( const T &src, unsigned int n ) {
+    void set ( const T &src, size_type n ) {
         lock();
         ( *data_local.ptr ) [n] = src;
         unlock();
@@ -190,7 +188,7 @@ public:
         lock();
         bp::ptime t = timestampShm();;
         des.resize ( data_local.ptr->size() );
-        for ( unsigned int i = 0; i < des.size(); i++ ) {
+        for ( size_t i = 0; i < des.size(); i++ ) {
             des[i] = ( *data_local.ptr ) [i];
         }
         unlock();
@@ -202,7 +200,7 @@ public:
      * @param des
      * @return copy of the shared timestamp
      **/
-    bp::ptime get ( T &des, unsigned int n ) {
+    bp::ptime get ( T &des, size_type n ) {
         lock();
         bp::ptime t = timestampShm();;
         des = ( *data_local.ptr ) [n];
@@ -217,7 +215,7 @@ public:
     virtual std::string human_readable() const {
         std::stringstream ss;
         ss << name() << " = [";
-        for ( unsigned int i = 0; i < data_local.ptr->size(); i++ ) {
+        for ( size_t i = 0; i < data_local.ptr->size(); i++ ) {
             ss << ( ( i == 0 ) ? " " : ", " ) << std::setw ( 10 ) << data_local.ptr->at ( i );
         }
         ss << "]";
@@ -238,20 +236,20 @@ public:
     /** UNSAVE!! (user have to lock and to update timestamp)
      * Inserts or erases elements at the end such that the size becomes n. New elements are default constructed.
      **/
-    void resize ( unsigned int n ) {
+    void resize ( size_t n ) {
         data_local.ptr->resize ( n );
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * Inserts or erases elements at the end such that the size becomes n. New elements are default constructed.
      **/
-    void resize ( unsigned int n, const T& v ) {
+    void resize ( size_t n, const T& v ) {
         data_local.ptr->resize ( n, v );
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * If n is less than or equal to capacity(), this call has no effect.
      * Otherwise, it is a request for allocation of additional memory.
      **/
-    void reserve ( unsigned int n ) {
+    void reserve ( size_t n ) {
         data_local.ptr->reserve ( n );
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
@@ -275,6 +273,24 @@ public:
         // Header::destroy();
         std::cerr << "vector::destroy() -> kown to have problem!" << std::endl;
     };
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     *  @param o vector for comparison
+     **/
+    template<typename T1>
+    bool operator == (const T1 &o ) const {
+        if ( size() != o.size() ) return false;
+	return (memcmp(&ref()[0], &o[0], size()) == 0);
+        //for ( size_t i = 0; i < size(); i++ ) if ( at ( i ) != o[i] ) return false;
+        //return true;
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     *  @param o vector for comparison
+     **/
+    template<typename T1>
+    bool operator != (const T1 &o ) const {
+        if ( size() != o.size() ) return true;
+	return (memcmp(&ref()[0], &o[0], size()) != 0);
+    }
 };
 
 class VectorStr : public ShmFw::Vector<ShmFw::CharString> {
