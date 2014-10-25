@@ -42,20 +42,14 @@
  */
 namespace ShmFw {
 
-/// Exdented header (not used in our case)
-class SharedHeaderAlloc : private SharedHeader {
-public:
-    SharedHeaderAlloc(const VoidAllocator &void_alloc) : SharedHeader(void_alloc) {}
-    friend class boost::serialization::access;
-};
 
 /// Class to manage a simple shared memory variable or array
 template<typename T>
 class Alloc : public Header {
     friend class boost::serialization::access;
     typedef bi::allocator<T, SegmentManager> Allocator;
-    SharedHeaderAlloc *header_shm;  /// exdented shared Header
-    LocalData<T>  data_local;         /// local data
+    SharedHeader *header_shm;     /// exdented shared Header
+    LocalData<T>  data_local;     /// local data
 public:
 
 
@@ -84,29 +78,30 @@ public:
      **/
     int construct ( const std::string &name, HandlerPtr &shmHdl, size_t size = 1 ) {
 #if __cplusplus > 199711L
-        size_t type_hash_code = typeid ( Alloc<T> ).hash_code(); 
-	const char *type_name = typeid ( Alloc<T> ).name();
+        size_t type_hash_code = typeid ( Alloc<T> ).hash_code();
+        const char *type_name = typeid ( Alloc<T> ).name();
 #else
-        size_t type_hash_code = 0; const char *type_name = typeid ( Alloc<T> ).name();
+        size_t type_hash_code = 0;
+        const char *type_name = typeid ( Alloc<T> ).name();
 #endif
-        if ( constructHeader<SharedHeaderAlloc> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;;
-            header_shm = ( SharedHeaderAlloc * ) pHeaderShm;
-            if ( pHeaderShm->array_size > 0 ) {
+        if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;;
+        header_shm = ( SharedHeader * ) pHeaderShm;
+        if ( pHeaderShm->array_size > 0 ) {
             data_local.creator = false;
         } else {
             /// constructing shared data
             try {
                 ScopedLock myLock ( pHeaderShm->mutex );
-                    pHeaderShm->container = ShmFw::Header::CONTAINER_ALLOC;
-                    Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
-                    pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct<T> ( bi::anonymous_instance ) [size] ( a );
-                    data_local.creator = true;
-                    pHeaderShm->array_size = size;
-                } catch ( ... ) {
-                    std::cerr << "Error when constructing shared data" << std::endl;
-                    return ERROR;
-                }
+                pHeaderShm->container = ShmFw::Header::CONTAINER_ALLOC;
+                Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
+                pHeaderShm->ptr = headerLoc.pShmHdl->getShm()->construct<T> ( bi::anonymous_instance ) [size] ( a );
+                data_local.creator = true;
+                pHeaderShm->array_size = size;
+            } catch ( ... ) {
+                std::cerr << "Error when constructing shared data" << std::endl;
+                return ERROR;
             }
+        }
         data_local.ptr = ( T * ) pHeaderShm->ptr.get();
         return OK;
     }
@@ -115,7 +110,7 @@ public:
      * @warning do not use this fnc, it is only for serialization
      * @return ref to shared data
      **/
-    SharedHeaderAlloc &shared_header() {
+    SharedHeader &shared_header() {
         return *header_shm;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
@@ -123,7 +118,7 @@ public:
      * @warning do not use this fnc, it is only for serialization
      * @return ref to shared data
      **/
-    const SharedHeaderAlloc &shared_header() const {
+    const SharedHeader &shared_header() const {
         return *header_shm;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
@@ -221,7 +216,7 @@ public:
     friend std::ostream &operator << ( std::ostream &os, const Alloc<T> &o ) {
         return os << *o.data_local.ptr;
     };
-    
+
     template<class ForwardIt>
     static ForwardIt next ( ForwardIt it, typename std::iterator_traits<ForwardIt>::difference_type n = 1 ) {
         std::advance ( it, n );

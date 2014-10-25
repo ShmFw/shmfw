@@ -39,13 +39,6 @@
 
 namespace ShmFw {
 
-/// Exdented header (not used in our case)
-class SharedHeaderDeque : private SharedHeader {
-public:
-    SharedHeaderDeque(const VoidAllocator &void_alloc) : SharedHeader(void_alloc) {}
-    friend class boost::serialization::access;
-};
-
 /// Class to manage a shared vectors
 template<typename T>
 class Deque : public Header {
@@ -56,7 +49,7 @@ public:
     typedef typename Allocator::size_type size_type;
 
 protected:
-    SharedHeaderDeque *header_shm;      /// exdented shared Header
+    SharedHeader *header_shm;      /// exdented shared Header
     LocalData<DequeShm>  data_local;                /// local data
 public:
 
@@ -90,8 +83,8 @@ public:
         size_t type_hash_code = 0; 
 	const char *type_name = typeid ( Deque<T> ).name();
 #endif
-        if ( constructHeader<SharedHeaderDeque> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
-            header_shm = ( SharedHeaderDeque * ) pHeaderShm;
+        if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
+            header_shm = ( SharedHeader * ) pHeaderShm;
             if ( pHeaderShm->array_size > 0 ) {
             data_local.creator = false;
         } else {
@@ -116,7 +109,7 @@ public:
      * @warning do not use this fnc, it is only for serialization
      * @return ref to shared data
      **/
-    SharedHeaderDeque &shared_header() {
+    SharedHeader &shared_header() {
         return *header_shm;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
@@ -124,7 +117,7 @@ public:
      * @warning do not use this fnc, it is only for serialization
      * @return ref to shared data
      **/
-    const SharedHeaderDeque &shared_header() const {
+    const SharedHeader &shared_header() const {
         return *header_shm;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)

@@ -42,18 +42,10 @@
  */
 namespace ShmFw {
 
-/// Exdented header (not used in our case)
-class SharedHeaderVar : private SharedHeader {
-public:
-    SharedHeaderVar(const VoidAllocator &void_alloc) : SharedHeader(void_alloc) {}
-    friend class boost::serialization::access;
-};
-
 /// Class to manage a simple shared memory variable or array
 template<typename T>
 class Var : public Header {
     friend class boost::serialization::access;
-    SharedHeaderVar *header_shm;  /// exdented shared Header
     LocalData<T>  data_local;         /// local data
 public:
 
@@ -90,9 +82,9 @@ public:
         size_t type_hash_code = 0; 
 	const char *type_name = typeid ( Var<T> ).name();
 #endif
-        if ( constructHeader<SharedHeaderVar> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;;
+        if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;;
             if ( size < 1 ) throw std::runtime_error ( "Size must be bigger as 0" );
-            header_shm = ( SharedHeaderVar * ) pHeaderShm;
+            header_shm = ( SharedHeader * ) pHeaderShm;
             if ( pHeaderShm->array_size > 0 ) {
                 data_local.creator = false;
             } else {
@@ -128,8 +120,8 @@ public:
         size_t type_hash_code = 0; 
 	const char *type_name = typeid ( Var<TA> ).name();
 #endif
-        if ( constructHeader<SharedHeaderVar> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;;
-            header_shm = ( SharedHeaderVar * ) pHeaderShm;
+        if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;;
+            header_shm = ( SharedHeader * ) pHeaderShm;
             if ( pHeaderShm->array_size > 0 ) {
                 data_local.creator = false;
             } else {
@@ -154,7 +146,7 @@ public:
      * @warning do not use this fnc, it is only for serialization
      * @return ref to shared data
      **/
-    SharedHeaderVar &shared_header() {
+    SharedHeader &shared_header() {
         return *header_shm;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
@@ -162,7 +154,7 @@ public:
      * @warning do not use this fnc, it is only for serialization
      * @return ref to shared data
      **/
-    const SharedHeaderVar &shared_header() const {
+    const SharedHeader &shared_header() const {
         return *header_shm;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)

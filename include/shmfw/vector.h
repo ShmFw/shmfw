@@ -38,15 +38,6 @@
 #include <shmfw/serialization/interprocess_vector.hpp>
 
 namespace ShmFw {
-
-/// Exdented header (not used in our case)
-class SharedHeaderVector : private SharedHeader {
-public:
-    SharedHeaderVector(const VoidAllocator &void_alloc) : SharedHeader(void_alloc) {}
-    friend class boost::serialization::access;
-};
-
-    
     
 /// Class to manage a shared vectors
 template<typename T>
@@ -58,7 +49,7 @@ public:
     typedef typename Allocator::size_type size_type;
 
 protected:
-    SharedHeaderVector *header_shm;                  /// exdented shared Header
+    SharedHeader *header_shm;                  /// exdented shared Header
     LocalData<VectorShm>  data_local;                /// local data
 public:
 
@@ -91,8 +82,8 @@ public:
 #else
         size_t type_hash_code = 0; const char *type_name = typeid ( Vector<T> ).name();
 #endif
-        if ( constructHeader<SharedHeaderVector> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
-            header_shm = ( SharedHeaderVector * ) pHeaderShm;
+        if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
+            header_shm = ( SharedHeader * ) pHeaderShm;
             if ( pHeaderShm->array_size > 0 ) {
             data_local.creator = false;
         } else {
@@ -117,7 +108,7 @@ public:
      * @warning do not use this fnc, it is only for serialization
      * @return ref to shared data
      **/
-    SharedHeaderVector &shared_header() {
+    SharedHeader &shared_header() {
         return *header_shm;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
@@ -125,7 +116,7 @@ public:
      * @warning do not use this fnc, it is only for serialization
      * @return ref to shared data
      **/
-    const SharedHeaderVector &shared_header() const {
+    const SharedHeader &shared_header() const {
         return *header_shm;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
