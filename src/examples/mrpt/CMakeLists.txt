@@ -1,4 +1,4 @@
-IF(USE_MRPT)
+IF(MRPT_FOUND)
 
 add_executable(shmfw-example_mrpt_transformaions src/example_transformaion.cpp )
 target_link_libraries(shmfw-example_mrpt_transformaions ${MRPT_LIBS})
@@ -12,4 +12,4 @@ target_link_libraries(shmfw-example_mrpt_shmfw_vector ${MRPT_LIBS}  ${Boost_LIBR
 add_executable(shmfw-example_mrpt_serialization src/example_mrpt_serialization.cpp )
 target_link_libraries(shmfw-example_mrpt_serialization ${MRPT_LIBS}  ${Boost_LIBRARIES} rt )
 
-ENDIF(USE_MRPT)
+ENDIF(MRPT_FOUND)

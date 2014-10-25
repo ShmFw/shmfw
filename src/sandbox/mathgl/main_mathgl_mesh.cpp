@@ -4,12 +4,11 @@
 
 int sample(mglGraph *gr)
 {
-  mglData x,y,y1,y2;  mgls_prepare1d(&y,&y1,&y2,&x);
-  gr->SubPlot(1,1,0,""); gr->Title("Traj plot");
-  gr->Box();  gr->Plot(x,y);  gr->Traj(x,y,y1,y2);
+  mglData a;  mgls_prepare2d(&a);
+  gr->Title("Mesh plot"); gr->Rotate(50,60);
+  gr->Box();  gr->Mesh(a);
   return 0;
 }
-
 //-----------------------------------------------------
 int main ( int argc,char **argv ) {
     mglQT gr ( sample,"MathGL examples" );

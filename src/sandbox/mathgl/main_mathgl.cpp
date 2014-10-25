@@ -1,22 +1,6 @@
 
 #include <mgl2/qt.h>
-
-void mgls_prepare1d(HMDT y, HMDT y1=0, HMDT y2=0, HMDT x1=0, HMDT x2=0)
-{
-  register long i,n=50;
-  if(y)   mgl_data_create(y,n,3,1);
-  mreal xx;
-  for(i=0;i<n;i++)
-  {
-    xx = i/(n-1.);
-    if(y)
-    {
-      mgl_data_set_value(y, 0.7*sin(2*M_PI*xx) + 0.5*cos(3*M_PI*xx) + 0.2*sin(M_PI*xx), i,0,0);
-      mgl_data_set_value(y, sin(2*M_PI*xx), i,1,0);
-      mgl_data_set_value(y, cos(2*M_PI*xx), i,2,0);
-    }
-  }
-}
+#include "mathgl_prepare_data.h"
 
 int sample(mglGraph *gr)
 {

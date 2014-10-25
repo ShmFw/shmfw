@@ -45,7 +45,7 @@ add_test(
     COMMAND shmfw-unittest_eigen
 )
 
-IF(USE_MRPT)
+IF(MRPT_FOUND)
 
 add_executable(shmfw-unittest_mrpt unittest_mrpt.cpp)
 target_link_libraries(shmfw-unittest_mrpt gtest ${Boost_LIBRARIES} rt shmfw ${MRPT_LIBS})
@@ -55,7 +55,7 @@ add_test(
     COMMAND shmfw-unittest_mrpt
 )
 
-ENDIF(USE_MRPT)
+ENDIF(MRPT_FOUND)
 
 add_executable(shmfw-unittest_opencv unittest_opencv.cpp)
 target_link_libraries(shmfw-unittest_opencv gtest ${Boost_LIBRARIES} ${OpenCV_LIBRARIES} rt)

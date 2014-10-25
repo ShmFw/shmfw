@@ -159,7 +159,7 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_VAR ( RouteSegment );
     RETURN_IF_TYPE_VAR ( Twist );
     RETURN_IF_TYPE_VAR ( ModelState );
-#ifdef USE_MRPT
+#ifdef MRPT_FOUND
     RETURN_IF_TYPE_VAR ( mrpt::poses::CPoint2D );
     RETURN_IF_TYPE_VAR ( mrpt::poses::CPoint3D );
     RETURN_IF_TYPE_VAR ( mrpt::poses::CPose2D );
@@ -167,7 +167,7 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_VAR ( mrpt::math::CQuaternion<double> );
     RETURN_IF_TYPE_VAR ( mrpt::math::CQuaternion<float> );
 #endif
-#ifdef USE_EIGEN
+#ifdef EIGEN_FOUND
     RETURN_IF_TYPE_VAR ( Eigen::Vector2d );
     RETURN_IF_TYPE_VAR ( Eigen::Vector3d );
     RETURN_IF_TYPE_VAR ( Eigen::Vector4d );
@@ -204,7 +204,7 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_VECTOR ( RouteSegment );
     RETURN_IF_TYPE_VECTOR ( Twist );
     RETURN_IF_TYPE_VECTOR ( ModelState );
-#ifdef USE_MRPT
+#ifdef MRPT_FOUND
     RETURN_IF_TYPE_VECTOR ( mrpt::poses::CPoint2D );
     RETURN_IF_TYPE_VECTOR ( mrpt::poses::CPoint3D );
     RETURN_IF_TYPE_VECTOR ( mrpt::poses::CPose2D );
@@ -212,7 +212,7 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_VECTOR ( mrpt::math::CQuaternion<double> );
     RETURN_IF_TYPE_VECTOR ( mrpt::math::CQuaternion<float> );
 #endif
-#ifdef USE_EIGEN
+#ifdef EIGEN_FOUND
     RETURN_IF_TYPE_VECTOR ( Eigen::Vector2d );
     RETURN_IF_TYPE_VECTOR ( Eigen::Vector3d );
     RETURN_IF_TYPE_VECTOR ( Eigen::Vector4d );
@@ -250,7 +250,7 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_DEQUE ( Twist );
     RETURN_IF_TYPE_DEQUE ( ModelState );
 
-#ifdef USE_MRPT
+#ifdef MRPT_FOUND
     RETURN_IF_TYPE_DEQUE ( mrpt::poses::CPoint2D );
     RETURN_IF_TYPE_DEQUE ( mrpt::poses::CPoint3D );
     RETURN_IF_TYPE_DEQUE ( mrpt::poses::CPose2D );
@@ -259,7 +259,7 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_DEQUE ( mrpt::math::CQuaternion<float> );
 #endif
 
-#ifdef USE_EIGEN
+#ifdef EIGEN_FOUND
     RETURN_IF_TYPE_DEQUE ( Eigen::Vector2d );
     RETURN_IF_TYPE_DEQUE ( Eigen::Vector3d );
     RETURN_IF_TYPE_DEQUE ( Eigen::Vector4d );
@@ -312,7 +312,7 @@ HandlerObjectPtr HandlerObject::create ( const std::string &name, HandlerPtr &sh
     CREATE_TYPE_VAR ( Pose2DAGV );
     CREATE_TYPE_VAR ( Twist );
     CREATE_TYPE_VAR ( ModelState );
-#ifdef USE_MRPT
+#ifdef MRPT_FOUND
     CREATE_TYPE_VAR ( mrpt::poses::CPoint2D );
     CREATE_TYPE_VAR ( mrpt::poses::CPoint3D );
     CREATE_TYPE_VAR ( mrpt::poses::CPose2D );
@@ -321,7 +321,7 @@ HandlerObjectPtr HandlerObject::create ( const std::string &name, HandlerPtr &sh
     CREATE_TYPE_VAR ( mrpt::math::CQuaternion<float> );
 #endif
 
-#ifdef USE_EIGEN
+#ifdef EIGEN_FOUND
     CREATE_TYPE_VAR ( Eigen::Vector2d );
     CREATE_TYPE_VAR ( Eigen::Vector3d );
     CREATE_TYPE_VAR ( Eigen::Vector4d );

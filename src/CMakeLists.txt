@@ -26,8 +26,8 @@ SET(SHMFW_DYNAMIC_LIBRARIES
 
 add_library(shmfw SHARED shmfw.cpp)
 target_link_libraries(shmfw ${Boost_LIBRARIES} rt  ${SHMFW_DYNAMIC_LIBRARIES})
-IF(USE_MRPT)
+IF(MRPT_FOUND)
 target_link_libraries(shmfw ${MRPT_LIBS})
-ENDIF(USE_MRPT)
+ENDIF(MRPT_FOUND)
 
 install(TARGETS shmfw DESTINATION ${LIBRARY_INSTALL_PATH} )

@@ -29,24 +29,33 @@
  *   WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE           *
  *   POSSIBILITY OF SUCH DAMAGE.                                           *
  ***************************************************************************/
+
 #include <iostream>
 #include <stdlib.h>
 #include <signal.h>
 
+
+#include <mgl2/qt.h>
 #include <shmfw/objects/dynamic_grid.h>
+#include <opencv2/highgui/highgui.hpp>
 #include <shmfw/allocator.h>
 #include <boost/program_options.hpp>
-#include <boost/thread.hpp>
-#include <boost/chrono.hpp>
-#include <boost/chrono/thread_clock.hpp>
 
 struct Prarmeters {
     std::string shm_memory_name;
     unsigned int shm_memory_size;
     std::string variable_name;
+    ShmFw::HandlerPtr shmHdl;
     bool loop;
 };
 Prarmeters params;
+
+
+void terminate (int s) {
+    printf("Caught signal %d\n",s);
+    fflush(stdout);
+    params.loop = false;
+}
 
 void readArgs ( int argc, char **argv, Prarmeters &params ) {
     namespace po = boost::program_options;
@@ -56,6 +65,7 @@ void readArgs ( int argc, char **argv, Prarmeters &params ) {
     ( "help", "get this help message" )
     ( "clear,c", "clears the shared memory" )
     ( "loop,l", "loops writing data" )
+    ( "variable_name,v", po::value<std::string> ( &params.variable_name )->default_value ( "Grid" ), "shared variable name" )
     ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
     ( "shm_memory_size,s", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" );
 
@@ -75,66 +85,54 @@ void readArgs ( int argc, char **argv, Prarmeters &params ) {
     params.loop = ! ( vm.count ( "loop" ) > 0 );
 }
 
-void terminate ( int s ) {
-    printf ( "Caught signal %d\n",s );
-    fflush ( stdout );
-    params.loop = false;
+void prepare_grid ( mglData* data ) {
+    srand ( time ( NULL ) );
+    ShmFw::Alloc<ShmFw::DynamicGrid64FShm> a ( params.variable_name, params.shmHdl );
+
+    size_t col, row,  columns = a->getSizeX(), rows = a->getSizeY();
+    mgl_data_create ( data, rows, columns, 1 );
+    for ( col = 0; col < columns; col++ )  {
+        for ( row=0; row < rows; row++ ) {
+            double v = a() (col,row);
+            mgl_data_set_value ( data, v, row, col, 0 );
+        }
+    }
 }
-int main ( int argc, char *argv[] ) {
+
+int sample ( mglGraph *gr ) {
+    mglData a;
+    prepare_grid ( &a );
+    gr->Title ( "Mesh plot" );
+    gr->Rotate ( 50,60 );
+    gr->Box();
+    gr->Mesh ( a );
+    return 0;
+}
 
 
-    using namespace boost::chrono;
-    typedef boost::chrono::thread_clock tclock;
-    thread_clock::time_point thStart, thStop;
-
+int main ( int argc, char **argv ) {
     readArgs ( argc, argv, params );
     signal ( SIGABRT,	terminate );
     signal ( SIGTERM,	terminate );
 
-    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
-    srand ( time ( NULL ) );
-
-    ShmFw::DynamicGrid<double> *grid1 = new ShmFw::DynamicGrid64FHeap;
-    ShmFw::DynamicGrid64FHeap grid2;
-    ShmFw::Alloc<ShmFw::DynamicGrid64FShm> a ( "Grid", shmHdl, 3 );
-    ShmFw::DynamicGrid<double> *grid3 = a.ptr();
-
-    grid1->setSize ( 0, 50, 0, 40, 1, 0 );
-    std::cout << *grid1 << std::endl;
-    int count = 0;
+    params.shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
+    ShmFw::Header shmHeader ( params.variable_name, params.shmHdl );
+    mglQT gr ( sample,"MathGL examples" );
+    gr.Update();
+    int update_count = 0;
+    int timeout_count = 0;
     do {
-        double d = sin ( count / 100. );
-        double x, y, m = grid1->getSizeX(), n = grid1->getSizeY();
-        for ( int i=0; i<m; i++ ) {
-            for ( int j=0; j<n; j++ ) {
-                x = i/ ( n-1. );
-                y = j/ ( m-1. );
-                double v = d*sin ( 2*M_PI*x ) *sin ( 3*M_PI*y ) + ( 1.0-d ) *cos ( 3*M_PI*x*y );
-                grid1->setCellByIndex ( i, j, v );
-            }
-        }
-        std::cout << std::endl;
-        thStart = tclock::now();
-        grid1->copyTo ( grid2, true );
-        thStop = tclock::now();
-        std::cout << "heap->heap: copyTo using_memcpy  : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
-        thStart = tclock::now();
-        grid1->copyTo ( grid2, false );
-        thStop = tclock::now();
-        std::cout << "heap->heap: copyTo using_forloop : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
-        thStart = tclock::now();
-        grid1->copyTo ( *grid3, true );
-        thStop = tclock::now();
-        std::cout << "heap->shm: copyTo using_memcpy   : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
-        thStart = tclock::now();
-        grid1->copyTo ( *grid3, false );
-        thStop = tclock::now();
-        std::cout << "heap->shm: copyTo using_forloop  : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
-        a.itHasChanged();
-        count++;
-        usleep ( 100000 );
+        gr.Update();
+	if(shmHeader.timed_wait(5000)){
+	  update_count++;
+	  timeout_count = 0;
+	  std::cout << "update_count:" << update_count << std::endl;
+	} else {
+	  timeout_count++;
+	  std::cout << "timeout_count:" << timeout_count << std::endl;
+	}
     } while ( params.loop );
+    return gr.Run();
 
     exit ( 0 );
-
 }

@@ -33,7 +33,7 @@
 #ifndef SHARED_MEM_EIGEN
 #define SHARED_MEM_EIGEN
 
-#ifdef USE_EIGEN
+#ifdef EIGEN_FOUND
 #include <Eigen/Core>
 namespace Eigen {  
 template<typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
@@ -43,6 +43,6 @@ inline std::istream& operator>> ( std::istream &input, Matrix<_Scalar, _Rows, _C
 }
 }
 
-#endif //USE_EIGEN
+#endif //EIGEN_FOUND
 #endif //SHARED_MEM_EIGEN
 

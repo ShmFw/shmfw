@@ -35,50 +35,55 @@
 
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
-
+#define SHMFW_UNUSED_PARAM(a)		(void)(a)
 namespace ShmFw {
-template <template<typename...> class Allocator>
-class DynamicGrid {
-    typedef boost::interprocess::vector<int8_t,    Allocator<int8_t>    > VectorT;
 
-    /** The cells.
-      */
-    VectorT m_map; /// cells
-    float m_x_min; /// min x in metric units
-    float m_x_max; /// max x in metric units
-    float m_y_min; /// min y in metric units
-    float m_y_max; /// max y in metric units
-    float m_resolution;  /// resolution: metric unit = cell * resolution
+  
+
+template <typename T> class DynamicGrid {
+protected:
+    double m_x_min; /// min x in metric units
+    double m_x_max; /// max x in metric units
+    double m_y_min; /// min y in metric units
+    double m_y_max; /// max y in metric units
+    double m_resolution;  /// resolution: metric unit = cell * resolution
     size_t m_size_x; /// size x in cells
     size_t m_size_y; /// size y in cells
+    size_t m_size;   /// size total number of cells = m_size_x*m_size_y
+    boost::interprocess::offset_ptr<T> m_data;      /// data;
 public:
-
-    DynamicGrid ( const Allocator<void>& void_alloc = {} )
-        : m_map ( void_alloc )
-        , m_x_min ( 0 )
+    DynamicGrid()
+        : m_x_min ( 0 )
         , m_x_max ( 0 )
         , m_y_min ( 0 )
         , m_y_max ( 0 )
         , m_resolution ( 0 )
         , m_size_x ( 0 )
-        , m_size_y ( 0 )    {
-
+        , m_size_y ( 0 )
+        , m_size ( 0 )
+        , m_data ( NULL )   {
+    }
+    DynamicGrid ( const DynamicGrid &src )
+        : m_x_min ( src.m_x_min )
+        , m_x_max ( src.m_x_max )
+        , m_y_min ( src.m_y_min )
+        , m_y_max ( src.m_y_max )
+        , m_resolution ( src.m_resolution )
+        , m_size_x ( src.m_size_x )
+        , m_size_y ( src.m_size_y )
+        , m_size ( src.m_size_x * src.m_size_y )
+        , m_data ( src.m_data )  {
     }
 
-    DynamicGrid ( const DynamicGrid &p )
-        : m_map ( p.m_map.get_allocator() )
-        , m_x_min ( p.m_x_min )
-        , m_x_max ( p.m_x_max )
-        , m_y_min ( p.m_y_min )
-        , m_y_max ( p.m_y_max )
-        , m_resolution ( p.m_resolution )
-        , m_size_x ( p.m_size_x )
-        , m_size_y ( p.m_size_y ) {
+    virtual void resize ( std::size_t n ) = 0;
+    virtual void assign ( std::size_t n, const T& val ) = 0;
+    virtual void setSize (
+        const double x_min, const double x_max,
+        const double y_min, const double y_max,
+        const double resolution, const T * fill_value = NULL ) = 0;
 
-    }
-
-    template<typename T2>
-    void copyTo ( T2& des ) const {
+    template<typename T1>
+    void copyTo ( T1& des, bool use_memcpy = true ) const {
         des.m_x_min = m_x_min;
         des.m_x_max = m_x_max;
         des.m_y_min = m_y_min;
@@ -86,13 +91,20 @@ public:
         des.m_resolution = m_resolution;
         des.m_size_x = m_size_x;
         des.m_size_y = m_size_y;
-        des.m_map.resize ( m_map.size() );
-        for ( size_t i = 0; i < des.m_map.size(); i++ ) {
-            des.data[i] = m_map[i];
-        }
+        des.resize ( m_size_x * m_size_y );
+        copyDataTo ( des, use_memcpy );
     }
-    template<typename T2>
-    DynamicGrid& copyFrom ( const T2& src ) {
+
+    template<typename T1>
+    void copyDataTo ( T1& des, bool use_memcpy = true ) const {
+	if(use_memcpy) 
+	  memcpy( &des[0], &m_data[0], sizeof(T) * size());
+        else 
+	  for ( size_t i = 0; i < size(); i++ ) des[i] = m_data[i];
+    }
+
+    template<typename T1>
+    DynamicGrid& copyFrom ( const T1& src, bool use_memcpy = true ) {
         m_x_min = src.m_x_min;
         m_x_max = src.m_x_max;
         m_y_min = src.m_y_min;
@@ -100,14 +112,23 @@ public:
         m_resolution = src.m_resolution;
         m_size_x = src.m_size_x;
         m_size_y = src.m_size_y;
-        m_map.resize ( src.m_map.size() );
-        for ( size_t i = 0; i < src.m_map.size(); i++ ) {
-            m_map[i] = src.m_map[i];
-        }
+        resize ( m_size_x*m_size_y );
+        return copyDataFrom ( src, use_memcpy );
+    }
+    template<typename T1>
+    DynamicGrid& copyDataFrom ( const T1& src, bool use_memcpy = true ) {
+	if (use_memcpy) 
+	  memcpy( &m_data[0], &src[0], sizeof(T) * size());
+        else 
+	  for ( size_t i = 0; i < size(); i++ )  m_data[i] = src[i];  
         return *this;
     }
 
-
+    /** Returns the number of cells.
+        */
+    inline size_t size() const {
+        return m_size;
+    }
     /** Returns the horizontal size of grid map in cells count.
         */
     inline size_t getSizeX() const {
@@ -149,30 +170,240 @@ public:
     inline float  getResolution() const  {
         return m_resolution;
     }
+    /** Returns a pointer to the contents of a cell given by its coordinates, or NULL if it is out of the map extensions.
+      */
+    inline T*	cellByPos ( float x, float y ) {
+        int cx = x2idx ( x );
+        int cy = y2idx ( y );
 
-    friend std::ostream& operator<< ( std::ostream &output, const DynamicGrid<Allocator> &o ) {
+        if ( cx<0 || cx>=static_cast<int> ( this->m_size_x ) ) return NULL;
+        if ( cy<0 || cy>=static_cast<int> ( this->m_size_y ) ) return NULL;
+
+        return &this->m_data[ cx + cy*this->m_size_x ];
+    }
+
+    /** Returns a pointer to the contents of a cell given by its coordinates, or NULL if it is out of the map extensions.
+      */
+    inline const T* cellByPos ( float x, float y ) const {
+        int cx = x2idx ( x );
+        int cy = y2idx ( y );
+
+        if ( cx<0 || cx>=static_cast<int> ( this->m_size_x ) ) return NULL;
+        if ( cy<0 || cy>=static_cast<int> ( this->m_size_y ) ) return NULL;
+
+        return &this->m_data[ cx + cy*this->m_size_x ];
+    }
+    /** set the contents of a cell given by its coordinates if the coordinates are with the range.
+      */
+    inline void setCellByPos ( float x, float y, const T &src ) {
+        int cx = x2idx ( x );
+        int cy = y2idx ( y );
+
+        if ( cx<0 || cx>=static_cast<int> ( this->m_size_x ) ) return;
+        if ( cy<0 || cy>=static_cast<int> ( this->m_size_y ) ) return;
+
+        this->m_data[ cx + cy*this->m_size_x ] = src;
+    }
+    /** Gets the contents of a cell given by its coordinates if the coordinates are with the range.
+      */
+    inline void getCellByPos ( float x, float y, T &des ) const {
+        int cx = x2idx ( x );
+        int cy = y2idx ( y );
+
+        if ( cx<0 || cx>=static_cast<int> ( this->m_size_x ) ) return;
+        if ( cy<0 || cy>=static_cast<int> ( this->m_size_y ) ) return;
+
+        des = this->m_data[ cx + cy*this->m_size_x ];
+    }
+
+    /** Returns a pointer to the contents of a cell given by its cell indexes, or NULL if it is out of the map extensions.
+      */
+    inline  T*	cellByIndex ( unsigned int cx, unsigned int cy ) {
+        if ( cx>=this->m_size_x || cy>=this->m_size_y )
+            return NULL;
+        else	return &this->m_data[ cx + cy*this->m_size_x ];
+    }
+
+    /** Returns a pointer to the contents of a cell given by its cell indexes, or NULL if it is out of the map extensions.
+      */
+    inline const T* cellByIndex ( unsigned int cx, unsigned int cy ) const {
+        if ( cx>=this->m_size_x || cy>=this->m_size_y )
+            return NULL;
+        else	return &this->m_data[ cx + cy*this->m_size_x ];
+    }
+    /** set the contents of a cell given by its cell indexes if the indexes are with the range.
+      */
+    inline void setCellByIndex ( unsigned int cx, unsigned int cy, const T &src ) {
+        if ( cx>=this->m_size_x || cy>=this->m_size_y )
+            return;
+        else
+            this->m_data[ cx + cy*this->m_size_x ] = src;
+    }
+    /** set the contents of a cell given by its cell indexes if the indexes are with the range.
+      */
+    inline void getCellByIndex ( unsigned int cx, unsigned int cy, T &des ) const {
+        if ( cx>=this->m_size_x || cy>=this->m_size_y )
+            return;
+        else
+            des = this->m_data[ cx + cy*this->m_size_x ];
+    }
+    /** Transform a coordinate values into cell indexes.
+      */
+    inline int   x2idx ( float x ) const {
+        return static_cast<int> ( ( x-this->m_x_min ) /this->m_resolution );
+    }
+    inline int   y2idx ( float y ) const {
+        return static_cast<int> ( ( y-this->m_y_min ) /this->m_resolution );
+    }
+    inline int   xy2idx ( float x,float y ) const {
+        return x2idx ( x ) + y2idx ( y ) *this->m_size_x;
+    }
+
+    /** Transform a global (linear) cell index value into its corresponding (x,y) cell indexes. */
+    inline void  idx2cxcy ( const int &idx,  int &cx, int &cy ) const {
+        cx = idx % this->m_size_x;
+        cy = idx / this->m_size_x;
+    }
+
+    /** Transform a cell index into a coordinate value.
+      */
+    inline float   idx2x ( int cx ) const {
+        return this->m_x_min+ ( cx+0.5f ) *this->m_resolution;
+    }
+    inline float   idx2y ( int cy ) const {
+        return this->m_y_min+ ( cy+0.5f ) *this->m_resolution;
+    }
+
+    /** Transform a coordinate value into a cell index, using a diferent "x_min" value
+        */
+    inline int   x2idx ( float x,float x_min ) const {
+        SHMFW_UNUSED_PARAM ( x_min );
+        return static_cast<int> ( ( x-this->m_x_min ) / this->m_resolution );
+    }
+    inline int   y2idx ( float y, float y_min ) const {
+        SHMFW_UNUSED_PARAM ( y_min );
+        return static_cast<int> ( ( y-this->m_y_min ) /this->m_resolution );
+    }
+
+    /** The user must implement this in order to provide "saveToTextFile" a way to convert each cell into a numeric value */
+    virtual float cell2float ( const T& c ) const {
+        SHMFW_UNUSED_PARAM ( c );
+        return 0;
+    }
+    /** Returns a pointer to the raw data.
+      */
+    inline const T *raw () const {
+        return m_data;
+    }
+    /** Returns a pointer to the raw data.
+      */
+    inline T *raw () {
+        return m_data;
+    }
+    friend std::ostream& operator<< ( std::ostream &output, const DynamicGrid &o ) {
         char msg[0xFF];
-        sprintf (msg, "%zu %zu @ %4.3fm/p of %s, %4.3f, %4.3f, %4.3f, %4.3f\n",
-                  o.getSizeX(), o.getSizeY(), o.getResolution(),
-                  typeid ( uint8_t ).name(),
-                  o.getXMin(), o.getYMin(),
-                  o.getXMax(), o.getYMax() );
+        sprintf ( msg, "%zu %zu @ %4.3fm/p of %zu bytes, range x:  %4.3f -> %4.3f, y: %4.3f -> %4.3f",
+                  o.m_size_x, o.m_size_y, o.m_resolution,
+                  sizeof ( T ),
+                  o.m_x_min, o.m_x_max,
+                  o.m_y_min, o.m_y_max );
         output << msg;
         return output;
     }
-    friend std::istream& operator>> ( std::istream &input, DynamicGrid<Allocator> &o ) {
+    friend std::istream& operator>> ( std::istream &input, DynamicGrid &o ) {
         return input;
     }
+    /** Returns a reference ot a cell, no boundary checks are performed.
+      */
+    inline const T &operator[] ( int idx ) const {
+        return m_data[idx];
+    }
+    /** Returns a reference ot a cell, no boundary checks are performed.
+      */
+    inline T &operator[] ( int idx ) {
+        return m_data[idx];
+    }
+    /** Returns a reference ot a cell, no boundary checks are performed.
+      */
+    inline const T &operator() ( unsigned int cx, unsigned int cy ) const {
+        return this->m_data[ cx + cy*this->m_size_x ];
+    }
+    /** Returns a reference ot a cell, no boundary checks are performed.
+      */
+    inline T &operator() ( unsigned int cx, unsigned int cy ) {
+        return this->m_data[ cx + cy*this->m_size_x ];
+    }
 };
+
+template <typename T, template<typename...> class Allocator>
+class DynamicGridData : public DynamicGrid<T> {
+    typedef boost::interprocess::vector<T,    Allocator<T>    > VectorT;
+public:
+    VectorT m_map; /// cells
+public:
+    DynamicGridData ( const Allocator<void>& void_alloc = {} )
+        : DynamicGrid<T>()
+        , m_map ( void_alloc ) {
+    }
+
+    DynamicGridData ( const DynamicGridData &src )
+        : DynamicGrid<T> ( src )
+        , m_map ( src.m_map.get_allocator() ) {
+        this->copyDataFrom ( src );
+    }
+
+    virtual void  setSize (
+        const double x_min, const double x_max,
+        const double y_min, const double y_max,
+        const double resolution, const T * fill_value = NULL ) {
+        // Adjust sizes to adapt them to full sized cells acording to the resolution:
+        this->m_x_min = resolution*round ( x_min/resolution );
+        this->m_y_min = resolution*round ( y_min/resolution );
+        this->m_x_max = resolution*round ( x_max/resolution );
+        this->m_y_max = resolution*round ( y_max/resolution );
+
+        // Res:
+        this->m_resolution = resolution;
+
+        // Now the number of cells should be integers:
+        this->m_size_x = round ( ( this->m_x_max-this->m_x_min ) / this->m_resolution );
+        this->m_size_y = round ( ( this->m_y_max-this->m_y_min ) / this->m_resolution );
+
+        // Cells memory:
+        if ( fill_value )
+            assign ( this->m_size_x * this->m_size_y, *fill_value );
+        else
+            resize ( this->m_size_x * this->m_size_y );
+    }
+
+    virtual void resize ( std::size_t n ) {
+        this->m_size = n;
+        m_map.resize ( this->m_size );
+        this->m_data = &m_map[0];
+    }
+    virtual void assign ( std::size_t n, const T& val ) {
+        this->m_size = n;
+        m_map.assign ( this->m_size, val );
+        this->m_data = &m_map[0];
+    }
+    static boost::shared_ptr<DynamicGridData<T, Allocator> > create(){
+      return boost::shared_ptr<DynamicGridData<T, Allocator> >(new (DynamicGridData<T, Allocator> ));
+    }
+};
+
 
 template <typename T>
 using AllocatorShm = boost::interprocess::allocator<T, boost::interprocess::managed_shared_memory::segment_manager>;
 
 // Variant to use on the heap:
-using DynamicGridHeap  = DynamicGrid<std::allocator>;
+using DynamicGridInt8Heap  = DynamicGridData<int8_t, std::allocator>;
 // Variant to use in shared memory:
-using DynamicGridShm = DynamicGrid<AllocatorShm>;
+using DynamicGridInt8Shm = DynamicGridData<int8_t, AllocatorShm>;
 
+// Variant to use on the heap:
+using DynamicGrid64FHeap  = DynamicGridData<double, std::allocator>;
+// Variant to use in shared memory:
+using DynamicGrid64FShm = DynamicGridData<double, AllocatorShm>;
 
 };
 
