@@ -84,7 +84,6 @@ public:
 #endif
         if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;;
             if ( size < 1 ) throw std::runtime_error ( "Size must be bigger as 0" );
-            header_shm = ( SharedHeader * ) pHeaderShm;
             if ( pHeaderShm->array_size > 0 ) {
                 data_local.creator = false;
             } else {
@@ -120,8 +119,7 @@ public:
         size_t type_hash_code = 0; 
 	const char *type_name = typeid ( Var<TA> ).name();
 #endif
-        if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;;
-            header_shm = ( SharedHeader * ) pHeaderShm;
+        if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
             if ( pHeaderShm->array_size > 0 ) {
                 data_local.creator = false;
             } else {
@@ -140,22 +138,6 @@ public:
                 }
         data_local.ptr = ( TA * ) pHeaderShm->ptr.get();
         return OK;
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared header
-     * @warning do not use this fnc, it is only for serialization
-     * @return ref to shared data
-     **/
-    SharedHeader &shared_header() {
-        return *header_shm;
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared header
-     * @warning do not use this fnc, it is only for serialization
-     * @return ref to shared data
-     **/
-    const SharedHeader &shared_header() const {
-        return *header_shm;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * operator to set the shared memory

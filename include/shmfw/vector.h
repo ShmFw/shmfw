@@ -49,7 +49,6 @@ public:
     typedef typename Allocator::size_type size_type;
 
 protected:
-    SharedHeader *header_shm;                  /// exdented shared Header
     LocalData<VectorShm>  data_local;                /// local data
 public:
 
@@ -83,7 +82,6 @@ public:
         size_t type_hash_code = 0; const char *type_name = typeid ( Vector<T> ).name();
 #endif
         if ( constructHeader<SharedHeader> ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
-            header_shm = ( SharedHeader * ) pHeaderShm;
             if ( pHeaderShm->array_size > 0 ) {
             data_local.creator = false;
         } else {
@@ -102,22 +100,6 @@ public:
             }
         data_local.ptr = ( VectorShm * ) pHeaderShm->ptr.get();
         return OK;
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared header
-     * @warning do not use this fnc, it is only for serialization
-     * @return ref to shared data
-     **/
-    SharedHeader &shared_header() {
-        return *header_shm;
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared header
-     * @warning do not use this fnc, it is only for serialization
-     * @return ref to shared data
-     **/
-    const SharedHeader &shared_header() const {
-        return *header_shm;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared vector

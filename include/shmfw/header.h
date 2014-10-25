@@ -545,6 +545,22 @@ public:
     size_t type_hash_code() const {
         return pHeaderShm->type_hash_code;
     }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     * returns a reference to the shared header
+     * @warning do not use this fnc, it is only for serialization
+     * @return ref to shared data
+     **/
+    SharedHeader &shared_header() {
+        return *pHeaderShm;
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     * returns a reference to the shared header
+     * @warning do not use this fnc, it is only for serialization
+     * @return ref to shared data
+     **/
+    const SharedHeader &shared_header() const {
+        return *pHeaderShm;
+    }
 };
 
 typedef boost::shared_ptr<Header> HeaderPtr;
