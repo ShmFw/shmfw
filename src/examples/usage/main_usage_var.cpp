@@ -93,7 +93,7 @@ int main ( int argc, char *argv[] ) {
     a.set ( 5.4 );
     std::cout << a.info_shm();
     std::cout << a.human_readable() << std::endl;
-    a() = 1.2;
+    *a.get() = 1.2;
     std::cout << a.human_readable() << std::endl;
     
     exit ( 0 );

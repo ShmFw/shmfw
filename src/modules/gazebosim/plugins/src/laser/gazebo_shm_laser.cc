@@ -75,7 +75,7 @@ void GazeboShmLaser::OnNewLaserScans()
   boost::posix_time::ptime t = boost::posix_time::microsec_clock::local_time();       
   boost::posix_time::time_duration d = t - tstamp;
   tstamp = t;  
-  ShmFw::LaserScan &scan = shmScan->ref();
+  ShmFw::LaserScan &scan = *shmScan->get();
   std::vector<double> ranges;
   parentSensor->GetRanges(ranges);
   scan.ranges.resize(ranges.size());

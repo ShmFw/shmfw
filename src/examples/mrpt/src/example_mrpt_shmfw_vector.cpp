@@ -39,10 +39,10 @@ int main() {
 	// manual locking
 	points.lock();
 	transformed.lock();
-	points().clear();
+	points->clear();
 	for(int i = 0; i < 10; i++){
-	  points.push_back(CPoint3D(1,0,i));
-	  transformed.push_back( (points().back() - R) ) ;
+	  points->push_back(CPoint3D(1,0,i));
+	  transformed->push_back( (points->back() - R) ) ;
 	}
 	transformed.unlock();
 	points.unlock();

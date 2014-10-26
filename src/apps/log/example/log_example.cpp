@@ -90,7 +90,7 @@ int main ( int argc, char *argv[] ) {
     
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create( params.shm_memory_name, params.shm_memory_size );
     ShmFw::Log log ( shmHdl, params.variable_name );
-    std::cout << log().max_size() << std::endl;
+    std::cout << log->max_size() << std::endl;
     for ( unsigned int i = 0; loop_program; i++ ) {
         int us = rand() % 10;
         SHMFW_Info_FNC ( "debug" );

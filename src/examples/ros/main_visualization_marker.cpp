@@ -96,7 +96,7 @@ int main ( int argc, char *argv[] ) {
     srand ( time ( NULL ) );
 
     ShmFw::Alloc<ShmFw::ros::Header> h ( "header", shmHdl );
-    h().frame_id = "world";
+    h->frame_id = "world";
 
     double r = 2, da = M_PI/64;
     int i = 0;

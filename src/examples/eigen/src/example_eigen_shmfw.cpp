@@ -14,8 +14,8 @@
 int main() {
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( ShmFw::DEFAULT_SEGMENT_NAME(), ShmFw::DEFAULT_SEGMENT_SIZE() );
     ShmFw::Var<Eigen::Vector3d> a ( "Eigen::Vector3d",shmHdl );
-    a() = Eigen::Vector3d::Random();
+    *a = Eigen::Vector3d::Random();
     ShmFw::Var<Eigen::Matrix3d> M ( "Eigen::Matrix3d",shmHdl );
-    M() = Eigen::Matrix3d::Random();
+    *M = Eigen::Matrix3d::Random();
     ShmFw::Var<Eigen::Vector3d> b ( "Eigen::Vector3d",shmHdl );
 }

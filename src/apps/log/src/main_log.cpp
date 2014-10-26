@@ -139,7 +139,7 @@ void dequeLog ( ShmFw::Log &log, const Prarmeters &params ) {
         }
         msgs.clear();
         log.lock();
-        for ( ShmFw::Log::Iterator it = log().begin(); it != log().end(); it++ ) {
+        for ( ShmFw::Log::Iterator it = log->begin(); it != log->end(); it++ ) {
 	    //source filter
             if ( (params.source < 0) || (params.source == ( *it ).getSource())) {
                 msgs.push_back ( *it );

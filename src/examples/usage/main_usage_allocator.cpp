@@ -93,12 +93,12 @@ int main ( int argc, char *argv[] ) {
     ShmFw::Alloc<ShmFw::LaserScan> l("scan", shmHdl);
     srand (time(NULL));
     
-    l->ranges.push_back(rand_01());
+    l.get()->ranges.push_back(rand_01());
     //for(size_t i = 0; i < l->ranges.size(); i++) std::cout << i << ": " << l->ranges[i] << std::endl;
     
     ShmFw::Alloc<ShmFw::Points> p("points", shmHdl);
     ShmFw::Point p0(rand_01(), rand_01(), rand_01());
-    p->points.push_back(p0);
+    p.get()->points.push_back(p0);
     for(size_t i = 0; i < p->points.size(); i++) std::cout << i << ": " << p->points[i] << std::endl;
     
 

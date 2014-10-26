@@ -25,15 +25,15 @@ int main() {
     
     try {
         // The landmark (global) position: 3D (x,y,z)
-        CPoint3D &L = l();
+        CPoint3D &L = *l;
 	L = CPoint3D(0,4,2);
 	
         // Robot pose: 2D (x,y,phi)
-        CPose2D  &R = r();
+        CPose2D  &R = *r;
 	R = CPose2D(2,1, DEG2RAD ( 45.0f ) );
 
         // Camera pose relative to the robot: 6D (x,y,z,yaw,pitch,roll).
-        CPose3D  &C = c();
+        CPose3D  &C = *c;
 	C = CPose3D( 0.5f,0.5f,1.5f ,DEG2RAD ( -90.0f ),DEG2RAD ( 0 ),DEG2RAD ( -90.0f ) );
 
         // TEST 1. Relative position L' of the landmark wrt the camera

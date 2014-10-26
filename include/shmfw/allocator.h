@@ -105,57 +105,43 @@ public:
      * returns a pointer to the shared object
      * @return ref to shared data
      **/
-    T *ptr()  {
+    T *get()  {
         return (T*) pHeaderShm->data.get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a pointer to the shared object
      * @return ref to shared data
      **/
-    const T *ptr() const {
+    const T *get() const {
         return (T*) pHeaderShm->data.get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared object
+     * returns a pointer to the shared object
      * @return ref to shared data
      **/
-    T &ref() {
-        return *ptr();
+    T *operator->() {
+        return get();
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     * returns a pointer to the shared object
+     * @return ref to shared data
+     **/
+    const T *operator->() const {
+        return get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared object
      * @return ref to shared data
      **/
-    const T &ref() const {
-        return *ptr();
+    T &operator*() {
+        return *get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared object
      * @return ref to shared data
      **/
-    T &operator() () {
-        return ref();
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared object
-     * @return ref to shared data
-     **/
-    const T &operator() () const {
-        return ref();
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared object
-     * @return ref to shared data
-     **/
-    T *operator-> () {
-        return ptr();
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared object
-     * @return ref to shared data
-     **/
-    const T *operator-> () const {
-        return ptr();
+    const T &operator*() const {
+        return *get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * Returns a human readable string to show the context
@@ -163,14 +149,14 @@ public:
      **/
     virtual std::string human_readable() const {
         std::stringstream ss;
-        ss << name() << " = " << ref();
+        ss << name() << " = " << *get();
         return ss.str();
     };
     /** UNSAVE!! (user have to lock and to update timestamp)
      * destroies the shared memory
      **/
     virtual void destroy() const {
-        headerLoc.pShmHdl->getShm()->destroy_ptr ( ptr() );
+        headerLoc.pShmHdl->getShm()->destroy_ptr ( get() );
         Header::destroy();
     };
 
@@ -179,14 +165,14 @@ public:
      **/
     template<typename T1>
     bool operator == (const T1 &o ) const {
-	return (ref() == o);
+	return (*get() == o);
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      *  @param o vector for comparison
      **/
     template<typename T1>
     bool operator != (const T1 &o ) const {
-	return (ref() != o);
+	return (*get() != o);
     }
     
     /**

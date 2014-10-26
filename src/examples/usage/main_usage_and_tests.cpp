@@ -92,7 +92,7 @@ void conditionThread ( ShmFw::HandlerPtr &shmHdl, const std::string &name ) {
     ShmFw::Vector<int> xy ( name, shmHdl );
     while ( xy.timed_wait ( 500 ) == false ) SHMFW_Debug_FNC ( "waiting 500ms" );
     xy.lock();
-    xy.push_back ( 100 );
+    xy->push_back ( 100 );
     std::cout << xy.human_readable() << std::endl;
     xy.unlock();
     xy.itHasChanged();
@@ -110,10 +110,10 @@ int main ( int argc, char *argv[] ) {
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
 
     ShmFw::Var<double> a ( "a", shmHdl);
-    a.set ( 5.4 );
+    a.set(5.4);
     std::cout << a.info_shm();
     std::cout << a.human_readable() << std::endl;
-    a() = 1.2;
+    a.set(1.2);
     std::cout << a.human_readable() << std::endl;
 
     ShmFw::Var<double> aa ( "a", shmHdl);
@@ -121,39 +121,39 @@ int main ( int argc, char *argv[] ) {
 
     ShmFw::Vector<double> b ( "b", shmHdl );
     std::cout << b.info_shm();
-    b().push_back ( 5 );
-    b().push_back ( 3 );
+    b->push_back ( 5 );
+    b->push_back ( 3 );
     b[0] = 0.3;
     std::cout << b.human_readable() << std::endl;
 
     ShmFw::Var<ShmFw::Point > point ( "point", shmHdl );
-    std::cout << "point: " << point() << std::endl;
-    point().setFromString ( "[43,44.4,2.4]" );
-    std::cout << "point: " << point() << std::endl;
+    std::cout << "point: " << *point << std::endl;
+    point->setFromString ( "[43,44.4,2.4]" );
+    std::cout << "point: " << *point << std::endl;
 
     ShmFw::Var<ShmFw::Quaternion > quaternion ( "quaternion", shmHdl );
-    std::cout << "quaternion: " << quaternion() << std::endl;
-    quaternion().setFromString ( "[0.1,4,35,43.2]" );
-    std::cout << "quaternion: " << quaternion() << std::endl;
+    std::cout << "quaternion: " << *quaternion << std::endl;
+    quaternion->setFromString ( "[0.1,4,35,43.2]" );
+    std::cout << "quaternion: " << *quaternion << std::endl;
 
     ShmFw::Var<ShmFw::Pose > pose ( "pose", shmHdl );
-    std::cout << "pose: " << pose() << std::endl;
-    pose().setFromString ( "[[42,4,2.6],[22,0.3,03, 2]]" );
-    std::cout << "pose: " << pose() << std::endl;
+    std::cout << "pose: " << *pose << std::endl;
+    pose->setFromString ( "[[42,4,2.6],[22,0.3,03, 2]]" );
+    std::cout << "pose: " << *pose << std::endl;
 
     ShmFw::Var<ShmFw::Pose2D > pose2d ( "pose2d", shmHdl );
-    std::cout << "pose2d: " << pose2d() << std::endl;
-    pose2d().setFromString ( "[[45.2,8.4],[3.14]]" );
-    std::cout << "pose2d: " << pose2d() << std::endl;
+    std::cout << "pose2d: " << *pose2d << std::endl;
+    pose2d->setFromString ( "[[45.2,8.4],[3.14]]" );
+    std::cout << "pose2d: " << *pose2d << std::endl;
 
     ShmFw::Var<ShmFw::Pose2DAGV > pose2d_agv ( "pose2d_agv", shmHdl );
-    std::cout << "pose2d_agv: " << pose2d_agv() << std::endl;
-    pose2d_agv().setFromString ( "[[45.2,8.4],[3.14], [3]]" );
-    std::cout << "pose2d_agv: " << pose2d_agv() << std::endl;
+    std::cout << "pose2d_agv: " << *pose2d_agv << std::endl;
+    pose2d_agv->setFromString ( "[[45.2,8.4],[3.14], [3]]" );
+    std::cout << "pose2d_agv: " << *pose2d_agv << std::endl;
 
     try {
         ShmFw::Var<double> c ( "c", shmHdl);
-        c = 2;
+        *c = 2;
         std::cout << "This will produces an error: " << c.human_readable()  << " = " << a.human_readable()  << std::endl;
         c = a;
         std::cout << c.human_readable() << std::endl;
@@ -164,8 +164,8 @@ int main ( int argc, char *argv[] ) {
     int testInt = std::rand() % 10;
     {
         ShmFw::Var<int> xy ( "myInt", shmHdl);
-        xy = testInt;
-        ShmFw::write ( "test.xml", xy, ShmFw::FORMAT_XML );
+        *xy = testInt;
+        ShmFw::write ( "test.xml", *xy, ShmFw::FORMAT_XML );
         std::cout << "wrote: xy: " << xy.human_readable()  << std::endl;
     }
 
@@ -173,25 +173,25 @@ int main ( int argc, char *argv[] ) {
         ShmFw::Var<int> xy ( "Other", shmHdl);
         std::cout << "goint to read xy: " << std::endl;
         ShmFw::read ( "test.xml", xy, ShmFw::FORMAT_XML );
-        if ( xy() != testInt ) std::cout << "problem!"  << std::endl;
+        if ( *xy != testInt ) std::cout << "problem!"  << std::endl;
         std::cout << "read xy: " << xy.human_readable()  << std::endl;
     }
 
     ShmFw::Vector<double> d ( "d", shmHdl );
-    d().push_back ( 4.3 );
+    d->push_back ( 4.3 );
     std::cout << d.human_readable() << std::endl;
 
     ShmFw::VectorStr log ( "log", shmHdl );
     ShmFw::CharAllocator allocator ( shmHdl->getShm()->get_segment_manager() );
     ShmFw::CharString mystring ( allocator );
     mystring = "Hello";
-    log().push_back ( mystring );
+    log->push_back ( mystring );
     ShmFw::CharString xx = shmHdl->createString();
     xx = "-";
-    log().push_back ( xx );
-    log().push_back ( shmHdl->createString ( "World" ) );
+    log->push_back ( xx );
+    log->push_back ( shmHdl->createString ( "World" ) );
     mystring = "!";
-    log().push_back ( mystring );
+    log->push_back ( mystring );
     log.push_back ( " How are you" );
     std::cout << log.human_readable() << std::endl;
 
@@ -202,10 +202,10 @@ int main ( int argc, char *argv[] ) {
     std::string varName ( "xy" );
     boost::thread t1 ( conditionThread, shmHdl,  varName );
     ShmFw::Vector<int> xy ( varName, shmHdl );
-    xy().clear();
+    xy.get()->clear();
     sleep ( 2 );
     xy.lock();
-    xy.push_back ( 3 );
+    xy->push_back ( 3 );
     xy.unlock();
     xy.itHasChanged();
     xy.wait();
@@ -220,18 +220,18 @@ int main ( int argc, char *argv[] ) {
     std::cout << "exit" << std::endl;
 
     ShmFw::Deque<int> myDeque0 ( "myDeque", shmHdl );
-    myDeque0().clear();
+    myDeque0.get()->clear();
     myDeque0.push_back ( 3 );
     myDeque0.push_back ( 4 );
     myDeque0.push_back ( 6 );
     ShmFw::Deque<int> myDeque1 ( "myDeque", shmHdl );
-    myDeque0().clear();
+    myDeque0.get()->clear();
     myDeque1.push_front ( 3 );
     myDeque0.push_back ( 4 );
     myDeque0.push_back ( 6 );
 
     ShmFw::Deque<ShmFw::Pose2D> waypoints ( "waypoints", shmHdl );
-    waypoints().clear();
+    waypoints.get()->clear();
     waypoints.push_back ( ShmFw::Pose2D ( ShmFw::Pose2D ( 1, 2, 0.3 ) ) );
     waypoints.push_back ( ShmFw::Pose2D ( ShmFw::Pose2D ( 2, 3, 0.1 ) ) );
 

@@ -171,9 +171,9 @@ TEST_F ( OpenCVTest, serializeImage ) {
     ShmFw::Alloc<ShmFw::ImageShm> a( shm_name, shmHdl );
     ShmFw::Alloc<ShmFw::ImageShm> b( shm_name, shmHdl );
     a->copyFrom(imgA, ShmFw::IMAGE_ENCODING_BGR8);    
-    ShmFw::write(filename, a());
-    ShmFw::read (filename, b());
-    EXPECT_EQ ( a(), b() );
+    ShmFw::write(filename, *a);
+    ShmFw::read (filename, *b);
+    EXPECT_EQ ( *a, *b );
     cv::Mat imgShm;
     b->toCvMat(imgShm);
     cv::putText(imgShm, "serializeImage", cv::Point(0, imgShm.rows/2), cv::FONT_HERSHEY_COMPLEX,1, cv::Scalar(0xFF,0xFF,0xFF),1);

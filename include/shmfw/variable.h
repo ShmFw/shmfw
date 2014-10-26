@@ -70,7 +70,7 @@ public:
      * @param name_data name of the data element in the memory segment on empty it will be the .name
      * @pre the ShmPtr poitner must be created first
      * @see ShmFw::createSegment
-     * @see ShmFw::construct
+     * @see ShmFw::ptrconstruct
      **/
     int construct ( const std::string &name, HandlerPtr &shmHdl, const std::string &name_data = std::string()) {
 #if __cplusplus > 199711L
@@ -101,29 +101,43 @@ public:
      * returns a pointer to the shared object
      * @return ref to shared data
      **/
-    T *ptr() {
+    T *get() {
         return (T*) pHeaderShm->data.get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a pointer to the shared object
      * @return ref to shared data
      **/
-    const T *ptr() const {
+    const T *get() const {
         return (T*) pHeaderShm->data.get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared object
+     * returns a pointer to the shared object
      * @return ref to shared data
      **/
-    T &ref() {
-        return *ptr();
+    T *operator->() {
+        return get();
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     * returns a pointer to the shared object
+     * @return ref to shared data
+     **/
+    const T *operator->() const {
+        return get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared object
      * @return ref to shared data
      **/
-    const T &ref() const {
-        return *ptr();
+    T &operator*() {
+        return *get();
+    }
+    /** UNSAVE!! (user have to lock and to update timestamp)
+     * returns a reference to the shared object
+     * @return ref to shared data
+     **/
+    const T &operator*() const {
+        return *get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * operator to set the shared memory
@@ -132,8 +146,8 @@ public:
      * @return ref to shared data
      **/
     T &operator = ( const T &source ) {
-        ref() = source;
-        return ref();
+        *get() = source;
+        return *get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * operator to set the shared memory
@@ -142,36 +156,8 @@ public:
      * @return ref to shared data
      **/
     T &operator = ( const Var<T> &v ) {
-        ref() = v.ref();
-        return ref();
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared object
-     * @return ref to shared data
-     **/
-    const T &operator() () const {
-        return ref();
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared object
-     * @return ref to shared data
-     **/
-    T &operator() () {
-        return ref();
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared object
-     * @return ref to shared data
-     **/
-    T *operator-> () {
-        return ptr();
-    }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * returns a reference to the shared object
-     * @return ref to shared data
-     **/
-    const T *operator-> () const {
-        return ptr();
+        *get() = *v.get();
+        return *get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * Returns a human readable string to show the context
@@ -179,7 +165,7 @@ public:
      **/
     virtual std::string human_readable() const {
         std::stringstream ss;
-        ss << name() << " = " << ref();
+        ss << name() << " = " << *get();
         return ss.str();
     };
     /** SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
@@ -188,7 +174,7 @@ public:
      **/
     void set ( const T &source ) {
         lock();
-        ref() = source;
+        *get() = source;
         unlock();
         itHasChanged();
     }
@@ -198,7 +184,7 @@ public:
      **/
     void get ( T &destination ) {
         lock();
-        destination = ref();
+        destination = *get();
         unlock();
         updateTimestampLocal();
     }
@@ -223,7 +209,7 @@ public:
      * destroies the shared memory
      **/
     virtual void destroy() const {
-        headerLoc.pShmHdl->getShm()->destroy_ptr ( ptr() );
+        headerLoc.pShmHdl->getShm()->destroy_ptr ( get() );
         Header::destroy();
     };
 
@@ -231,21 +217,21 @@ public:
      * overloads the << and calls the varalible overloades operator
      **/
     friend std::ostream &operator << ( std::ostream &os, const Var<T> &o ) {
-        return os << o.ref();
+        return os << *o.get();
     };
     /** UNSAVE!! (user have to lock and to update timestamp)
      *  @param o vector for comparison
      **/
     template<typename T1>
     bool operator == (const T1 &o ) const {
-	return (ref() == o);
+	return (*get() == o);
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      *  @param o vector for comparison
      **/
     template<typename T1>
     bool operator != (const T1 &o ) const {
-	return (ref() != o);
+	return (*get() != o);
     }
 };
 };

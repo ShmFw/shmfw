@@ -64,9 +64,9 @@ TEST_F ( MrptTest, MrptInShm_Point2D ) {
     ShmFw::Var<CPose2D> r ( "R",shmHdl );
     ShmFw::Var<CPose3D> c ( "C",shmHdl );
 
-    l() = CPoint3D ( 0,4,2 );
-    r() = CPose2D ( 2,1, DEG2RAD ( 45.0f ) );
-    c() = CPose3D ( 0.5f,0.5f,1.5f , DEG2RAD ( -90.0f ), DEG2RAD ( 0 ), DEG2RAD ( -90.0f ) );
+    *l = CPoint3D ( 0,4,2 );
+    *r = CPose2D ( 2,1, DEG2RAD ( 45.0f ) );
+    *c = CPose3D ( 0.5f,0.5f,1.5f , DEG2RAD ( -90.0f ), DEG2RAD ( 0 ), DEG2RAD ( -90.0f ) );
     
     ShmFw::Var<CPoint3D> l2 ( "L",shmHdl );
     ShmFw::Var<CPose2D> r2 ( "R",shmHdl );
@@ -76,9 +76,9 @@ TEST_F ( MrptTest, MrptInShm_Point2D ) {
     CPose2D R( 2,1, DEG2RAD ( 45.0f ) );
     CPose3D C( 0.5f,0.5f,1.5f ,DEG2RAD ( -90.0f ), DEG2RAD ( 0 ), DEG2RAD ( -90.0f ));
     
-    EXPECT_EQ ( l2.ref(), L );
-    EXPECT_EQ ( r2.ref(), R );
-    EXPECT_EQ ( c2.ref(), C );
+    EXPECT_EQ ( l2, L );
+    EXPECT_EQ ( r2, R );
+    EXPECT_EQ ( c2, C );
     
     shmHdl->removeSegment();
 }

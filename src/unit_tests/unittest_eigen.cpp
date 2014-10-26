@@ -59,8 +59,8 @@ TEST_F ( EigenTest, ShmVector3d ) {
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
     ShmFw::Var<Eigen::Vector3d> a ( name,shmHdl );
     ShmFw::Var<Eigen::Vector3d> b ( name,shmHdl );
-    a() << rand_01(), rand_01(), rand_01();
-    EXPECT_EQ ( a(), b() );
+    *a << rand_01(), rand_01(), rand_01();
+    EXPECT_EQ ( *a, *b );
     shmHdl->removeSegment();
 }
 TEST_F ( EigenTest, Matrix3d ) {
@@ -69,8 +69,8 @@ TEST_F ( EigenTest, Matrix3d ) {
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
     ShmFw::Var<Eigen::Matrix3d> a ( name,shmHdl );
     ShmFw::Var<Eigen::Matrix3d> b ( name,shmHdl );
-    a() = Eigen::Matrix3d::Random();
-    EXPECT_EQ ( a(), b() );
+    *a = Eigen::Matrix3d::Random();
+    EXPECT_EQ ( *a, *b );
     shmHdl->removeSegment();
 }
 TEST_F ( EigenTest, serializeVector3dXML ) {

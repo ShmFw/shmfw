@@ -93,11 +93,11 @@ TEST_F ( ShmTest, VarInt ) {
     std::string name("var0");
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
     ShmFw::Var<int> a ( name, shmHdl );
-    a() = var;
+    *a = var;
     EXPECT_EQ ( a, var );
     ShmFw::Var<int> b ( name, shmHdl );
     EXPECT_EQ ( b, var );
-    a() += 1;
+    *a += 1;
     EXPECT_NE ( b, var );
     shmHdl->removeSegment();
 }
@@ -137,15 +137,15 @@ TEST_F ( ShmTest, AllocPoints ) {
     ShmFw::Alloc<ShmFw::Points> a ( "var0", shmHdl ) ;
     a->points.push_back(ShmFw::Point(rand_01(), rand_01(), rand_01()));
     a->points.push_back(ShmFw::Point(rand_01(), rand_01(), rand_01()));
-    a().frame = "world";
+    a->frame = "world";
     ShmFw::Alloc<ShmFw::Points> b ( "var0", shmHdl ) ;
-    EXPECT_EQ (a(), b());
+    EXPECT_EQ (*a, *b);
     ShmFw::Alloc<ShmFw::Points> c ( "var1", shmHdl ) ;
-    c().copyFrom(b());
-    EXPECT_EQ (a(), c());
+    c->copyFrom(*b);
+    EXPECT_EQ (*a, *c);
     a->points[0].x = 3;
-    EXPECT_TRUE (a() == b());
-    EXPECT_FALSE (a() == c());
+    EXPECT_TRUE (*a == *b);
+    EXPECT_FALSE (*a == *c);
     // std::cout << "a: " << a() << "c: " << c();
     shmHdl->removeSegment();
 
@@ -154,52 +154,52 @@ TEST_F ( ShmTest, AllocPoints ) {
 TEST_F ( ShmTest, VarParameterEntry ) {
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
     ShmFw::Var<ShmFw::ParameterEntry<int> > a ( "a", shmHdl );
-    a() = 10;
-    EXPECT_EQ ( a(), 10 );
+    *a = 10;
+    EXPECT_EQ ( *a, 10 );
     ShmFw::Var<ShmFw::ParameterEntry<int> > b ( "a", shmHdl );
-    EXPECT_EQ ( b(), 10 );
+    EXPECT_EQ ( *b, 10 );
     int v = 20, min = -10, max = 200, step = 3;
-    b() = ShmFw::ParameterEntry<int> ( v, min, max, step );
-    EXPECT_EQ ( b(), v );
-    EXPECT_EQ ( b().max(), max );
-    EXPECT_EQ ( b().min(), min );
-    EXPECT_EQ ( b().step_size(), step );
-    EXPECT_TRUE ( b().valid() );
-    EXPECT_TRUE ( b().enable() );
-    a().enable ( false );
-    EXPECT_FALSE ( b().enable() );
-    EXPECT_TRUE ( b().valid() );
-    a().enable ( true );
-    b() = min-1;
-    EXPECT_FALSE ( b().valid() );
-    b() = min;
-    EXPECT_TRUE ( b().valid() );
-    b() = max+1;
-    EXPECT_FALSE ( b().valid() );
-    b() = max;
-    EXPECT_TRUE ( b().valid() );
-    b() = v;
-    EXPECT_TRUE ( b().valid() );
+    *b = ShmFw::ParameterEntry<int> ( v, min, max, step );
+    EXPECT_EQ ( *b, v );
+    EXPECT_EQ ( b->max(), max );
+    EXPECT_EQ ( b->min(), min );
+    EXPECT_EQ ( b->step_size(), step );
+    EXPECT_TRUE ( b->valid() );
+    EXPECT_TRUE ( b->enable() );
+    a->enable ( false );
+    EXPECT_FALSE ( b->enable() );
+    EXPECT_TRUE ( b->valid() );
+    a->enable ( true );
+    *b = min-1;
+    EXPECT_FALSE ( b->valid() );
+    *b = min;
+    EXPECT_TRUE ( b->valid() );
+    *b = max+1;
+    EXPECT_FALSE ( b->valid() );
+    *b = max;
+    EXPECT_TRUE ( b->valid() );
+    *b = v;
+    EXPECT_TRUE ( b->valid() );
     bool compareOperators;
-    compareOperators = b() < ( v+1 );
+    compareOperators = *b < ( v+1 );
     EXPECT_TRUE ( compareOperators );
-    compareOperators = b() > ( v+1 );
+    compareOperators = *b > ( v+1 );
     EXPECT_FALSE ( compareOperators );
-    compareOperators = b() < ( v-1 );
+    compareOperators = *b < ( v-1 );
     EXPECT_FALSE ( compareOperators );
-    compareOperators = b() > ( v-1 );
+    compareOperators = *b > ( v-1 );
     EXPECT_TRUE ( compareOperators );
-    b() = max;
-    b().increase();
-    EXPECT_EQ ( b(), max );
-    b() = min;
-    b().decrease();
-    EXPECT_EQ ( b(), min );
-    b() = v;
-    b().increase();
-    EXPECT_EQ ( b(), v+step );
-    b().decrease();
-    EXPECT_EQ ( b(), v );
+    *b = max;
+    b->increase();
+    EXPECT_EQ ( *b, max );
+    *b = min;
+    b->decrease();
+    EXPECT_EQ ( *b, min );
+    *b = v;
+    b->increase();
+    EXPECT_EQ ( *b, v+step );
+    b->decrease();
+    EXPECT_EQ ( *b, v );
     /*
     ShmFw::Var<ShmFw::ParameterEntry<double> > c ( "c", shmHdl);
     ShmFw::Var<ShmFw::ParameterEntry<double> > d ( "a", shmHdl);
@@ -272,15 +272,15 @@ TEST_F ( ShmTest, TestSimpleAssignment ) {
     ShmFw::Var<double> a ( name, shmHdl );
     a = v;
     ShmFw::Var<double> b ( name, shmHdl );
-    EXPECT_EQ ( 0, a()-v );
-    EXPECT_EQ ( 0, b()-v );
-    EXPECT_EQ ( 0, a()-b() );
+    EXPECT_EQ ( 0, *a - v );
+    EXPECT_EQ ( 0, *b - v );
+    EXPECT_EQ ( 0, *a - *b );
     a.set ( v+1 );
-    EXPECT_EQ ( v+1, a() );
+    EXPECT_EQ ( v+1, *a );
     double v2;
     b.get ( v2 );
     EXPECT_EQ ( v+1, v2 );
-    EXPECT_EQ ( v2, b() );
+    EXPECT_EQ ( v2, *b );
     shmHdl->removeSegment();
 }
 
@@ -302,13 +302,13 @@ TEST_F ( ShmTest, TestChanged ) {
     ShmFw::Var<double> a ( name, shmHdl );
     double v = 3;
     a = 3;
-    EXPECT_EQ ( v, a() );
+    EXPECT_EQ ( v, *a );
     EXPECT_FALSE ( a.hasChanged() );
     ShmFw::Var<double> b ( name, shmHdl );
     b = v + 1;
     b.itHasChanged();
     EXPECT_TRUE ( a.hasChanged ( ) );
-    EXPECT_TRUE ( a() !=v );
+    EXPECT_TRUE ( *a !=v );
     a.dataProcessed();
     EXPECT_FALSE ( a.hasChanged ( ) );
     shmHdl->removeSegment();
@@ -354,7 +354,7 @@ TEST_F ( ShmTest, TestSerializeXML ) {
     ShmFw::write ( filename,  a, ShmFw::FORMAT_XML );
     ShmFw::Var<double> b ( name2, shmHdl );
     ShmFw::read ( filename,  b, ShmFw::FORMAT_XML );
-    EXPECT_TRUE ( a() == b() );
+    EXPECT_TRUE ( *a == *b );
     EXPECT_TRUE ( a.timestampShm() == b.timestampShm() );
     shmHdl->removeSegment();
 }
@@ -378,7 +378,7 @@ TEST_F ( ShmTest, TestSerializeTXT ) {
         boost::archive::text_iarchive ia ( ifs );
         ia >> b;
     }
-    EXPECT_TRUE ( a() == b() );
+    EXPECT_TRUE ( *a == *b );
     EXPECT_TRUE ( a.timestampShm() == b.timestampShm() );
     shmHdl->removeSegment();
 }
@@ -402,7 +402,7 @@ TEST_F ( ShmTest, TestSerializeBinary ) {
         boost::archive::binary_iarchive ia ( ifs );
         ia >> b;
     }
-    EXPECT_TRUE ( a() == b() );
+    EXPECT_TRUE ( *a == *b );
     EXPECT_TRUE ( a.timestampShm() == b.timestampShm() );
     shmHdl->removeSegment();
 }
@@ -414,14 +414,14 @@ TEST_F ( ShmTest, TestSerializeVectorXML ) {
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
     ShmFw::Vector<double> a ( name1, shmHdl );
     ShmFw::Vector<double> b ( name2, shmHdl );
-    a().clear();
-    for ( size_t i = 0; i < 5; i++ ) a.push_back ( rand() );
+    a->clear();
+    for ( size_t i = 0; i < 5; i++ ) a->push_back ( rand() );
 
     ShmFw::write ( filename, a, ShmFw::FORMAT_XML );
     ShmFw::read ( filename, b, ShmFw::FORMAT_XML );
-    EXPECT_TRUE ( a() == b() );
+    EXPECT_TRUE ( *a == *b );
     EXPECT_TRUE ( a.timestampShm() == b.timestampShm() );
-    EXPECT_TRUE ( a.size() == b.size() );
+    EXPECT_TRUE ( a->size() == b->size() );
     shmHdl->removeSegment();
 }
 
@@ -432,11 +432,11 @@ TEST_F ( ShmTest, TestSerializeDequeXML ) {
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
     ShmFw::Deque<int> a ( name1, shmHdl );
     ShmFw::Deque<int> b ( name2, shmHdl );
-    a().clear();
-    for ( size_t i = 0; i < 5; i++ ) a.push_back ( rand() );
+    a->clear();
+    for ( size_t i = 0; i < 5; i++ ) a->push_back ( rand() );
     ShmFw::write ( filename, a, ShmFw::FORMAT_XML );
     ShmFw::read ( filename, b, ShmFw::FORMAT_XML );
-    EXPECT_TRUE ( a() == b() );
+    EXPECT_TRUE ( *a == *b );
     EXPECT_TRUE ( a.timestampShm() == b.timestampShm() );
     EXPECT_TRUE ( a.size() == b.size() );
     shmHdl->removeSegment();

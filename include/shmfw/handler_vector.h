@@ -100,7 +100,7 @@ public:
       }
       if(openTags == 0){
 	std::string s = str.substr(start+1, end-1); 
-	v.push_back(boost::lexical_cast<T>(s) );
+	v->push_back(boost::lexical_cast<T>(s) );
       }
     }
     int construct ( const std::string &name, Handler &shmHdl ){

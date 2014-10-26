@@ -21,7 +21,7 @@ int main() {
     ShmFw::Var<int> b ( "variableB", shmHdl );
 
 
-    a() = rand();
+    *a = rand();
 
     ShmFw::write ( filename, a, ShmFw::FORMAT_XML );
     ShmFw::read ( filename, b, ShmFw::FORMAT_XML );

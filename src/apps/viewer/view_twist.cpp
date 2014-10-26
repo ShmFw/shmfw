@@ -115,13 +115,13 @@ int main ( int argc, char *argv[] ) {
 	int row = firstRow;
 	int col = 0;
 	int offest = 20;
-        mvprintw ( row, col+=offest, "vx: %lf", twist().linear.x);
-        mvprintw ( row, col+=offest, "vy: %lf", twist().linear.y);
-        mvprintw ( row, col+=offest, "vz: %lf", twist().linear.z);
-        mvprintw ( row, col+=offest, "wx: %lf", twist().angular.x);
-        mvprintw ( row, col+=offest, "wy: %lf", twist().angular.y);
-        mvprintw ( row, col+=offest, "wz: %lf", twist().angular.z);
-	ShmFw::Twist vel(twist());
+        mvprintw ( row, col+=offest, "vx: %lf", twist->linear.x);
+        mvprintw ( row, col+=offest, "vy: %lf", twist->linear.y);
+        mvprintw ( row, col+=offest, "vz: %lf", twist->linear.z);
+        mvprintw ( row, col+=offest, "wx: %lf", twist->angular.x);
+        mvprintw ( row, col+=offest, "wy: %lf", twist->angular.y);
+        mvprintw ( row, col+=offest, "wz: %lf", twist->angular.z);
+	ShmFw::Twist vel(*twist);
         timeout ( 100 );
         key = getch();
         switch ( key ) {

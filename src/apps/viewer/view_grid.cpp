@@ -93,7 +93,7 @@ void prepare_grid ( mglData* data ) {
     mgl_data_create ( data, rows, columns, 1 );
     for ( col = 0; col < columns; col++ )  {
         for ( row=0; row < rows; row++ ) {
-            double v = a() (col,row);
+            double v = (*a)(col,row);
             mgl_data_set_value ( data, v, row, col, 0 );
         }
     }

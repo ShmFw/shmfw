@@ -27,15 +27,15 @@ int main() {
     ShmFw::Vector<ShmFw::Point2D> shmPointsSrc ( "pointsSrc", shmHdl );
     ShmFw::Vector<ShmFw::Point2D> shmPointsDes ( "pointsDes", shmHdl );
 
-    shmPointsSrc().clear();
+    shmPointsSrc->clear();
     for ( int i = 0; i < N; i++ ) {
-        shmPointsSrc.push_back(ShmFw::Point2D(rand(), rand()));
+        shmPointsSrc->push_back(ShmFw::Point2D(rand(), rand()));
     }
 
     ShmFw::write(filePoints, shmPointsSrc, ShmFw::FORMAT_XML);
     ShmFw::read(filePoints, shmPointsDes, ShmFw::FORMAT_XML);
     
-    if ( shmPointsSrc.size() == shmPointsDes.size() ) {
+    if ( shmPointsSrc->size() == shmPointsDes.size() ) {
         for ( size_t i = 0; i < shmPointsDes.size(); i++ ) {
             std::cout << i << ": " << shmPointsDes[i] << " = " << shmPointsDes[i] << std::endl;
         }
@@ -51,7 +51,7 @@ int main() {
     ShmFw::Deque<ShmFw::Pose2D> shmPosesSrc ( "posesSrc", shmHdl );
     ShmFw::Deque<ShmFw::Pose2D> shmPosesDes ( "posesDes", shmHdl );
     
-    shmPosesSrc().clear();
+    shmPosesSrc->clear();
     for ( int i = 0; i < N; i++ ) {
         shmPosesSrc.push_back(ShmFw::Pose2D(rand(), rand(), rand()));
     }

@@ -90,18 +90,18 @@ int main ( int argc, char *argv[] ) {
 
     ShmFw::Alloc<ShmFw::LaserScan> src ( "a", shmHdl );
 
-    src().range_max =  M_PI/2;
-    src().range_min = -M_PI/2;
-    src().ranges.resize ( 10 );
-    for ( size_t i = 0; i  < src().ranges.size(); i++ ) {
-        src().ranges[i] = rand();
+    src->range_max =  M_PI/2;
+    src->range_min = -M_PI/2;
+    src->ranges.resize ( 10 );
+    for ( size_t i = 0; i  < src->ranges.size(); i++ ) {
+        src->ranges[i] = rand();
     }
 
     ShmFw::Alloc<ShmFw::LaserScan> des ( "a", shmHdl );
 
-    for ( size_t i = 0; i < src().ranges.size(); i++ ) {
-        std::cout << i << ": " << src().ranges[i] << " = " << des().ranges[i] << std::endl;
-        if ( src().ranges[i] != des().ranges[i] ) {
+    for ( size_t i = 0; i < src->ranges.size(); i++ ) {
+        std::cout << i << ": " << src->ranges[i] << " = " << des->ranges[i] << std::endl;
+        if ( src->ranges[i] != des->ranges[i] ) {
             std::cout << "Something went wrong!" << std::endl;
         }
     }

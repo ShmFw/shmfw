@@ -93,13 +93,13 @@ int main ( int argc, char *argv[] ) {
 
     
     ShmFw::Var<ShmFw::ParameterEntry<int> > a ( "param_int", shmHdl);
-    a() = 10;
+    *a = 10;
     ShmFw::Var<ShmFw::ParameterEntry<int> > b ( "param_int", shmHdl);
-    b() = ShmFw::ParameterEntry<int>(10, -10, 200, 3);
+    *b = ShmFw::ParameterEntry<int>(10, -10, 200, 3);
     ShmFw::Var<ShmFw::ParameterEntry<double> > c ( "param_double", shmHdl);
-    c() = ShmFw::ParameterEntry<double>(4.2, -3, 12.3, 0.2);
+    *c = ShmFw::ParameterEntry<double>(4.2, -3, 12.3, 0.2);
     ShmFw::Var<ShmFw::ParameterEntry<double> > d ( "param_error", shmHdl);
-    d() = ShmFw::ParameterEntry<double>(40.2, -3, 12.3, 0.2);
+    *d = ShmFw::ParameterEntry<double>(40.2, -3, 12.3, 0.2);
     
     
     std::cout << std::endl;

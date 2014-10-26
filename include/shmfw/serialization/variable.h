@@ -47,7 +47,7 @@ namespace serialization {
 /// serialize function
 template<class archive, class T> inline  void serialize ( archive &ar, ShmFw::Var< T > &o, const unsigned int version ) {
     ar & boost::serialization::make_nvp ( "SharedHeader", o.shared_header() );
-    ar & boost::serialization::make_nvp ( "data", o.ref() );
+    ar & boost::serialization::make_nvp ( "data", *o );
 }
 
 }; // namespace serialization
