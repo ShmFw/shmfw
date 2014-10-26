@@ -65,14 +65,14 @@ public:
         if ( construct ( name, shmHdl ) == ERROR ) exit ( 1 );
     }
     /**
-     * @param name name of the shared header element in the memory segment
+     * @param shm_instance_name name of the shared header element in the memory segment
      * @param shmHdl pointer to the shared memory segment handler
-     * @param name_data name of the data element in the memory segment on empty it will be the .name
+     * @param data on NULL the fnc will an anonymous instance otherwise this data will be linked to the shared header
      * @pre the ShmPtr poitner must be created first
      * @see ShmFw::createSegment
      * @see ShmFw::ptrconstruct
      **/
-    int construct ( const std::string &name, HandlerPtr &shmHdl, boost::interprocess::offset_ptr<void> data = NULL) {
+    int construct ( const std::string &shm_instance_name, HandlerPtr &shmHdl, boost::interprocess::offset_ptr<T> data = NULL) {
 #if __cplusplus > 199711L
         size_t type_hash_code = typeid ( Var<T> ).hash_code();
         const char *type_name = typeid ( Var<T> ).name();
@@ -80,7 +80,7 @@ public:
         size_t type_hash_code = 0;
         const char *type_name = typeid ( Var<T> ).name();
 #endif
-        if ( constructHeader ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
+        if ( constructHeader ( shm_instance_name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
         if ( header_local.creator ) {
             /// constructing shared data
             try {
