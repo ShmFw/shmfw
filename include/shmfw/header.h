@@ -45,16 +45,16 @@
 namespace ShmFw {
 
 
-class SharedHeader {
+class HeaderShared {
 public:
-    SharedHeader ( const VoidAllocator &void_alloc )
+    HeaderShared ( const VoidAllocator &void_alloc )
         : container ( 0 )
         , type_hash_code ( 0 )
         , type_name ( void_alloc )
         , info_text ( void_alloc )
         , user_flag ( false )
         , user_register ( 0 )
-        , tstamp ( bp::microsec_clock::local_time() ) {}
+        , timestamp ( bp::microsec_clock::local_time() ) {}
     bi::offset_ptr<void> data;              /// offest pointer to the data
     uint8_t  container;                     /// container type @see CONTAINER_HEADER, CONTAINER_VARIABLE, CONTAINER_VECTOR, CONTAINER_DEQUE, ...
     size_t type_hash_code;                  /// varaiable type hash code C++ (2011) @see std::type_info::hash_code
@@ -62,7 +62,7 @@ public:
     CharString info_text;                   /// char array for general use @see info_text()
     bool user_flag;                         /// flag for general usage
     uint32_t user_register;                 /// register for general usage
-    bp::ptime tstamp;                       /// timestamp to tag the last change of the shared variable
+    bp::ptime timestamp;                    /// timestamp to tag the last change of the shared variable
     bi::interprocess_mutex mutex;           /// mutex
     bi::interprocess_mutex condition_mutex; /// mutex used for wait condition calles
     bi::interprocess_condition condition;   /// used for wait and notify condition calles
@@ -70,12 +70,12 @@ public:
 };
 
 ///local header to to manage changes
-class LocalHeader {
+class HeaderLocal {
 public:
-    std::string varName;            /// name of the shared header in the shared memory segment
-    HandlerPtr pShmHdl;             /// smart pointer to the shared memory segment header
-    bool creator;                   /// ture if this process created the the shared varaible
-    bp::ptime tstamp;               /// time stamp of the last local access to this variable
+    std::string shm_instance_name;      /// name of the shared header in the shared memory segment
+    HandlerPtr shm_handler;             /// smart pointer to the shared memory segment header
+    bool creator;                       /// ture if this process created the the shared varaible
+    bp::ptime timestamp;                /// time stamp of the last local access to this variable
 };
 
 /// Common header of all shared memory segments
@@ -97,8 +97,8 @@ public:
 protected:
     ///header which is placed in the shared memory
 protected:
-    SharedHeader *pHeaderShm;          /// shared header
-    LocalHeader headerLoc;             /// local header
+    HeaderShared *header_shared;          /// shared header
+    HeaderLocal header_local;             /// local header
 
     /** Constructor used if you just have a pointer to the shared memory
      * @param shmHeader name of the variable
@@ -108,12 +108,12 @@ protected:
      * @see ShmFw::createSegment
      **/
     int findHeader ( const std::string &name, HandlerPtr &shmHdl ) {
-        headerLoc.creator = false;
-        headerLoc.pShmHdl = shmHdl;
-        headerLoc.varName = shmHdl->resolve_namespace ( name );
+        header_local.creator = false;
+        header_local.shm_handler = shmHdl;
+        header_local.shm_instance_name = shmHdl->resolve_namespace ( name );
         try {
-            pHeaderShm = ( SharedHeader * ) headerLoc.pShmHdl->getShm()->find<char> ( headerLoc.varName.c_str() ).first;
-            if ( pHeaderShm == NULL ) {
+            header_shared = ( HeaderShared * ) header_local.shm_handler->getShm()->find<char> ( header_local.shm_instance_name.c_str() ).first;
+            if ( header_shared == NULL ) {
                 std::cerr << "variable does not exist" << std::endl;
             }
         } catch ( ... ) {
@@ -133,29 +133,29 @@ protected:
      * @see ShmFw::createSegment
      **/
     int constructHeader ( const std::string &name, HandlerPtr &shmHdl, const char* type_name, size_t type_hash ) {
-        typedef bi::allocator<SharedHeader, SegmentManager> Allocator;
-        pHeaderShm = NULL;
-        headerLoc.pShmHdl = shmHdl;
+        typedef bi::allocator<HeaderShared, SegmentManager> Allocator;
+        header_shared = NULL;
+        header_local.shm_handler = shmHdl;
         //const char* p = pShm->get_device().get_name();
-        headerLoc.varName = shmHdl->resolve_namespace ( name );
+        header_local.shm_instance_name = shmHdl->resolve_namespace ( name );
         /// constructing shared header
         int ret = ERROR;
         try {
-            pHeaderShm = headerLoc.pShmHdl->getShm()->find<SharedHeader> ( headerLoc.varName.c_str() ).first;
-            if ( pHeaderShm != NULL ) { /// already exists
-                headerLoc.tstamp = pHeaderShm->tstamp;
-                headerLoc.creator = false;
+            header_shared = header_local.shm_handler->getShm()->find<HeaderShared> ( header_local.shm_instance_name.c_str() ).first;
+            if ( header_shared != NULL ) { /// already exists
+                header_local.timestamp = header_shared->timestamp;
+                header_local.creator = false;
                 updateTimestampLocal();
                 ret = OK_NEW_HEADER;
             } else {
-                Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
-                pHeaderShm = headerLoc.pShmHdl->getShm()->construct<SharedHeader> ( headerLoc.varName.c_str() ) ( a );
-                headerLoc.creator = true;
-                ScopedLock myLock ( pHeaderShm->mutex );
-                pHeaderShm->tstamp = bp::microsec_clock::local_time();
-                headerLoc.tstamp = pHeaderShm->tstamp;
-                pHeaderShm->condition_mutex.unlock();
-                pHeaderShm->condition.notify_all();
+                Allocator a ( header_local.shm_handler->getShm()->get_segment_manager() );
+                header_shared = header_local.shm_handler->getShm()->construct<HeaderShared> ( header_local.shm_instance_name.c_str() ) ( a );
+                header_local.creator = true;
+                ScopedLock myLock ( header_shared->mutex );
+                header_shared->timestamp = bp::microsec_clock::local_time();
+                header_local.timestamp = header_shared->timestamp;
+                header_shared->condition_mutex.unlock();
+                header_shared->condition.notify_all();
                 updateTimestamps();
                 setType ( type_name, type_hash );
                 ret = OK_USED_EXITING;
@@ -184,8 +184,8 @@ private:
      * @see std::hypeid
      **/
     void setType ( const char *name, size_t hash_code ) {
-        pHeaderShm->type_name = name;
-        pHeaderShm->type_hash_code = hash_code;
+        header_shared->type_name = name;
+        header_shared->type_hash_code = hash_code;
     }
 public:
 
@@ -194,7 +194,7 @@ public:
      * @post ShmFw::constructHeader
      **/
     Header()
-        : pHeaderShm ( NULL ) {
+        : header_shared ( NULL ) {
     }
     /** Constructor used if you just have a pointer to the shared memory
      * @param shmHeader name of the variable
@@ -205,7 +205,7 @@ public:
      * @see ShmFw::createSegment
      **/
     Header ( HandlerPtr shmHdl, const std::string &name )
-        : pHeaderShm ( NULL ) {
+        : header_shared ( NULL ) {
         if ( findHeader ( name, shmHdl ) == ERROR ) exit ( 1 );
     }
     /** Constructor
@@ -217,7 +217,7 @@ public:
      * @see ShmFw::createSegment
      **/
     Header ( const std::string &name, HandlerPtr shmHdl, unsigned int headerSize = 0 )
-        : pHeaderShm ( NULL ) {
+        : header_shared ( NULL ) {
 #if __cplusplus > 199711L
         size_t type_hash_code = typeid ( Header ).hash_code();
         const char *type_name = typeid ( Header ).name();
@@ -230,7 +230,7 @@ public:
     /** sets an info text
      **/
     void info_text ( const char* text ) {
-        pHeaderShm->info_text = text;
+        header_shared->info_text = text;
     }
     /** sets an info text
      **/
@@ -241,20 +241,20 @@ public:
      * @return info
      **/
     std::string info_text() const {
-        return pHeaderShm->info_text.c_str();
+        return header_shared->info_text.c_str();
     }
     /**
      * Shared variable name
      * @return name
      **/
     std::string name() const {
-        return std::string ( headerLoc.varName );
+        return std::string ( header_local.shm_instance_name );
     }
     /** Tries to lock
      * @return If the thread acquires ownership of the mutex, returns true
      **/
     bool try_lock() {
-        return pHeaderShm->mutex.try_lock();
+        return header_shared->mutex.try_lock();
     }
     /** check if the mutex is locked without locking it
      * @return ture if it is locked
@@ -271,19 +271,19 @@ public:
      * Waits until the lock was suggessful lock
      **/
     void lock() {
-        return pHeaderShm->mutex.lock();
+        return header_shared->mutex.lock();
     }
     /**
      * Unlook
      **/
     void unlock() {
-        return pHeaderShm->mutex.unlock();
+        return header_shared->mutex.unlock();
     }
     /**
      * Returns the mutex
      **/
     bi::interprocess_mutex &mutex() {
-        return pHeaderShm->mutex;
+        return header_shared->mutex;
     }
     /**
      * Waits ms to to look the mutex
@@ -292,7 +292,7 @@ public:
      **/
     bool timed_lock ( unsigned int ms ) {
         bp::ptime timeout = bp::microsec_clock::universal_time() + bp::milliseconds ( ms );
-        return pHeaderShm->mutex.timed_lock ( timeout );
+        return header_shared->mutex.timed_lock ( timeout );
     }
     /**
      * Info string
@@ -302,11 +302,11 @@ public:
     std::string info_shm ( bool type = false ) {
         std::stringstream ss;
         bool locked = try_lock();
-        ss << std::setw ( 20 ) << name() << ": " << pHeaderShm->tstamp;
+        ss << std::setw ( 20 ) << name() << ": " << header_shared->timestamp;
         ss << " container: " << std::setw ( 10 ) << containerName();
         ss << " locked: " << ( locked ? "NO" : "YES" );
-        ss << " hash: "<< std::setw ( 3 ) << pHeaderShm->type_hash_code;
-        ss << " type: "<< std::setw ( 0x1F ) << std::string ( pHeaderShm->type_name.c_str() );
+        ss << " hash: "<< std::setw ( 3 ) << header_shared->type_hash_code;
+        ss << " type: "<< std::setw ( 0x1F ) << std::string ( header_shared->type_name.c_str() );
         if ( locked ) unlock();
         return ss.str();
     }
@@ -315,21 +315,21 @@ public:
      * Should after you just accessed the image (reading)
      **/
     void updateTimestampLocal() {
-        headerLoc.tstamp = now();
+        header_local.timestamp = now();
     }
     /**
      * Returns the local time stamp
      * @return timestamp of the local header
      **/
     const boost::posix_time::ptime &timestampLocal() const {
-        return headerLoc.tstamp;
+        return header_local.timestamp;
     }
     /**
      * Returns the shared time stamp
      * @return timestamp of the shared header
      **/
     const boost::posix_time::ptime &timestampShm() const {
-        return pHeaderShm->tstamp;
+        return header_shared->timestamp;
     }
     /**
      * Sets the shared time stamp to now
@@ -337,14 +337,14 @@ public:
      * But please consider to use updateTimestamps to set both local and shared
      **/
     void updateTimestampShared() {
-        pHeaderShm->tstamp = now();
+        header_shared->timestamp = now();
     }
     /**
      * Sets the shared and local time stamp to now
      **/
     void updateTimestamps() {
-        headerLoc.tstamp = now();
-        pHeaderShm->tstamp = headerLoc.tstamp;
+        header_local.timestamp = now();
+        header_shared->timestamp = header_local.timestamp;
     }
     /**
      * Should be called after a process changed the context of the shared variable \n
@@ -353,15 +353,15 @@ public:
      **/
     void itHasChanged() {
         updateTimestamps();
-        pHeaderShm->condition.notify_all();
+        header_shared->condition.notify_all();
     }
     /**
      * Blocking function waits until itHasChanged
      * @see itHasChanged
      **/
     void wait() {
-        ScopedLock lock ( pHeaderShm->condition_mutex );
-        pHeaderShm->condition.wait ( lock );
+        ScopedLock lock ( header_shared->condition_mutex );
+        header_shared->condition.wait ( lock );
     }
     /**
      * Blocking function waits until itHasChanged or timeout
@@ -372,8 +372,8 @@ public:
     bool timed_wait ( unsigned int ms ) {
         using namespace bp;
         bp::ptime timeout = bp::microsec_clock::universal_time() + bp::milliseconds ( ms );
-        ScopedLock lock ( pHeaderShm->condition_mutex );
-        return pHeaderShm->condition.timed_wait ( lock, timeout );
+        ScopedLock lock ( header_shared->condition_mutex );
+        return header_shared->condition.timed_wait ( lock, timeout );
     }
     /**
      * Sets the time stamps to now
@@ -389,8 +389,8 @@ public:
      * @post dataProcessed
      **/
     bool hasChanged() const {
-        if ( headerLoc.tstamp == pHeaderShm->tstamp ) return false;
-        bp::time_duration d =  headerLoc.tstamp - pHeaderShm->tstamp;
+        if ( header_local.timestamp == header_shared->timestamp ) return false;
+        bp::time_duration d =  header_local.timestamp - header_shared->timestamp;
         bool check = d.is_negative();
         return check;
     }
@@ -399,7 +399,7 @@ public:
      * @post dataProcessed
      **/
     void userFlag ( bool value ) {
-        pHeaderShm->user_flag = value;
+        header_shared->user_flag = value;
     }
     /**
      * returns user flag
@@ -407,14 +407,14 @@ public:
      * @post dataProcessed
      **/
     bool userFlag() const {
-        return pHeaderShm->user_flag;
+        return header_shared->user_flag;
     }
     /**
      * sets user register
      * @post dataProcessed
      **/
     void userRegister ( uint32_t value ) {
-        pHeaderShm->user_register = value;
+        header_shared->user_register = value;
     }
     /**
      * returns user register
@@ -422,7 +422,7 @@ public:
      * @post dataProcessed
      **/
     uint32_t userRegister() const {
-        return pHeaderShm->user_register;
+        return header_shared->user_register;
     }
 
     /**
@@ -431,7 +431,7 @@ public:
      * @see CONTAINER_HEADER, CONTAINER_VARIABLE, ...
      **/
     uint16_t container() const {
-        return pHeaderShm->container;
+        return header_shared->container;
     }
     /**
      * container type as string
@@ -467,21 +467,21 @@ public:
      * Destroies the shared variable
      **/
     virtual void destroy() const {
-        char *p = ( char * ) pHeaderShm;
-        headerLoc.pShmHdl->getShm()->destroy_ptr ( p );
+        char *p = ( char * ) header_shared;
+        header_local.shm_handler->getShm()->destroy_ptr ( p );
     };
     /** compares the variable type entries
      * @return true on equal
      **/
     template <class T1>
     bool isType () const {
-        const char* type_name_in_shm = pHeaderShm->type_name.c_str();
+        const char* type_name_in_shm = header_shared->type_name.c_str();
         const char* type_name_request = typeid ( T1 ).name();
         bool result_name = ( strcmp ( type_name_in_shm, type_name_request ) == 0 );
         bool result_hash_code = true;
 #if __cplusplus > 199711L
-        if ( pHeaderShm->type_hash_code != 0 ) {
-            result_hash_code = ( pHeaderShm->type_hash_code == typeid ( T1 ).hash_code() );
+        if ( header_shared->type_hash_code != 0 ) {
+            result_hash_code = ( header_shared->type_hash_code == typeid ( T1 ).hash_code() );
         }
 #endif
         return result_name && result_hash_code;
@@ -492,11 +492,11 @@ public:
      * @return true on equal
      **/
     bool isType ( const Header &header ) const {
-        bool result_name = ( strcmp ( pHeaderShm->type_name.c_str(), header.pHeaderShm->type_name.c_str() ) == 0 );
+        bool result_name = ( strcmp ( header_shared->type_name.c_str(), header.header_shared->type_name.c_str() ) == 0 );
         bool result_hash_code = true;
 #if __cplusplus > 199711L
-        if ( ( pHeaderShm->type_hash_code != 0 ) && ( header.pHeaderShm->type_hash_code !=0 ) ) {
-            result_hash_code = ( pHeaderShm->type_hash_code == header.pHeaderShm->type_hash_code );
+        if ( ( header_shared->type_hash_code != 0 ) && ( header.header_shared->type_hash_code !=0 ) ) {
+            result_hash_code = ( header_shared->type_hash_code == header.header_shared->type_hash_code );
         }
 #endif
         return result_name && result_hash_code;
@@ -508,30 +508,30 @@ public:
      * @return tpyeid.name();
      **/
     const char* type_name() const {
-        return pHeaderShm->type_name.c_str();
+        return header_shared->type_name.c_str();
     }
     /** returns the variable tpye hash code
      * @see std::tpyeid.hash_code()
      * @return tpyeid.hash_code() or if the C++ standard is less than 2011
      **/
     size_t type_hash_code() const {
-        return pHeaderShm->type_hash_code;
+        return header_shared->type_hash_code;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared header
      * @warning do not use this fnc, it is only for serialization
      * @return ref to shared data
      **/
-    SharedHeader &shared_header() {
-        return *pHeaderShm;
+    HeaderShared &shared_header() {
+        return *header_shared;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a reference to the shared header
      * @warning do not use this fnc, it is only for serialization
      * @return ref to shared data
      **/
-    const SharedHeader &shared_header() const {
-        return *pHeaderShm;
+    const HeaderShared &shared_header() const {
+        return *header_shared;
     }
 };
 

@@ -83,17 +83,17 @@ public:
         const char *type_name = typeid ( Deque<T> ).name();
 #endif
         if ( constructHeader ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
-        if ( headerLoc.creator ) {
+        if ( header_local.creator ) {
             /// constructing shared data
             try {
-                ScopedLock myLock ( pHeaderShm->mutex );
-                pHeaderShm->container = ShmFw::Header::CONTAINER_DEQUE;
-                Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
-                //pHeaderShm->data = headerLoc.pShmHdl->getShm()->construct< DequeShm > ( bi::anonymous_instance ) ( a );
+                ScopedLock myLock ( header_shared->mutex );
+                header_shared->container = ShmFw::Header::CONTAINER_DEQUE;
+                Allocator a ( header_local.shm_handler->getShm()->get_segment_manager() );
+                //header_shared->data = header_local.shm_handler->getShm()->construct< DequeShm > ( bi::anonymous_instance ) ( a );
 	        std::string name_data_shm;
-		if(name_data.empty()) name_data_shm = "." + headerLoc.varName;
+		if(name_data.empty()) name_data_shm = "." + header_local.shm_instance_name;
 		else name_data_shm = name_data;
-		pHeaderShm->data =  headerLoc.pShmHdl->getShm()->find_or_construct<DequeShm> (name_data_shm.c_str()) (a);
+		header_shared->data =  header_local.shm_handler->getShm()->find_or_construct<DequeShm> (name_data_shm.c_str()) (a);
             } catch ( ... ) {
                 std::cerr << "Error when constructing shared data" << std::endl;
                 return ERROR;
@@ -106,14 +106,14 @@ public:
      * @return ref to shared data
      **/
     DequeShm *get() {
-        return (DequeShm*) pHeaderShm->data.get();
+        return (DequeShm*) header_shared->data.get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a pointer to the shared object
      * @return ref to shared data
      **/
     const DequeShm *get() const {
-        return (DequeShm*) pHeaderShm->data.get();
+        return (DequeShm*) header_shared->data.get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a pointer to the shared object
@@ -355,7 +355,7 @@ public:
      * @ToDo
      **/
     virtual void destroy() const {
-        // headerLoc.pShmHdl->getShm()->destroy_ptr(data_local.ptr);
+        // header_local.shm_handler->getShm()->destroy_ptr(data_local.ptr);
         // Header::destroy();
         std::cerr << "vector::destroy() -> kown to have problem!" << std::endl;
     };
@@ -404,7 +404,7 @@ public:
      * Inserts a copy of x at the end of the vector.
      **/
     void push_back ( const std::string &str ) {
-        CharString shmStr = headerLoc.pShmHdl->createString ( str );
+        CharString shmStr = header_local.shm_handler->createString ( str );
         get()->push_back ( shmStr );
     }
 };

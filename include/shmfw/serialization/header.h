@@ -44,10 +44,10 @@ namespace boost {
 namespace serialization {
 
 /// serialize function
-template<class archive> inline  void serialize ( archive &ar, ShmFw::SharedHeader &o, const unsigned int version ) {
+template<class archive> inline  void serialize ( archive &ar, ShmFw::HeaderShared &o, const unsigned int version ) {
     std::string str;
     ar & boost::serialization::make_nvp ( "container", o.container );
-    ar & boost::serialization::make_nvp ( "tstamp", o.tstamp );
+    ar & boost::serialization::make_nvp ( "timestamp", o.timestamp );
     ar & boost::serialization::make_nvp ( "type_hash_code", o.type_hash_code );
     if ( archive::is_saving::value ) {
         str = o.type_name.c_str();
@@ -63,9 +63,9 @@ template<class archive> inline  void serialize ( archive &ar, ShmFw::SharedHeade
     }
 }
 
-template<class archive> inline  void serialize ( archive &ar, ShmFw::LocalHeader & o, const unsigned int version ) {
-    std::string name ( o.varName );
-    ar & boost::serialization::make_nvp ( "varName", name );
+template<class archive> inline  void serialize ( archive &ar, ShmFw::HeaderLocal & o, const unsigned int version ) {
+    std::string name ( o.shm_instance_name );
+    ar & boost::serialization::make_nvp ( "shm_instance_name", name );
 }
 
 

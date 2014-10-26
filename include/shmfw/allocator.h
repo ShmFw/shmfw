@@ -83,17 +83,17 @@ public:
         const char *type_name = typeid ( Alloc<T> ).name();
 #endif
         if ( constructHeader ( name, shmHdl, type_name, type_hash_code ) == ERROR ) return ERROR;
-        if ( headerLoc.creator ) {
+        if ( header_local.creator ) {
             /// constructing shared data
             try {
-                ScopedLock myLock ( pHeaderShm->mutex );
-                pHeaderShm->container = ShmFw::Header::CONTAINER_ALLOC;
-                Allocator a ( headerLoc.pShmHdl->getShm()->get_segment_manager() );
-                //pHeaderShm->data = headerLoc.pShmHdl->getShm()->construct<T> ( bi::anonymous_instance ) [1] ( a );
+                ScopedLock myLock ( header_shared->mutex );
+                header_shared->container = ShmFw::Header::CONTAINER_ALLOC;
+                Allocator a ( header_local.shm_handler->getShm()->get_segment_manager() );
+                //header_shared->data = header_local.shm_handler->getShm()->construct<T> ( bi::anonymous_instance ) [1] ( a );
 	        std::string name_data_shm;
-		if(name_data.empty()) name_data_shm = "." + headerLoc.varName;
+		if(name_data.empty()) name_data_shm = "." + header_local.shm_instance_name;
 		else name_data_shm = name_data;
-		pHeaderShm->data =  headerLoc.pShmHdl->getShm()->find_or_construct<T> (name_data_shm.c_str()) (a);
+		header_shared->data =  header_local.shm_handler->getShm()->find_or_construct<T> (name_data_shm.c_str()) (a);
             } catch ( ... ) {
                 std::cerr << "Error when constructing shared data" << std::endl;
                 return ERROR;
@@ -106,14 +106,14 @@ public:
      * @return ref to shared data
      **/
     T *get()  {
-        return (T*) pHeaderShm->data.get();
+        return (T*) header_shared->data.get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a pointer to the shared object
      * @return ref to shared data
      **/
     const T *get() const {
-        return (T*) pHeaderShm->data.get();
+        return (T*) header_shared->data.get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a pointer to the shared object
@@ -156,7 +156,7 @@ public:
      * destroies the shared memory
      **/
     virtual void destroy() const {
-        headerLoc.pShmHdl->getShm()->destroy_ptr ( get() );
+        header_local.shm_handler->getShm()->destroy_ptr ( get() );
         Header::destroy();
     };
 
