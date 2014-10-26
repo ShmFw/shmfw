@@ -178,7 +178,7 @@ public:
         unsigned int new_size_y = round ( ( new_y_max-new_y_min ) / m_resolution );
 
         // Reserve new memory:
-        typename VectorT new_map(m_map.get_allocator());
+        VectorT new_map(m_map.get_allocator());
         new_map.resize ( new_size_x*new_size_y,defaultValueNewCells );
 
         // Copy previous rows:
