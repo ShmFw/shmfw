@@ -42,19 +42,16 @@ namespace ShmFw {
 /// Class to manage a shared vectors
 template<typename T>
 class Deque : public Header {
-
-public:
     typedef bi::allocator<T, SegmentManager> Allocator;
     typedef bi::deque<T, Allocator > DequeShm;
     typedef typename Allocator::size_type size_type;
-
-protected:
+    DequeShm *data_element;
 public:
 
     /** Default constructor
      * @post Deque::construct
      **/
-    Deque() {
+    Deque()  : data_element(NULL) {
     }
 
     /** Constructor
@@ -63,7 +60,7 @@ public:
      * @pre the ShmPtr poitner must be created first
      * @see ShmFw::createSegment
      **/
-    Deque ( const std::string &name, HandlerPtr &shmHdl ) {
+    Deque ( const std::string &name, HandlerPtr &shmHdl )  : data_element(NULL) {
         if ( construct ( name, shmHdl ) == ERROR ) exit ( 1 );
     }
 
@@ -99,6 +96,7 @@ public:
                 return ERROR;
             }
         }
+        data_element = (DequeShm*) header_shared->data.get();
         return OK;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
@@ -106,14 +104,14 @@ public:
      * @return ref to shared data
      **/
     DequeShm *get() {
-        return (DequeShm*) header_shared->data.get();
+        return data_element;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a pointer to the shared object
      * @return ref to shared data
      **/
     const DequeShm *get() const {
-        return (DequeShm*) header_shared->data.get();
+        return data_element;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a pointer to the shared object

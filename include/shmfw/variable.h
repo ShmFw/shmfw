@@ -46,13 +46,14 @@ namespace ShmFw {
 template<typename T>
 class Var : public Header {
     friend class boost::serialization::access;
+    T *data_element;
 public:
 
 
     /** Default constructor
      * @post Var::construct
      **/
-    Var() {
+    Var() : data_element(NULL) {
     }
     /** Constructor
      * @param name name of the variable
@@ -61,7 +62,7 @@ public:
      * @see ShmFw::createSegment
      * @see ShmFw::construct
      **/
-    Var ( const std::string &name, HandlerPtr &shmHdl ) {
+    Var ( const std::string &name, HandlerPtr &shmHdl ) : data_element(NULL) {
         if ( construct ( name, shmHdl ) == ERROR ) exit ( 1 );
     }
     /**
@@ -96,6 +97,7 @@ public:
                 return ERROR;
             }
         }
+        data_element = (T*) header_shared->data.get();
         return OK;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
@@ -103,14 +105,14 @@ public:
      * @return ref to shared data
      **/
     T *get() {
-        return (T*) header_shared->data.get();
+        return data_element;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a pointer to the shared object
      * @return ref to shared data
      **/
     const T *get() const {
-        return (T*) header_shared->data.get();
+        return data_element;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a pointer to the shared object

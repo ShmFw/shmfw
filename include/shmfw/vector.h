@@ -43,18 +43,17 @@ namespace ShmFw {
 template<typename T>
 class Vector : public Header {
     friend class boost::serialization::access;
-public:
     typedef bi::allocator<T, SegmentManager> Allocator;
     typedef bi::vector<T, Allocator > VectorShm;
     typedef typename Allocator::size_type size_type;
+    VectorShm *data_element;
 
-protected:
 public:
 
     /** Default constructor
      * @post Vector::construct
      **/
-    Vector() {
+    Vector() : data_element(NULL){
     }
 
     /** Constructor
@@ -63,7 +62,7 @@ public:
      * @pre the ShmPtr poitner must be created first
      * @see ShmFw::createSegment
      **/
-    Vector ( const std::string &name, HandlerPtr &shmHdl ) {
+    Vector ( const std::string &name, HandlerPtr &shmHdl ) : data_element(NULL) {
         if ( construct ( name, shmHdl ) == ERROR ) exit ( 1 );
     }
 
@@ -99,6 +98,7 @@ public:
                 return ERROR;
             }
         }
+        data_element = (VectorShm*) header_shared->data.get();
         return OK;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
@@ -106,14 +106,14 @@ public:
      * @return ref to shared data
      **/
     VectorShm *get() {
-        return (VectorShm*) header_shared->data.get();
+        return data_element;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a pointer to the shared object
      * @return ref to shared data
      **/
     const VectorShm *get() const {
-        return (VectorShm*) header_shared->data.get();
+        return data_element;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      * returns a pointer to the shared object

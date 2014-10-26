@@ -94,43 +94,44 @@ int main ( int argc, char *argv[] ) {
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
     srand ( time ( NULL ) );
 
-    ShmFw::DynamicGrid<double> *grid1 = new ShmFw::DynamicGrid64FHeap;
-    ShmFw::DynamicGrid64FHeap grid2;
-    ShmFw::Alloc<ShmFw::DynamicGrid64FShm> a ( "Grid", shmHdl);
-    ShmFw::DynamicGrid<double> *grid3 = a.get();
+    ShmFw::DynamicGrid64FHeap gridHeap1;
+    ShmFw::DynamicGrid64FHeap gridHeap2;
+    ShmFw::Alloc<ShmFw::DynamicGrid64FShm> gridShm ( "Grid", shmHdl);
 
-    grid1->setSize ( 0, 50, 0, 40, 1, 0 );
-    std::cout << *grid1 << std::endl;
+    gridHeap1.setSize ( 0, 50, 0, 40, 1, 0 );
+    std::cout << gridHeap1 << std::endl;
     int count = 0;
     do {
         double d = sin ( count / 100. );
-        double x, y, m = grid1->getSizeX(), n = grid1->getSizeY();
+        double x, y, m = gridHeap1.getSizeX(), n = gridHeap1.getSizeY();
         for ( int i=0; i<m; i++ ) {
             for ( int j=0; j<n; j++ ) {
                 x = i/ ( n-1. );
                 y = j/ ( m-1. );
                 double v = d*sin ( 2*M_PI*x ) *sin ( 3*M_PI*y ) + ( 1.0-d ) *cos ( 3*M_PI*x*y );
-                grid1->setCellByIndex ( i, j, v );
+                gridHeap1.setCellByIndex ( i, j, v );
             }
         }
         std::cout << std::endl;
         thStart = tclock::now();
-        grid1->copyTo ( grid2, true );
+        gridHeap1.copyTo ( gridHeap2 );
         thStop = tclock::now();
         std::cout << "heap->heap: copyTo using_memcpy  : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
         thStart = tclock::now();
-        grid1->copyTo ( grid2, false );
+        gridHeap1.copyTo ( gridHeap2 );
         thStop = tclock::now();
         std::cout << "heap->heap: copyTo using_forloop : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
         thStart = tclock::now();
-        grid1->copyTo ( *grid3, true );
+        gridHeap1.copyTo ( *gridShm );
         thStop = tclock::now();
         std::cout << "heap->shm: copyTo using_memcpy   : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
         thStart = tclock::now();
-        grid1->copyTo ( *grid3, false );
+        gridHeap1.copyTo ( *gridShm );
         thStop = tclock::now();
         std::cout << "heap->shm: copyTo using_forloop  : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
-        a.itHasChanged();
+        gridShm.itHasChanged();
+	
+	gridShm->resize(gridShm->getXMin(), gridShm->getXMax()*2., gridShm->getYMin(), gridShm->getYMax(), -1);
         count++;
         usleep ( 100000 );
     } while ( params.loop );

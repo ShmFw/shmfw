@@ -88,12 +88,16 @@ void readArgs ( int argc, char **argv, Prarmeters &params ) {
 void prepare_grid ( mglData* data ) {
     srand ( time ( NULL ) );
     ShmFw::Alloc<ShmFw::DynamicGrid64FShm> a ( params.variable_name, params.shmHdl );
-
-    size_t col, row,  columns = a->getSizeX(), rows = a->getSizeY();
+    ShmFw::DynamicGrid64FHeap b;
+    b.copyFrom(*a);
+    b.resize(b.getXMin(), b.getXMax(), b.getYMin(), b.getYMax()*2., 0);
+    size_t col, row; 
+    size_t columns = b.getSizeX();
+    size_t rows = b.getSizeY();
     mgl_data_create ( data, rows, columns, 1 );
     for ( col = 0; col < columns; col++ )  {
         for ( row=0; row < rows; row++ ) {
-            double v = (*a)(col,row);
+            double v = b(col,row);
             mgl_data_set_value ( data, v, row, col, 0 );
         }
     }
