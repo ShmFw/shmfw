@@ -130,8 +130,6 @@ int main ( int argc, char *argv[] ) {
         thStop = tclock::now();
         std::cout << "heap->shm: copyTo using_forloop  : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
         gridShm.itHasChanged();
-	
-	gridShm->resize(gridShm->getXMin(), gridShm->getXMax()*2., gridShm->getYMin(), gridShm->getYMax(), -1);
         count++;
         usleep ( 100000 );
     } while ( params.loop );

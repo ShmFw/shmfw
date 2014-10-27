@@ -47,13 +47,17 @@ struct Prarmeters {
     std::string variable_name;
     ShmFw::HandlerPtr shmHdl;
     bool loop;
+    std::string title;
+    std::string arguments;
+    std::string plot_type;
+    unsigned int update_time;
 };
 Prarmeters params;
 
 
-void terminate (int s) {
-    printf("Caught signal %d\n",s);
-    fflush(stdout);
+void terminate ( int s ) {
+    printf ( "Caught signal %d\n",s );
+    fflush ( stdout );
     params.loop = false;
 }
 
@@ -65,6 +69,10 @@ void readArgs ( int argc, char **argv, Prarmeters &params ) {
     ( "help", "get this help message" )
     ( "clear,c", "clears the shared memory" )
     ( "loop,l", "loops writing data" )
+    ( "title,t", po::value<std::string> ( &params.title )->default_value ( "2D" ), "plot title" )
+    ( "plot_type,p", po::value<std::string> ( &params.plot_type )->default_value ( "mesh" ), "plot type: mesh, fall, belt, boxs, tile ... " )
+    ( "arguments,a", po::value<std::string> ( &params.arguments )->default_value ( "" ), "plot arguments" )
+    ( "update_time,u", po::value<unsigned int> ( &params.update_time )->default_value ( 5000 ), "update time in ms" )
     ( "variable_name,v", po::value<std::string> ( &params.variable_name )->default_value ( "Grid" ), "shared variable name" )
     ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
     ( "shm_memory_size,s", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" );
@@ -82,22 +90,17 @@ void readArgs ( int argc, char **argv, Prarmeters &params ) {
         std::cout << desc << std::endl;
         exit ( 1 );
     }
-    params.loop = ! ( vm.count ( "loop" ) > 0 );
+    params.loop = ( vm.count ( "loop" ) > 0 );
 }
 
 void prepare_grid ( mglData* data ) {
     srand ( time ( NULL ) );
     ShmFw::Alloc<ShmFw::DynamicGrid64FShm> a ( params.variable_name, params.shmHdl );
-    ShmFw::DynamicGrid64FHeap b;
-    b.copyFrom(*a);
-    b.resize(b.getXMin(), b.getXMax(), b.getYMin(), b.getYMax()*2., 0);
-    size_t col, row; 
-    size_t columns = b.getSizeX();
-    size_t rows = b.getSizeY();
+    size_t col, row, columns = a->getSizeX(), rows = a->getSizeY();
     mgl_data_create ( data, rows, columns, 1 );
     for ( col = 0; col < columns; col++ )  {
         for ( row=0; row < rows; row++ ) {
-            double v = b(col,row);
+            double v = a->fastCellByIndex ( col,row );
             mgl_data_set_value ( data, v, row, col, 0 );
         }
     }
@@ -106,10 +109,19 @@ void prepare_grid ( mglData* data ) {
 int sample ( mglGraph *gr ) {
     mglData a;
     prepare_grid ( &a );
-    gr->Title ( "Mesh plot" );
+    gr->Title ( params.title.c_str() );
     gr->Rotate ( 50,60 );
     gr->Box();
-    gr->Mesh ( a );
+    if ( boost::iequals ( "mesh", params.plot_type ) )
+        gr->Mesh ( a, params.arguments.c_str() );
+    if ( boost::iequals ( "fall", params.plot_type ) )
+        gr->Fall ( a, params.arguments.c_str() );
+    if ( boost::iequals ( "belt", params.plot_type ) )
+        gr->Belt ( a, params.arguments.c_str() );
+    if ( boost::iequals ( "boxs", params.plot_type ) )
+        gr->Boxs ( a, params.arguments.c_str() );
+    if ( boost::iequals ( "tile", params.plot_type ) )
+        gr->Tile ( a, params.arguments.c_str() );
     return 0;
 }
 
@@ -122,21 +134,23 @@ int main ( int argc, char **argv ) {
     params.shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
     ShmFw::Header shmHeader ( params.variable_name, params.shmHdl );
     mglQT gr ( sample,"MathGL examples" );
-    gr.Update();
-    int update_count = 0;
-    int timeout_count = 0;
-    do {
+    if ( params.loop ) {
         gr.Update();
-	if(shmHeader.timed_wait(5000)){
-	  update_count++;
-	  timeout_count = 0;
-	  std::cout << "update_count:" << update_count << std::endl;
-	} else {
-	  timeout_count++;
-	  std::cout << "timeout_count:" << timeout_count << std::endl;
-	}
-    } while ( params.loop );
-    return gr.Run();
-
+        int update_count = 0;
+        int timeout_count = 0;
+        do {
+            gr.Update();
+            if ( shmHeader.timed_wait ( params.update_time ) ) {
+                update_count++;
+                timeout_count = 0;
+                std::cout << "update_count:" << update_count << std::endl;
+            } else {
+                timeout_count++;
+                std::cout << "timeout_count:" << timeout_count << std::endl;
+            }
+        } while ( params.loop );
+    } else {
+      return gr.Run();
+    }
     exit ( 0 );
 }
