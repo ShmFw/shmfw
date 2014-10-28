@@ -59,6 +59,7 @@ namespace ShmFw {
   class RouteSegment;
   class ModelState;
   class Handler;
+  template <typename T, template<typename...> class Allocator> class DynamicGrid;
 };
 
 

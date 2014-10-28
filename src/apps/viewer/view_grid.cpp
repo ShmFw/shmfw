@@ -94,21 +94,20 @@ void readArgs ( int argc, char **argv, Prarmeters &params ) {
 }
 
 void prepare_grid ( mglData* data ) {
-    srand ( time ( NULL ) );
-    ShmFw::Alloc<ShmFw::DynamicGrid64FShm> a ( params.variable_name, params.shmHdl );
-    size_t col, row, columns = a->getSizeX(), rows = a->getSizeY();
-    mgl_data_create ( data, rows, columns, 1 );
-    for ( col = 0; col < columns; col++ )  {
-        for ( row=0; row < rows; row++ ) {
-            double v = a->fastCellByIndex ( col,row );
-            mgl_data_set_value ( data, v, row, col, 0 );
-        }
-    }
 }
 
 int sample ( mglGraph *gr ) {
     mglData a;
-    prepare_grid ( &a );
+    srand ( time ( NULL ) );
+    ShmFw::Alloc<ShmFw::DynamicGrid64FShm> dynamic_grid ( params.variable_name, params.shmHdl );
+    size_t col, row, columns = dynamic_grid->getSizeX(), rows = dynamic_grid->getSizeY();
+    mgl_data_create ( &a, rows, columns, 1 );
+    for ( col = 0; col < columns; col++ )  {
+        for ( row=0; row < rows; row++ ) {
+            double v = dynamic_grid->fastCellByIndex ( col,row );
+            mgl_data_set_value ( &a, v, row, col, 0 );
+        }
+    }
     gr->Title ( params.title.c_str() );
     gr->Rotate ( 50,60 );
     gr->Box();
@@ -122,6 +121,9 @@ int sample ( mglGraph *gr ) {
         gr->Boxs ( a, params.arguments.c_str() );
     if ( boost::iequals ( "tile", params.plot_type ) )
         gr->Tile ( a, params.arguments.c_str() );
+    gr->SetRanges ( dynamic_grid->getXMin(),dynamic_grid->getXMax(),dynamic_grid->getYMin(),dynamic_grid->getYMax() );
+    gr->Axis();
+    gr->Grid();
     return 0;
 }
 
@@ -150,7 +152,7 @@ int main ( int argc, char **argv ) {
             }
         } while ( params.loop );
     } else {
-      return gr.Run();
+        return gr.Run();
     }
     exit ( 0 );
 }
