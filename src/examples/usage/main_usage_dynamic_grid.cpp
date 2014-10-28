@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #include <signal.h>
 
-#include <shmfw/objects/dynamic_grid.h>
+#include <shmfw/objects/grid_map.h>
 #include <shmfw/allocator.h>
 #include <boost/program_options.hpp>
 #include <boost/thread.hpp>
@@ -94,9 +94,9 @@ int main ( int argc, char *argv[] ) {
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
     srand ( time ( NULL ) );
 
-    ShmFw::DynamicGrid64FHeap gridHeap1;
-    ShmFw::DynamicGrid64FHeap gridHeap2;
-    ShmFw::Alloc<ShmFw::DynamicGrid64FShm> gridShm ( "Grid", shmHdl);
+    ShmFw::DynamicGridMap64FHeap gridHeap1;
+    ShmFw::DynamicGridMap64FHeap gridHeap2;
+    ShmFw::Alloc<ShmFw::DynamicGridMap64FShm> gridShm ( "Grid", shmHdl);
 
     gridHeap1.setSize ( 0, 50, 0, 40, 1, 0 );
     std::cout << gridHeap1 << std::endl;

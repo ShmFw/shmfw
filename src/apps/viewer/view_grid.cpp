@@ -36,7 +36,7 @@
 
 
 #include <mgl2/qt.h>
-#include <shmfw/objects/dynamic_grid.h>
+#include <shmfw/objects/grid_map.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <shmfw/allocator.h>
 #include <boost/program_options.hpp>
@@ -99,12 +99,12 @@ void prepare_grid ( mglData* data ) {
 int sample ( mglGraph *gr ) {
     mglData a;
     srand ( time ( NULL ) );
-    ShmFw::Alloc<ShmFw::DynamicGrid64FShm> dynamic_grid ( params.variable_name, params.shmHdl );
+    ShmFw::Alloc<ShmFw::DynamicGridMap64FShm> dynamic_grid ( params.variable_name, params.shmHdl );
     size_t col, row, columns = dynamic_grid->getSizeX(), rows = dynamic_grid->getSizeY();
     mgl_data_create ( &a, rows, columns, 1 );
     for ( col = 0; col < columns; col++ )  {
         for ( row=0; row < rows; row++ ) {
-            double v = dynamic_grid->fastCellByIndex ( col,row );
+            double v = dynamic_grid->cellByIndex_nocheck ( col,row );
             mgl_data_set_value ( &a, v, row, col, 0 );
         }
     }
