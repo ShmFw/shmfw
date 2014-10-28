@@ -206,26 +206,26 @@ public:
 
     /** Returns a pointer to the contents of a cell given by its coordinates, or NULL if it is out of the map extensions.
       */
-    inline T*	cellByPos ( double x, double y ) {
+    inline T& cellByPos ( double x, double y ) {
         int cx = x2idx ( x );
         int cy = y2idx ( y );
 
         if ( cx<0 || cx>=static_cast<int> ( this->m_size_x ) ) return NULL;
         if ( cy<0 || cy>=static_cast<int> ( this->m_size_y ) ) return NULL;
 
-        return &cellByIndex_nocheck ( cx, cy );
+        return cellByIndex_nocheck ( cx, cy );
     }
 
     /** Returns a pointer to the contents of a cell given by its coordinates, or NULL if it is out of the map extensions.
       */
-    inline const T* cellByPos ( double x, double y ) const {
+    inline const T& cellByPos ( double x, double y ) const {
         int cx = x2idx ( x );
         int cy = y2idx ( y );
 
         if ( cx<0 || cx>=static_cast<int> ( this->m_size_x ) ) return NULL;
         if ( cy<0 || cy>=static_cast<int> ( this->m_size_y ) ) return NULL;
 
-        return &cellByIndex_nocheck ( cx, cy );
+        return cellByIndex_nocheck ( cx, cy );
     }
     /** set the contents of a cell given by its coordinates if the coordinates are with the range.
       */
