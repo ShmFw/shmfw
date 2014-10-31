@@ -64,7 +64,7 @@ namespace ShmFw {
 namespace bi = boost::interprocess;
 namespace bp = boost::posix_time;
 
-template <typename T> using AllocatorShmT = bi::allocator<T, bi::managed_shared_memory::segment_manager>;
+template <typename T> using Allocator = bi::allocator<T, bi::managed_shared_memory::segment_manager>;
   
 typedef bi::scoped_lock<bi::interprocess_mutex> ScopedLock;
 typedef boost::shared_ptr<ScopedLock> ScopedLockPtr;

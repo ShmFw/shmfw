@@ -134,13 +134,13 @@ TEST_F ( ShmTest, DequeInt ) {
 
 TEST_F ( ShmTest, AllocPoints ) {  
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
-    ShmFw::Alloc<ShmFw::Points<ShmFw::AllocatorShmT>  > a ( "var0", shmHdl ) ;
+    ShmFw::Alloc<ShmFw::Points<ShmFw::Allocator>  > a ( "var0", shmHdl ) ;
     a->points.push_back(ShmFw::Point(rand_01(), rand_01(), rand_01()));
     a->points.push_back(ShmFw::Point(rand_01(), rand_01(), rand_01()));
     a->frame = "world";
-    ShmFw::Alloc<ShmFw::Points<ShmFw::AllocatorShmT> > b ( "var0", shmHdl ) ;
+    ShmFw::Alloc<ShmFw::Points<ShmFw::Allocator> > b ( "var0", shmHdl ) ;
     EXPECT_EQ (*a, *b);
-    ShmFw::Alloc<ShmFw::Points<ShmFw::AllocatorShmT> > c ( "var1", shmHdl ) ;
+    ShmFw::Alloc<ShmFw::Points<ShmFw::Allocator> > c ( "var1", shmHdl ) ;
     c->copyFrom(*b);
     EXPECT_EQ (*a, *c);
     a->points[0].x = 3;
