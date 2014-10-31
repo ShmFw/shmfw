@@ -38,6 +38,8 @@
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/graph/graph_concepts.hpp>
 #include <glob.h>
+#include <shmfw/handler.h>
+
 #define SHMFW_UNUSED_PARAM(a)		(void)(a)
 namespace ShmFw {
 
@@ -636,51 +638,48 @@ public:
     }
 };
 
-template <typename T>
-using AllocatorGridMap = boost::interprocess::allocator<T, boost::interprocess::managed_shared_memory::segment_manager>;
-
 // Variant to use on the heap:
 using DynamicGridMapS8Heap  = DynamicGridMap<int8_t, std::allocator>;
 // Variant to use in shared memory:
-using DynamicGridMapS8Shm = DynamicGridMap<int8_t, AllocatorGridMap>;
+using DynamicGridMapS8Shm = DynamicGridMap<int8_t, AllocatorShmT>;
 // Variant to use on the heap:
 using DynamicGridMapS16Heap  = DynamicGridMap<int16_t, std::allocator>;
 // Variant to use in shared memory:
-using DynamicGridMapS16Shm = DynamicGridMap<int16_t, AllocatorGridMap>;
+using DynamicGridMapS16Shm = DynamicGridMap<int16_t, AllocatorShmT>;
 // Variant to use on the heap:
 using DynamicGridMapS32Heap  = DynamicGridMap<int32_t, std::allocator>;
 // Variant to use in shared memory:
-using DynamicGridMapS32Shm = DynamicGridMap<int32_t, AllocatorGridMap>;
+using DynamicGridMapS32Shm = DynamicGridMap<int32_t, AllocatorShmT>;
 
 // Variant to use on the heap:
 using DynamicGridMapU8Heap  = DynamicGridMap<uint8_t, std::allocator>;
 // Variant to use in shared memory:
-using DynamicGridMapU8Shm = DynamicGridMap<uint8_t, AllocatorGridMap>;
+using DynamicGridMapU8Shm = DynamicGridMap<uint8_t, AllocatorShmT>;
 // Variant to use on the heap:
 using DynamicGridMapU16Heap  = DynamicGridMap<uint16_t, std::allocator>;
 // Variant to use in shared memory:
-using DynamicGridMapU16Shm = DynamicGridMap<uint16_t, AllocatorGridMap>;
+using DynamicGridMapU16Shm = DynamicGridMap<uint16_t, AllocatorShmT>;
 // Variant to use on the heap:
 using DynamicGridMapU32Heap  = DynamicGridMap<uint32_t, std::allocator>;
 // Variant to use in shared memory:
-using DynamicGridMapU32Shm = DynamicGridMap<uint32_t, AllocatorGridMap>;
+using DynamicGridMapU32Shm = DynamicGridMap<uint32_t, AllocatorShmT>;
 
 // Variant to use on the heap:
 using DynamicGridMap64FHeap  = DynamicGridMap<double, std::allocator>;
 // Variant to use in shared memory:
-using DynamicGridMap64FShm = DynamicGridMap<double, AllocatorGridMap>;
+using DynamicGridMap64FShm = DynamicGridMap<double, AllocatorShmT>;
 // Variant to use on the heap:
 using DynamicGridMap32FHeap  = DynamicGridMap<float, std::allocator>;
 // Variant to use in shared memory:
-using DynamicGridMap32FShm = DynamicGridMap<float, AllocatorGridMap>;
+using DynamicGridMap32FShm = DynamicGridMap<float, AllocatorShmT>;
 // Variant to use on the heap:
 using DynamicGridMap8UHeap  = DynamicGridMap<uchar, std::allocator>;
 // Variant to use in shared memory:
-using DynamicGridMap8UShm = DynamicGridMap<uchar, AllocatorGridMap>;
+using DynamicGridMap8UShm = DynamicGridMap<uchar, AllocatorShmT>;
 // Variant to use on the heap:
 using DynamicGridMap8U3CHeap  = DynamicGridMap<uchar[3], std::allocator>;
 // Variant to use in shared memory:
-using DynamicGridMap8U3CShm = DynamicGridMap<uchar[3], AllocatorGridMap>;
+using DynamicGridMap8U3CShm = DynamicGridMap<uchar[3], AllocatorShmT>;
 
 };
 

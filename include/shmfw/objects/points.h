@@ -51,16 +51,17 @@ namespace ShmFw {
 /**
  * @note this class can only be used in combination with ShmFw::Alloc
  **/
-namespace bi = boost::interprocess;
+
+template <template<typename...> class Allocator = std::allocator>
 class Points {
-    typedef bi::allocator<ShmFw::Point, SegmentManager> AllocatorPoint;
-    typedef bi::vector<ShmFw::Point, AllocatorPoint > VectorPoints;
+    typedef bi::vector<ShmFw::Point, Allocator<ShmFw::Point> > VectorPoints;
+    typedef bi::basic_string<char, std::char_traits<char> , Allocator<char> > CharString;
 
 public:
     CharString frame;
     VectorPoints points;
 
-    Points ( const VoidAllocator &void_alloc )
+    Points ( const Allocator<void>& void_alloc = {} )
         : frame ( void_alloc ), points ( void_alloc )
     {}
 
@@ -88,9 +89,9 @@ public:
     }
     bool operator == ( const Points& o ) const {
         if ( points.size() != o.points.size() ) return false;
-        if ( frame.compare ( o.frame ) != 0 ) return false;
-        for ( VectorPoints::const_iterator it0 = points.begin(),  it1 = o.points.begin(); it1 != o.points.end(); it1++, it0++ ) {
-            if ( !(*it0 == *it1) ) return false;
+        if ( frame.compare ( o.frame ) != 0 ) return false;	
+        for ( size_t i = 0; i < points.size(); i++ ) {
+            if ( !(points[i] == o.points[i]) ) return false;
         }
         return true;
     }
@@ -98,13 +99,13 @@ public:
         copyFrom(o);
         return *this;
     }
-    template<typename T>
-    void copyTo ( T& des ) const {
+    template<typename T1>
+    void copyTo ( T1& des ) const {
         des.frame = frame;
         des.points = points;
     }
-    template<typename T>
-    Points& copyFrom ( const T& src ) {
+    template<typename T1>
+    Points& copyFrom ( const T1& src ) {
         frame = src.frame;
         points = src.points;
         return *this;

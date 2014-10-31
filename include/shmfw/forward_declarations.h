@@ -33,6 +33,7 @@
 #ifndef SHARED_MEM_FORWARD_DECLARATIONS_H
 #define SHARED_MEM_FORWARD_DECLARATIONS_H
 
+
 namespace ShmFw {
   class Handler;
   template <class> class Var;
