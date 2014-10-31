@@ -36,10 +36,15 @@
 
 
 #include <mgl2/qt.h>
+//#include <mgl2/fltk.h>
+//#include <mgl2/window.h>
 #include <shmfw/objects/grid_map.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <shmfw/allocator.h>
 #include <boost/program_options.hpp>
+#include <boost/thread.hpp>
+
+mglQT *gr=NULL;
 
 struct Prarmeters {
     std::string shm_memory_name;
@@ -70,7 +75,7 @@ void readArgs ( int argc, char **argv, Prarmeters &params ) {
     ( "clear,c", "clears the shared memory" )
     ( "loop,l", "loops writing data" )
     ( "title,t", po::value<std::string> ( &params.title )->default_value ( "2D" ), "plot title" )
-    ( "plot_type,p", po::value<std::string> ( &params.plot_type )->default_value ( "mesh" ), "plot type: mesh, fall, belt, boxs, tile ... " )
+    ( "plot_type,p", po::value<std::string> ( &params.plot_type )->default_value ( "mesh" ), "plot type: mesh, fall, belt, boxs, tile, dens  ... " )
     ( "arguments,a", po::value<std::string> ( &params.arguments )->default_value ( "" ), "plot arguments" )
     ( "update_time,u", po::value<unsigned int> ( &params.update_time )->default_value ( 5000 ), "update time in ms" )
     ( "variable_name,v", po::value<std::string> ( &params.variable_name )->default_value ( "Grid" ), "shared variable name" )
@@ -96,65 +101,81 @@ void readArgs ( int argc, char **argv, Prarmeters &params ) {
 void prepare_grid ( mglData* data ) {
 }
 
-int sample ( mglGraph *gr ) {
-    mglData a;
-    srand ( time ( NULL ) );
+int capture_data () {
+    params.shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
     ShmFw::Alloc<ShmFw::DynamicGridMap64FShm> dynamic_grid ( params.variable_name, params.shmHdl );
-    size_t col, row, columns = dynamic_grid->getSizeX(), rows = dynamic_grid->getSizeY();
-    mgl_data_create ( &a, rows, columns, 1 );
-    for ( col = 0; col < columns; col++ )  {
-        for ( row=0; row < rows; row++ ) {
-            double v = dynamic_grid->cellByIndex_nocheck ( col,row );
-            mgl_data_set_value ( &a, v, row, col, 0 );
-        }
+    size_t col=0, row=0, columns=0, rows=0;
+    unsigned int loop_count = 0;
+    int update_count = 0;
+    int timeout_count = 0;
+    while ( gr == NULL ) {
+        sleep ( 1 );
     }
-    gr->Title ( params.title.c_str() );
-    gr->Rotate ( 50,60 );
-    gr->Box();
-    if ( boost::iequals ( "mesh", params.plot_type ) )
-        gr->Mesh ( a, params.arguments.c_str() );
-    if ( boost::iequals ( "fall", params.plot_type ) )
-        gr->Fall ( a, params.arguments.c_str() );
-    if ( boost::iequals ( "belt", params.plot_type ) )
-        gr->Belt ( a, params.arguments.c_str() );
-    if ( boost::iequals ( "boxs", params.plot_type ) )
-        gr->Boxs ( a, params.arguments.c_str() );
-    if ( boost::iequals ( "tile", params.plot_type ) )
-        gr->Tile ( a, params.arguments.c_str() );
-    if ( boost::iequals ( "cont", params.plot_type ) )
-        gr->Cont ( a, params.arguments.c_str() );
-    gr->SetRanges ( dynamic_grid->getXMin(),dynamic_grid->getXMax(),dynamic_grid->getYMin(),dynamic_grid->getYMax() );
-    gr->Axis();
-    gr->Grid();
-    return 0;
-}
+    do {
+        mglData a;
+        if ( dynamic_grid.timed_wait ( params.update_time ) ) {
+            update_count++;
+            timeout_count = 0;
+            std::cout << "update_count:" << update_count << std::endl;
+        } else {
+            timeout_count++;
+            std::cout << "timeout_count:" << timeout_count << std::endl;
+        }
+        columns = dynamic_grid->getSizeX();
+        rows = dynamic_grid->getSizeY();
+        mgl_data_create ( &a, rows, columns, 1 );
 
+        for ( col = 0; col < columns; col++ )  {
+            for ( row=0; row < rows; row++ ) {
+                double v = dynamic_grid->cellByIndex_nocheck ( col,row );
+                mgl_data_set_value ( &a, v, row, col, 0 );
+            }
+        }
+        gr->Clf();      // make new drawing
+        usleep ( 10000 );
+        gr->Title ( params.title.c_str() );
+        gr->Rotate ( 50,60 );
+        gr->Box();
+        if ( boost::iequals ( "mesh", params.plot_type ) ) {
+            if ( params.arguments.empty() ) gr->Mesh ( a );
+            else gr->Mesh ( a, params.arguments.c_str() );
+        } else if ( boost::iequals ( "fall", params.plot_type ) ) {
+            if ( params.arguments.empty() ) gr->Fall ( a );
+            else gr->Fall ( a, params.arguments.c_str() );
+        } else if ( boost::iequals ( "belt", params.plot_type ) ) {
+            if ( params.arguments.empty() ) gr->Belt ( a );
+            else gr->Belt ( a, params.arguments.c_str() );
+        } else if ( boost::iequals ( "boxs", params.plot_type ) ) {
+            if ( params.arguments.empty() ) gr->Boxs ( a );
+            else gr->Boxs ( a, params.arguments.c_str() );
+        } else if ( boost::iequals ( "tile", params.plot_type ) ) {
+            if ( params.arguments.empty() ) gr->Tile ( a );
+            else gr->Tile ( a, params.arguments.c_str() );
+        } else if ( boost::iequals ( "dens", params.plot_type ) ) {
+            if ( params.arguments.empty() ) gr->Dens ( a );
+            else gr->Dens ( a, params.arguments.c_str() );
+        } else if ( boost::iequals ( "cont", params.plot_type ) ) {
+            if ( params.arguments.empty() ) gr->Cont ( a );
+            else gr->Cont ( a, params.arguments.c_str() );
+        }
+        gr->SetRanges ( dynamic_grid->getXMin(),dynamic_grid->getXMax(),dynamic_grid->getYMin(),dynamic_grid->getYMax() );
+        gr->Axis();
+        gr->Grid();
+        gr->Update();
+        loop_count ++;
+    } while ( params.loop );
+    exit ( 0 );
+}
 
 int main ( int argc, char **argv ) {
     readArgs ( argc, argv, params );
     signal ( SIGABRT,	terminate );
     signal ( SIGTERM,	terminate );
 
-    params.shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
-    ShmFw::Header shmHeader ( params.variable_name, params.shmHdl );
-    mglQT gr ( sample,"MathGL examples" );
-    if ( params.loop ) {
-        gr.Update();
-        int update_count = 0;
-        int timeout_count = 0;
-        do {
-            gr.Update();
-            if ( shmHeader.timed_wait ( params.update_time ) ) {
-                update_count++;
-                timeout_count = 0;
-                std::cout << "update_count:" << update_count << std::endl;
-            } else {
-                timeout_count++;
-                std::cout << "timeout_count:" << timeout_count << std::endl;
-            }
-        } while ( params.loop );
-    } else {
-        return gr.Run();
-    }
-    exit ( 0 );
+    gr = new mglQT;
+    sleep ( 1 );
+    boost::thread data_update ( capture_data );
+    gr->Run();
+    return 0;
 }
+

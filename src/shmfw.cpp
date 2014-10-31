@@ -58,6 +58,8 @@
 #include "shmfw/objects/rgb.h"
 #include "shmfw/objects/twist.h"
 #include "shmfw/objects/model_state.h"
+#include "shmfw/objects/agent_state.h"
+#include "shmfw/objects/grid_map.h"
 #include "shmfw/objects/mrpt.h"
 #include "shmfw/objects/eigen.h"
 
@@ -159,6 +161,13 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_VAR ( RouteSegment );
     RETURN_IF_TYPE_VAR ( Twist );
     RETURN_IF_TYPE_VAR ( ModelState );
+    RETURN_IF_TYPE_VAR ( AgentState );
+    RETURN_IF_TYPE_VAR ( GridMap<uint8_t> );
+    RETURN_IF_TYPE_VAR ( GridMap<uint16_t> );
+    RETURN_IF_TYPE_VAR ( GridMap<int8_t> );
+    RETURN_IF_TYPE_VAR ( GridMap<int16_t> );
+    RETURN_IF_TYPE_VAR ( GridMap<float> );
+    RETURN_IF_TYPE_VAR ( GridMap<double> );
 #ifdef MRPT_FOUND
     RETURN_IF_TYPE_VAR ( mrpt::poses::CPoint2D );
     RETURN_IF_TYPE_VAR ( mrpt::poses::CPoint3D );
@@ -204,6 +213,13 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_VECTOR ( RouteSegment );
     RETURN_IF_TYPE_VECTOR ( Twist );
     RETURN_IF_TYPE_VECTOR ( ModelState );
+    RETURN_IF_TYPE_VECTOR ( AgentState );
+    RETURN_IF_TYPE_VECTOR ( GridMap<uint8_t> );
+    RETURN_IF_TYPE_VECTOR ( GridMap<uint16_t> );
+    RETURN_IF_TYPE_VECTOR ( GridMap<int8_t> );
+    RETURN_IF_TYPE_VECTOR ( GridMap<int16_t> );
+    RETURN_IF_TYPE_VECTOR ( GridMap<float> );
+    RETURN_IF_TYPE_VECTOR ( GridMap<double> );
 #ifdef MRPT_FOUND
     RETURN_IF_TYPE_VECTOR ( mrpt::poses::CPoint2D );
     RETURN_IF_TYPE_VECTOR ( mrpt::poses::CPoint3D );
@@ -249,6 +265,13 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_DEQUE ( RouteSegment );
     RETURN_IF_TYPE_DEQUE ( Twist );
     RETURN_IF_TYPE_DEQUE ( ModelState );
+    RETURN_IF_TYPE_DEQUE ( AgentState );
+    RETURN_IF_TYPE_DEQUE ( GridMap<uint8_t> );
+    RETURN_IF_TYPE_DEQUE ( GridMap<uint16_t> );
+    RETURN_IF_TYPE_DEQUE ( GridMap<int8_t> );
+    RETURN_IF_TYPE_DEQUE ( GridMap<int16_t> );
+    RETURN_IF_TYPE_DEQUE ( GridMap<float> );
+    RETURN_IF_TYPE_DEQUE ( GridMap<double> );
 
 #ifdef MRPT_FOUND
     RETURN_IF_TYPE_DEQUE ( mrpt::poses::CPoint2D );
@@ -312,6 +335,14 @@ HandlerObjectPtr HandlerObject::create ( const std::string &name, HandlerPtr &sh
     CREATE_TYPE_VAR ( Pose2DAGV );
     CREATE_TYPE_VAR ( Twist );
     CREATE_TYPE_VAR ( ModelState );
+    CREATE_TYPE_VAR ( ModelState );
+    CREATE_TYPE_VAR ( AgentState );
+    CREATE_TYPE_VAR ( GridMap<uint8_t> );
+    CREATE_TYPE_VAR ( GridMap<uint16_t> );
+    CREATE_TYPE_VAR ( GridMap<int8_t> );
+    CREATE_TYPE_VAR ( GridMap<int16_t> );
+    CREATE_TYPE_VAR ( GridMap<float> );
+    CREATE_TYPE_VAR ( GridMap<double> );
 #ifdef MRPT_FOUND
     CREATE_TYPE_VAR ( mrpt::poses::CPoint2D );
     CREATE_TYPE_VAR ( mrpt::poses::CPoint3D );

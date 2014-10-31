@@ -33,6 +33,7 @@
 #ifndef SHARED_MEM_OBJECT_GRID_MAP_H
 #define SHARED_MEM_OBJECT_GRID_MAP_H
 
+#include <opencv2/core/core.hpp>
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/graph/graph_concepts.hpp>
@@ -55,10 +56,12 @@ protected:
     double m_resolution;  /// resolution: metric unit = cell * resolution
     size_t m_size_x; /// size x in cells
     size_t m_size_y; /// size y in cells
+    size_t m_depth;  /// number of bytes per cell (sizeof(T))
+    size_t m_type_hash_code; /// type hash code only for C+11;
     boost::interprocess::offset_ptr<T>  m_data; /// cells
 
     /// Sets the bounderies and rounds the values to integers and to multipliers of the given resolution
-    void setBounderies ( const float x_min, const float x_max, const float y_min, const float y_max, const float resolution ) {
+    void setBounderies ( const double x_min, const double x_max, const double y_min, const double y_max, const double resolution ) {
         m_x_min = resolution*round ( x_min/resolution );
         m_y_min = resolution*round ( y_min/resolution );
         m_x_max = resolution*round ( x_max/resolution );
@@ -69,6 +72,13 @@ protected:
         m_size_x = round ( ( m_x_max-m_x_min ) /m_resolution );
         m_size_y = round ( ( m_y_max-m_y_min ) /m_resolution );
     }
+    /// Sets the bounderies and rounds the values to integers and to multipliers of the given resolution
+    void setBounderies ( const double x_min, const double x_max, const double y_min, const double y_max, const size_t size_x, const size_t size_y ) {
+	double rx = (x_max-x_min) / (double) size_x;
+	double ry = (y_max-y_min) / (double) size_y;
+	double resolution = std::max(rx, ry);
+	setBounderies ( x_min, x_max, y_min, y_max, resolution );
+    }
 public:
     GridMap ()
         : m_x_min ( 0 )
@@ -78,20 +88,32 @@ public:
         , m_resolution ( 0 )
         , m_size_x ( 0 )
         , m_size_y ( 0 )
+        , m_depth ( sizeof ( T ) )
+#if __cplusplus > 199711L
+        , m_type_hash_code ( typeid ( T ).hash_code() )
+#else
+        ,m_type_hash_code ( 0 )
+#endif
         , m_data () {
     }
-    GridMap ( const float x_min, const float x_max, const float y_min, const float y_max, const float resolution, T *data, const T * fill_value = NULL ) {
-      init(x_min, x_max, y_min, y_max, resolution, data, fill_value);
+    GridMap ( const double x_min, const double x_max, const double y_min, const double y_max, const double resolution, T *data, const T * fill_value = NULL ) {
+        init ( x_min, x_max, y_min, y_max, resolution, data, fill_value );
     }
     /** Initilialies a given data array
       */
     void init (
-        const float x_min, const float x_max,
-        const float y_min, const float y_max,
-        const float resolution, T *data, const T * fill_value = NULL ) {
-	setBounderies(x_min, x_max, y_min, y_max, resolution, data, fill_value);
-	m_data = data;   
-	if(fill_value) fill(fill_value);	
+        const double x_min, const double x_max,
+        const double y_min, const double y_max,
+        const double resolution, T *data, const T * fill_value = NULL ) {
+        setBounderies ( x_min, x_max, y_min, y_max, resolution, data, fill_value );
+        m_data = data;
+        m_depth = sizeof ( T );
+#if __cplusplus > 199711L
+        m_type_hash_code = typeid ( T ).hash_code();
+#else
+        m_type_hash_code = 0;
+#endif
+        if ( fill_value ) fill ( fill_value );
     }
     template<typename T1>
     void copyDataTo ( T1& des ) const {
@@ -106,11 +128,19 @@ public:
         memcpy ( data(), &src[0], sizeof ( T ) * size() );
         return *this;
     }
+    void copyDataFromArray ( const void *src ) {
+        /// works as long as the data is aligned
+        memcpy ( data(), src, sizeof ( T ) * size() );
+    }
 
     /** Fills all the cells with the same value
       */
     inline void fill ( const T& value ) {
-        for ( size_t i = size()-1; i >= 0; i-- ) m_data[i] = value;
+        T *p =  m_data.get();
+        T *end = p+size();
+        while ( p != end ) {
+            *p++ = value;
+        }
     }
     /** Returns a reference to a cell, no boundary checks are performed.
       */
@@ -143,11 +173,27 @@ public:
     inline size_t getSizeX() const {
         return m_size_x;
     }
+    inline size_t getColumns() const {
+        return getSizeX();
+    }
 
     /** Returns the vertical size of grid map in cells count.
         */
     inline size_t getSizeY() const {
         return m_size_y;
+    }
+    inline size_t getRows() const {
+        return getSizeY();
+    }
+    /** Returns the number of bytes per cell
+        */
+    inline size_t getDepth() const {
+        return m_depth;
+    }
+    /** Returns the type hash code
+     */
+    inline size_t getTypeHashCode() const {
+        return m_type_hash_code;
     }
 
     /** Returns the "x" coordinate of left side of grid map.
@@ -202,6 +248,18 @@ public:
       */
     inline const T& cellByIndex_nocheck ( int cx, int cy ) const {
         return m_data[ cx + cy*this->m_size_x ];
+    };
+
+    /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
+      */
+    inline T& cellByIndex_nocheck ( const cv::Point &p ) {
+        return cellByIndex_nocheck ( p.x, p.y );
+    };
+
+    /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
+      */
+    inline const T& cellByIndex_nocheck ( const cv::Point &p ) const {
+        return cellByIndex_nocheck ( p.x, p.y );
     };
 
     /** Returns a pointer to the contents of a cell given by its coordinates, or NULL if it is out of the map extensions.
@@ -326,11 +384,12 @@ public:
     }
     friend std::ostream& operator<< ( std::ostream &output, const GridMap &o ) {
         char msg[0xFF];
-        sprintf ( msg, "%zu %zu @ %4.3fm/p of %zu bytes, range x:  %4.3f -> %4.3f, y: %4.3f -> %4.3f",
+        sprintf ( msg, "%zu %zu @ %4.3fm/p of %zu bytes, range x:  %4.3f -> %4.3f, y: %4.3f -> %4.3f, type_hash_code: %zu",
                   o.getSizeX(), o.getSizeY(), o.getResolution(),
-                  sizeof ( T ),
+                  o.getDepth (),
                   o.getXMin(), o.getXMax(),
-                  o.getYMin(), o.getYMax() );
+                  o.getYMin(), o.getYMax(),
+                  o.getTypeHashCode() );
         output << msg;
         return output;
     }
@@ -346,6 +405,81 @@ public:
       */
     T &operator() ( int cx, int cy ) {
         return cellByIndex_nocheck ( cx, cy );
+    }
+    /** Returns a metric pose as cell pose.
+      */
+    inline cv::Point cvCellPoint ( double &x, double &y ) {
+        return cv::Point ( x2idx ( x ), y2idx ( y ) );
+    }
+    /** Returns a cell pose as metric pose.
+      */
+    inline cv::Point2d cvPosePoint ( int &x, int &y ) {
+        return cv::Point2d ( idx2x ( x ), idx2y ( y ) );
+    }
+    /** Returns a cell pose as metric pose.
+      */
+    inline cv::Point2d cvPosePoint ( const cv::Point &p ) {
+        return cv::Point2d ( idx2x ( p.x ), idx2y ( p.y ) );
+    }
+    /** Returns the data as opencv matrix
+      */
+    cv::Mat_<T> &cvMat ( cv::Mat_<T> &m ) {
+        m = cvMat();
+        return m;
+    }
+    /** Returns the data as opencv matrix
+      */
+    cv::Mat_<T> cvMat() const {
+        return cv::Mat_<T> ( getSizeY(), getSizeX(), m_data.get() );
+    }
+    /** Returns the data as opencv matrix
+      */
+    cv::Mat &cvMat ( cv::Mat &m, int cvtype ) {
+        m = cvMat ( cvtype );
+        return m;
+    }
+    /** Returns the data as opencv matrix
+      */
+    cv::Mat cvMat ( int cvtype ) const {
+        return cv::Mat ( getSizeY(), getSizeX(), cvtype, m_data.get() );
+    }
+    /** creates a opencv line iterator based on a metric start and endpoint
+      */
+    cv::LineIterator cvLineIteratorByPose ( double x0, double y0, double x1, double y1, int connectivity=8, bool leftToRight=false ) const {
+        cv::Mat img = cvMat();
+        return cv::LineIterator ( img, cvCellPoint ( x0,y0 ), cvCellPoint ( x1,y1 ), connectivity, leftToRight );
+    }
+
+    /** draws a line based on metrc coordinate
+      */
+    void cvLine ( cv::Point2d p0, cv::Point2d p1, const cv::Scalar& color, int thickness=1, int lineType=8, int shift=0 ) {
+        if ( cvtype() != -1 ) {
+            cv::Mat img = cvMat ( cvtype() );
+            cv::line ( img, cvCellPoint ( p0.x,p0.y ), cvCellPoint ( p1.x,p1.y ), color, thickness, lineType, shift );
+        }
+    }
+    /** tries to identify the cvtype
+     * @return cvtype or -1
+      */
+    int cvtype() const {
+        int type = -1;
+        if ( m_depth == 1 ) type = CV_8U;
+        else if ( m_depth == 2 ) type = CV_16U;
+        else if ( m_depth == 3 ) type = CV_8UC3;
+        return type;
+    }
+
+    /// return a opencv color for drawing
+    static cv::Scalar cvGreen() {
+        return cv::Scalar ( 0,255,0 );
+    }
+    /// return a opencv color for drawing
+    static cv::Scalar cvBlue() {
+        return cv::Scalar ( 0,0,255 );
+    }
+    /// return a opencv color for drawing
+    static cv::Scalar cvRed() {
+        return cv::Scalar ( 0,0,255 );
     }
 };
 
@@ -363,14 +497,14 @@ public:
 
     template<typename T1>
     void copyTo ( T1& des ) const {
-        des.setSize ( this->getXMin(), this->getXMax(), this->getYMin(), this->getYMax(), this->getResolution() );
+        des.setSize ( this->getXMin(), this->getXMax(), this->getYMin(), this->getYMax(), this->getResolution(), NULL );
         this->copyDataTo ( des );
     }
 
 
     template<typename T1>
     DynamicGridMap& copyFrom ( const T1& src ) {
-        setSize ( src.getXMin(), src.getXMax(), src.getYMin(), src.getYMax(), src.getResolution() );
+        setSize ( src.getXMin(), src.getXMax(), src.getYMin(), src.getYMax(), src.getResolution(), NULL  );
         return this->copyDataFrom ( src );
     }
 
@@ -382,13 +516,33 @@ public:
       * \sa resize, fill
       */
     void  setSize (
-        const float x_min, const float x_max,
-        const float y_min, const float y_max,
-        const float resolution, const T * fill_value = NULL ) {
-        
+        const double x_min, const double x_max,
+        const double y_min, const double y_max,
+        const double resolution, const T * fill_value ) {
+
         // Sets the bounderies and rounds the values to integers if needed
-	this->setBounderies(x_min, x_max, y_min, y_max, resolution);
-	
+        this->setBounderies ( x_min, x_max, y_min, y_max, resolution );
+
+        // Cells memory:
+        if ( fill_value )  m_map.assign ( this->m_size_x*this->m_size_y, *fill_value );
+        else m_map.resize ( this->m_size_x*this->m_size_y );
+        this->m_data = &m_map[0];
+    }
+    /** Changes the size of the grid, ERASING all previous contents.
+      * If \a fill_value is left as NULL, the contents of cells may be undefined (some will remain with
+      *  their old values, the new ones will have the default cell value, but the location of old values
+      *  may change wrt their old places).
+      * If \a fill_value is not NULL, it is assured that all cells will have a copy of that value after resizing.
+      * \sa resize, fill
+      */
+    void  setSize (
+        const double x_min, const double x_max,
+        const double y_min, const double y_max,
+        const size_t size_x, const size_t size_y, const T * fill_value ) {
+
+        // Sets the bounderies and rounds the values to integers if needed
+        this->setBounderies ( x_min, x_max, y_min, y_max, size_x,  size_y);
+
         // Cells memory:
         if ( fill_value )  m_map.assign ( this->m_size_x*this->m_size_y, *fill_value );
         else m_map.resize ( this->m_size_x*this->m_size_y );
@@ -406,9 +560,9 @@ public:
       * \sa setSize
       */
     void  resize (
-        float new_x_min, float new_x_max,
-        float new_y_min, float new_y_max,
-        const T& defaultValueNewCells, float additionalMarginMeters = 2.0f ) {
+        double new_x_min, double new_x_max,
+        double new_y_min, double new_y_max,
+        const T& defaultValueNewCells, double additionalMarginMeters = 2.0f ) {
         // Is resize really necesary?
         if ( new_x_min >= this->m_x_min &&
                 new_y_min >= this->m_y_min &&
@@ -480,21 +634,53 @@ public:
     size_t size() const {
         return m_map.size();
     }
-
 };
 
 template <typename T>
-using AllocatorShm = boost::interprocess::allocator<T, boost::interprocess::managed_shared_memory::segment_manager>;
+using AllocatorGridMap = boost::interprocess::allocator<T, boost::interprocess::managed_shared_memory::segment_manager>;
 
 // Variant to use on the heap:
-using DynamicGridMapInt8Heap  = DynamicGridMap<int8_t, std::allocator>;
+using DynamicGridMapS8Heap  = DynamicGridMap<int8_t, std::allocator>;
 // Variant to use in shared memory:
-using DynamicGridMapInt8Shm = DynamicGridMap<int8_t, AllocatorShm>;
+using DynamicGridMapS8Shm = DynamicGridMap<int8_t, AllocatorGridMap>;
+// Variant to use on the heap:
+using DynamicGridMapS16Heap  = DynamicGridMap<int16_t, std::allocator>;
+// Variant to use in shared memory:
+using DynamicGridMapS16Shm = DynamicGridMap<int16_t, AllocatorGridMap>;
+// Variant to use on the heap:
+using DynamicGridMapS32Heap  = DynamicGridMap<int32_t, std::allocator>;
+// Variant to use in shared memory:
+using DynamicGridMapS32Shm = DynamicGridMap<int32_t, AllocatorGridMap>;
+
+// Variant to use on the heap:
+using DynamicGridMapU8Heap  = DynamicGridMap<uint8_t, std::allocator>;
+// Variant to use in shared memory:
+using DynamicGridMapU8Shm = DynamicGridMap<uint8_t, AllocatorGridMap>;
+// Variant to use on the heap:
+using DynamicGridMapU16Heap  = DynamicGridMap<uint16_t, std::allocator>;
+// Variant to use in shared memory:
+using DynamicGridMapU16Shm = DynamicGridMap<uint16_t, AllocatorGridMap>;
+// Variant to use on the heap:
+using DynamicGridMapU32Heap  = DynamicGridMap<uint32_t, std::allocator>;
+// Variant to use in shared memory:
+using DynamicGridMapU32Shm = DynamicGridMap<uint32_t, AllocatorGridMap>;
 
 // Variant to use on the heap:
 using DynamicGridMap64FHeap  = DynamicGridMap<double, std::allocator>;
 // Variant to use in shared memory:
-using DynamicGridMap64FShm = DynamicGridMap<double, AllocatorShm>;
+using DynamicGridMap64FShm = DynamicGridMap<double, AllocatorGridMap>;
+// Variant to use on the heap:
+using DynamicGridMap32FHeap  = DynamicGridMap<float, std::allocator>;
+// Variant to use in shared memory:
+using DynamicGridMap32FShm = DynamicGridMap<float, AllocatorGridMap>;
+// Variant to use on the heap:
+using DynamicGridMap8UHeap  = DynamicGridMap<uchar, std::allocator>;
+// Variant to use in shared memory:
+using DynamicGridMap8UShm = DynamicGridMap<uchar, AllocatorGridMap>;
+// Variant to use on the heap:
+using DynamicGridMap8U3CHeap  = DynamicGridMap<uchar[3], std::allocator>;
+// Variant to use in shared memory:
+using DynamicGridMap8U3CShm = DynamicGridMap<uchar[3], AllocatorGridMap>;
 
 };
 

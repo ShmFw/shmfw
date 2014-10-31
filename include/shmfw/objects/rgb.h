@@ -32,11 +32,14 @@
 #ifndef SHARED_MEM_OBJECTS_RGB_H
 #define SHARED_MEM_OBJECTS_RGB_H
 
+#include <opencv2/core/core.hpp>
+#include <time.h>       /* time */
+
 namespace ShmFw {
 
 class RGB {
 public:
-    char r, g, b;
+    uint8_t r, g, b;
     RGB(): r(0), g(0), b(0) {};
     RGB(uint8_t r, uint8_t g, uint8_t b): r(r), g(g), b(b) {};
     RGB(const RGB &p): r(p.r), g(p.g), b(p.b) {};
@@ -80,6 +83,104 @@ public:
     RGB& copyFrom ( const T& src ) {
         r = src.r, g = src.g, b = src.b;
         return *this;
+    }
+    cv::Scalar cvScalar() const {
+      return cv::Scalar(b,g,r);
+    }
+    static RGB BLACK() {
+      return RGB(0,0,0);
+    }
+    static RGB SILVER() {
+      return RGB(0xC0,0xC0,0xC0);
+    }
+    static RGB GRAY() {
+      return RGB(0x80,0x80,0x80);
+    }
+    static RGB WHITE() {
+      return RGB(0x00,0x00,0x00);
+    }
+    static RGB MAROON() {
+      return RGB(0x80,0x00,0x00);
+    }
+    static RGB RED() {
+      return RGB(0xFF,0x00,0x00);
+    }
+    static RGB PURPLE() {
+      return RGB(0x80,0x00,0x80);
+    }
+    static RGB FUCHASIA() {
+      return RGB(0xFF,0x00,0xFF);
+    }
+    static RGB GREEN() {
+      return RGB(0x00,0x80,0x00);
+    }
+    static RGB LIME() {
+      return RGB(0x00,0xFF,0x00);
+    }
+    static RGB OLIVE() {
+      return RGB(0x80,0x80,0x00);
+    }
+    static RGB YELLOW() {
+      return RGB(0xFF,0xFF,0x00);
+    }
+    static RGB NAVY() {
+      return RGB(0x00,0x00,0x80);
+    }
+    static RGB BLUE() {
+      return RGB(0x00,0x00,0xFF);
+    }
+    static RGB TEAL() {
+      return RGB(0x00,0x80,0x80);
+    }
+    static RGB AQUA() {
+      return RGB(0x00,0xFF,0xFF);
+    }
+    static RGB RAND() {
+      srand (time(NULL));
+      unsigned int i = rand() & 0xF;
+      return COLOR(i);
+    }
+    static RGB COLOR(unsigned int i) {
+      i = i & 0xF;
+      switch(i){
+	case 0: return BLACK();
+	case 1: return WHITE();
+	case 2: return SILVER();
+	case 3: return GRAY();
+	case 4: return MAROON();
+	case 5: return RED();
+	case 6: return PURPLE();
+	case 7: return FUCHASIA();
+	case 8: return GREEN();
+	case 9: return LIME();
+	case 10: return OLIVE();
+	case 11: return YELLOW();
+	case 12: return NAVY();
+	case 13: return BLUE();
+	case 14: return AQUA();
+	case 15: return TEAL();
+      }
+      return BLACK();
+    }
+    static RGB COLOR_NO_WB(unsigned int i) {
+      i = i & 0xE;
+      switch(i){
+	case 0: return SILVER();
+	case 1: return GRAY();
+	case 2: return MAROON();
+	case 3: return RED();
+	case 4: return PURPLE();
+	case 5: return FUCHASIA();
+	case 6: return GREEN();
+	case 7: return LIME();
+	case 8: return OLIVE();
+	case 9: return YELLOW();
+	case 10: return NAVY();
+	case 11: return BLUE();
+	case 12: return AQUA();
+	case 13: return TEAL();
+      }
+      return GRAY();
     }
 protected:
     friend class boost::serialization::access;
