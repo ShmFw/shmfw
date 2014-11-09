@@ -1,11 +1,8 @@
-
-#include <iostream>
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/containers/map.hpp>
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/containers/string.hpp>
-
 
 using namespace boost::interprocess;
 
@@ -52,15 +49,16 @@ public:
 typedef allocator<complex_data, segment_manager_t>     complex_data_allocator;
 typedef vector<complex_data, complex_data_allocator>   complex_data_vector;
 
-template<class ForwardIt>
-ForwardIt next(ForwardIt it, typename std::iterator_traits<ForwardIt>::difference_type n = 1)
+template<class ForwardIt> //next will be available in C+11
+ForwardIt inline next(ForwardIt it, typename std::iterator_traits<ForwardIt>::difference_type n = 1)
 {
     std::advance(it, n);
     return it;
 }
 
-template <typename V, typename Element /*= typename V::value_type*/>
-static inline void resize ( V& vect, size_t newsize, Element const& element ) {
+template <typename T, typename Allocator, typename Element /*= typename V::value_type*/>
+static inline void resize ( boost::interprocess::vector<T, Allocator>& vect, size_t newsize, Element const& element ) {
+    if ( vect.size() == newsize ) return;
     if ( vect.size() < newsize ) {
         vect.insert (
             vect.end(),
@@ -75,14 +73,14 @@ static inline void resize ( V& vect, size_t newsize, Element const& element ) {
     }
 }
 
-template <typename V>
-static inline void resize ( V& vect, size_t newsize, typename V::allocator_type const& alloc_inst ) {
-    resize ( vect, newsize, typename V::value_type ( alloc_inst ) );
+template <typename T, typename Allocator>
+static inline void resize ( boost::interprocess::vector<T, Allocator> & vect, size_t newsize, typename boost::interprocess::vector<T, Allocator>::allocator_type const& alloc_inst ) {
+    resize ( vect, newsize, typename boost::interprocess::vector<T, Allocator>::value_type ( alloc_inst ) );
 }
 
-template <typename V>
-static inline void resize ( V& vect, size_t newsize ) {
-    resize ( vect, newsize, typename V::value_type ( vect.get_allocator() ) );
+template <typename T, typename Allocator>
+static inline void resize ( boost::interprocess::vector<T, Allocator >& vect, size_t newsize )  {
+    resize ( vect, newsize, typename boost::interprocess::vector<T, Allocator >::value_type ( vect.get_allocator() ) );
 }
 
 int main () {
@@ -144,4 +142,3 @@ int main () {
     }
     return 0;
 }
-

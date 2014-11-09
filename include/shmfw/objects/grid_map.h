@@ -55,7 +55,8 @@ protected:
     double m_x_max; /// max x in metric units
     double m_y_min; /// min y in metric units
     double m_y_max; /// max y in metric units
-    double m_resolution;  /// resolution: metric unit = cell * resolution
+    double m_x_resolution;  /// resolution: metric unit = cell * resolution
+    double m_y_resolution;  /// resolution: metric unit = cell * resolution
     size_t m_size_x; /// size x in cells
     size_t m_size_y; /// size y in cells
     size_t m_depth;  /// number of bytes per cell (sizeof(T))
@@ -63,23 +64,23 @@ protected:
     boost::interprocess::offset_ptr<T>  m_data; /// cells
 
     /// Sets the bounderies and rounds the values to integers and to multipliers of the given resolution
-    void setBounderies ( const double x_min, const double x_max, const double y_min, const double y_max, const double resolution ) {
-        m_x_min = resolution*round ( x_min/resolution );
-        m_y_min = resolution*round ( y_min/resolution );
-        m_x_max = resolution*round ( x_max/resolution );
-        m_y_max = resolution*round ( y_max/resolution );
+    void setBounderies ( const double x_min, const double x_max, const double y_min, const double y_max, const double x_resolution, const double y_resolution ) {
+        m_x_min = x_resolution*round ( x_min/x_resolution );
+        m_y_min = y_resolution*round ( y_min/y_resolution );
+        m_x_max = x_resolution*round ( x_max/x_resolution );
+        m_y_max = y_resolution*round ( y_max/y_resolution );
         // Res:
-        m_resolution = resolution;
+        m_x_resolution = x_resolution;
+        m_y_resolution = y_resolution;
         // Now the number of cells should be integers:
-        m_size_x = round ( ( m_x_max-m_x_min ) /m_resolution );
-        m_size_y = round ( ( m_y_max-m_y_min ) /m_resolution );
+        m_size_x = round ( ( m_x_max-m_x_min ) /m_x_resolution );
+        m_size_y = round ( ( m_y_max-m_y_min ) /m_y_resolution );
     }
     /// Sets the bounderies and rounds the values to integers and to multipliers of the given resolution
     void setBounderies ( const double x_min, const double x_max, const double y_min, const double y_max, const size_t size_x, const size_t size_y ) {
-	double rx = (x_max-x_min) / (double) size_x;
-	double ry = (y_max-y_min) / (double) size_y;
-	double resolution = std::max(rx, ry);
-	setBounderies ( x_min, x_max, y_min, y_max, resolution );
+	m_x_resolution = (x_max-x_min) / (double) size_x;
+	m_y_resolution = (y_max-y_min) / (double) size_y;
+	setBounderies ( x_min, x_max, y_min, y_max, m_x_resolution, m_y_resolution );
     }
 public:
     GridMap ()
@@ -87,7 +88,8 @@ public:
         , m_x_max ( 0 )
         , m_y_min ( 0 )
         , m_y_max ( 0 )
-        , m_resolution ( 0 )
+        , m_x_resolution ( 0 )
+        , m_y_resolution ( 0 )
         , m_size_x ( 0 )
         , m_size_y ( 0 )
         , m_depth ( sizeof ( T ) )
@@ -98,16 +100,17 @@ public:
 #endif
         , m_data () {
     }
-    GridMap ( const double x_min, const double x_max, const double y_min, const double y_max, const double resolution, T *data, const T * fill_value = NULL ) {
-        init ( x_min, x_max, y_min, y_max, resolution, data, fill_value );
+    GridMap ( const double x_min, const double x_max, const double y_min, const double y_max, const double x_resolution, const double y_resolution, T *data, const T * fill_value = NULL ) {
+        init ( x_min, x_max, y_min, y_max, x_resolution, y_resolution, data, fill_value );
     }
     /** Initilialies a given data array
       */
     void init (
         const double x_min, const double x_max,
         const double y_min, const double y_max,
-        const double resolution, T *data, const T * fill_value = NULL ) {
-        setBounderies ( x_min, x_max, y_min, y_max, resolution, data, fill_value );
+        const double x_resolution,
+        const double y_resolution, T *data, const T * fill_value = NULL ) {
+        setBounderies ( x_min, x_max, y_min, y_max, x_resolution, y_resolution, data, fill_value );
         m_data = data;
         m_depth = sizeof ( T );
 #if __cplusplus > 199711L
@@ -224,8 +227,13 @@ public:
 
     /** Returns the resolution of the grid map.
         */
-    inline double getResolution() const  {
-        return m_resolution;
+    inline double getResolutionX() const  {
+        return m_x_resolution;
+    }
+    /** Returns the resolution of the grid map.
+        */
+    inline double getResolutionY() const  {
+        return m_y_resolution;
     }
 
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
@@ -344,10 +352,10 @@ public:
     /** Transform a coordinate values into cell indexes.
       */
     inline int   x2idx ( double x ) const {
-        return static_cast<int> ( ( x-this->m_x_min ) /this->m_resolution );
+        return static_cast<int> ( ( x-this->m_x_min ) /this->m_x_resolution );
     }
     inline int   y2idx ( double y ) const {
-        return static_cast<int> ( ( y-this->m_y_min ) /this->m_resolution );
+        return static_cast<int> ( ( y-this->m_y_min ) /this->m_y_resolution );
     }
     inline int   xy2idx ( double x,double y ) const {
         return x2idx ( x ) + y2idx ( y ) *this->m_size_x;
@@ -362,21 +370,21 @@ public:
     /** Transform a cell index into a coordinate value.
       */
     inline double   idx2x ( int cx ) const {
-        return this->m_x_min+ ( cx+0.5f ) *this->m_resolution;
+        return this->m_x_min+ ( cx+0.5f ) *this->m_x_resolution;
     }
     inline double   idx2y ( int cy ) const {
-        return this->m_y_min+ ( cy+0.5f ) *this->m_resolution;
+        return this->m_y_min+ ( cy+0.5f ) *this->m_y_resolution;
     }
 
     /** Transform a coordinate value into a cell index, using a diferent "x_min" value
         */
     inline int   x2idx ( double x,double x_min ) const {
         SHMFW_UNUSED_PARAM ( x_min );
-        return static_cast<int> ( ( x-this->m_x_min ) / this->m_resolution );
+        return static_cast<int> ( ( x-this->m_x_min ) / this->m_x_resolution );
     }
     inline int   y2idx ( double y, double y_min ) const {
         SHMFW_UNUSED_PARAM ( y_min );
-        return static_cast<int> ( ( y-this->m_y_min ) /this->m_resolution );
+        return static_cast<int> ( ( y-this->m_y_min ) /this->m_y_resolution );
     }
 
     /** The user must implement this in order to provide "saveToTextFile" a way to convert each cell into a numeric value */
@@ -386,8 +394,8 @@ public:
     }
     friend std::ostream& operator<< ( std::ostream &output, const GridMap &o ) {
         char msg[0xFF];
-        sprintf ( msg, "%zu %zu @ %4.3fm/p of %zu bytes, range x:  %4.3f -> %4.3f, y: %4.3f -> %4.3f, type_hash_code: %zu",
-                  o.getSizeX(), o.getSizeY(), o.getResolution(),
+        sprintf ( msg, "[%zu, %zu] @ [%4.3f, %4.3f]m/px of %zu bytes, range x:  %4.3f -> %4.3f, y: %4.3f -> %4.3f, type_hash_code: %zu",
+                  o.getSizeX(), o.getSizeY(), o.getResolutionX(), o.getResolutionY(),
                   o.getDepth (),
                   o.getXMin(), o.getXMax(),
                   o.getYMin(), o.getYMax(),
@@ -499,56 +507,85 @@ public:
 
     template<typename T1>
     void copyTo ( T1& des ) const {
-        des.setSize ( this->getXMin(), this->getXMax(), this->getYMin(), this->getYMax(), this->getResolution(), NULL );
+        des.setSizeWithResolution ( this->getXMin(), this->getXMax(), this->getYMin(), this->getYMax(), this->getResolutionX(), this->getResolutionY() );
         this->copyDataTo ( des );
     }
 
 
     template<typename T1>
     DynamicGridMap& copyFrom ( const T1& src ) {
-        setSize ( src.getXMin(), src.getXMax(), src.getYMin(), src.getYMax(), src.getResolution(), NULL  );
+        setSizeWithResolution ( src.getXMin(), src.getXMax(), src.getYMin(), src.getYMax(), src.getResolutionX(), src.getResolutionY()  );
         return this->copyDataFrom ( src );
     }
 
     /** Changes the size of the grid, ERASING all previous contents.
-      * If \a fill_value is left as NULL, the contents of cells may be undefined (some will remain with
-      *  their old values, the new ones will have the default cell value, but the location of old values
-      *  may change wrt their old places).
-      * If \a fill_value is not NULL, it is assured that all cells will have a copy of that value after resizing.
-      * \sa resize, fill
       */
-    void  setSize (
+    void  setSizeWithResolution (
         const double x_min, const double x_max,
         const double y_min, const double y_max,
-        const double resolution, const T * fill_value ) {
+        const double x_resolution, const double y_resolution) {
 
         // Sets the bounderies and rounds the values to integers if needed
-        this->setBounderies ( x_min, x_max, y_min, y_max, resolution );
+        this->setBounderies ( x_min, x_max, y_min, y_max, x_resolution, y_resolution );
 
         // Cells memory:
-        if ( fill_value )  m_map.assign ( this->m_size_x*this->m_size_y, *fill_value );
-        else m_map.resize ( this->m_size_x*this->m_size_y );
+        m_map.resize ( this->m_size_x*this->m_size_y );
         this->m_data = &m_map[0];
     }
     /** Changes the size of the grid, ERASING all previous contents.
-      * If \a fill_value is left as NULL, the contents of cells may be undefined (some will remain with
-      *  their old values, the new ones will have the default cell value, but the location of old values
-      *  may change wrt their old places).
-      * If \a fill_value is not NULL, it is assured that all cells will have a copy of that value after resizing.
-      * \sa resize, fill
       */
-    void  setSize (
+    void  setSizeWithResolution (
         const double x_min, const double x_max,
         const double y_min, const double y_max,
-        const size_t size_x, const size_t size_y, const T * fill_value ) {
+        const double x_resolution, const double y_resolution, const T &fill_value ) {
+
+        // Sets the bounderies and rounds the values to integers if needed
+        this->setBounderies ( x_min, x_max, y_min, y_max, x_resolution, y_resolution );
+
+        m_map.assign ( this->m_size_x*this->m_size_y, fill_value );
+        this->m_data = &m_map[0];
+    }
+    /** Changes the size of the grid, ERASING all previous contents.
+      */
+    void  setSizeWithNrOfCells (
+        const double x_min, const double x_max,
+        const double y_min, const double y_max,
+        const size_t size_x, const size_t size_y ) {
 
         // Sets the bounderies and rounds the values to integers if needed
         this->setBounderies ( x_min, x_max, y_min, y_max, size_x,  size_y);
 
         // Cells memory:
-        if ( fill_value )  m_map.assign ( this->m_size_x*this->m_size_y, *fill_value );
-        else m_map.resize ( this->m_size_x*this->m_size_y );
+        m_map.resize ( this->m_size_x*this->m_size_y );
         this->m_data = &m_map[0];
+    }
+    /** Changes the size of the grid, ERASING all previous contents.
+      */
+    void  setSizeWithNrOfCells (
+        const double x_min, const double x_max,
+        const double y_min, const double y_max,
+        const size_t size_x, const size_t size_y, const T &fill_value  ) {
+
+        // Sets the bounderies and rounds the values to integers if needed
+        this->setBounderies ( x_min, x_max, y_min, y_max, size_x,  size_y);
+
+        // Cells memory:
+        m_map.assign ( this->m_size_x*this->m_size_y, fill_value );
+        this->m_data = &m_map[0];
+    }
+    /** Changes the size of the grid, ERASING all previous contents.
+      */
+    void  setSize (const GridMap<T> &map, bool copy = false){
+
+        // Sets the bounderies and rounds the values to integers if needed
+        this->setBounderies ( map.getXMin(), map.getXMax(), map.getYMin(), map.getYMax(), map.getSizeX(),  map.getSizeY());
+
+        // Cells memory:
+        m_map.resize ( this->m_size_x*this->m_size_y);
+        this->m_data = &m_map[0];
+	if(copy){
+	  this->copyDataFrom(map);
+	}
     }
 
 
@@ -585,21 +622,21 @@ public:
         }
 
         // Adjust sizes to adapt them to full sized cells acording to the resolution:
-        if ( fabs ( new_x_min/this->m_resolution - round ( new_x_min/this->m_resolution ) ) >0.05f )
-            new_x_min = this->m_resolution*round ( new_x_min/this->m_resolution );
-        if ( fabs ( new_y_min/this->m_resolution - round ( new_y_min/this->m_resolution ) ) >0.05f )
-            new_y_min = this->m_resolution*round ( new_y_min/this->m_resolution );
-        if ( fabs ( new_x_max/this->m_resolution - round ( new_x_max/this->m_resolution ) ) >0.05f )
-            new_x_max = this->m_resolution*round ( new_x_max/this->m_resolution );
-        if ( fabs ( new_y_max/this->m_resolution - round ( new_y_max/this->m_resolution ) ) >0.05f )
-            new_y_max = this->m_resolution*round ( new_y_max/this->m_resolution );
+        if ( fabs ( new_x_min/this->m_x_resolution - round ( new_x_min/this->m_x_resolution ) ) >0.05f )
+            new_x_min = this->m_x_resolution*round ( new_x_min/this->m_x_resolution );
+        if ( fabs ( new_y_min/this->m_y_resolution - round ( new_y_min/this->m_y_resolution ) ) >0.05f )
+            new_y_min = this->m_y_resolution*round ( new_y_min/this->m_y_resolution );
+        if ( fabs ( new_x_max/this->m_x_resolution - round ( new_x_max/this->m_x_resolution ) ) >0.05f )
+            new_x_max = this->m_x_resolution*round ( new_x_max/this->m_x_resolution );
+        if ( fabs ( new_y_max/this->m_y_resolution - round ( new_y_max/this->m_y_resolution ) ) >0.05f )
+            new_y_max = this->m_y_resolution*round ( new_y_max/this->m_y_resolution );
 
         // Change the map size: Extensions at each side:
-        unsigned int extra_x_izq = round ( ( this->m_x_min-new_x_min ) / this->m_resolution );
-        unsigned int extra_y_arr = round ( ( this->m_y_min-new_y_min ) / this->m_resolution );
+        unsigned int extra_x_izq = round ( ( this->m_x_min-new_x_min ) / this->m_x_resolution );
+        unsigned int extra_y_arr = round ( ( this->m_y_min-new_y_min ) / this->m_y_resolution );
 
-        unsigned int new_size_x = round ( ( new_x_max-new_x_min ) / this->m_resolution );
-        unsigned int new_size_y = round ( ( new_y_max-new_y_min ) / this->m_resolution );
+        unsigned int new_size_x = round ( ( new_x_max-new_x_min ) / this->m_x_resolution );
+        unsigned int new_size_y = round ( ( new_y_max-new_y_min ) / this->m_y_resolution );
 
         // Reserve new memory:
         VectorT new_map ( m_map.get_allocator() );

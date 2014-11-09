@@ -34,6 +34,7 @@
 #define SHARED_MEM_CONTAINER_H
 
 #include <shmfw/header.h>
+#include <boost/interprocess/containers/vector.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 
@@ -55,7 +56,7 @@ public:
     /** Default constructor
      * @post Alloc::construct
      **/
-    Alloc() : data_element(NULL) {
+    Alloc() : data_element ( NULL ) {
     }
     /** Constructor
      * @param name name of the variable
@@ -64,7 +65,7 @@ public:
      * @see ShmFw::createSegment
      * @see ShmFw::construct
      **/
-    Alloc ( const std::string &name, HandlerPtr &shmHdl) : data_element(NULL) {
+    Alloc ( const std::string &name, HandlerPtr &shmHdl ) : data_element ( NULL ) {
         if ( construct ( name, shmHdl ) == ERROR ) exit ( 1 );
     }
     /**
@@ -75,7 +76,7 @@ public:
      * @see ShmFw::createSegment
      * @see ShmFw::construct
      **/
-    int construct ( const std::string &shm_instance_name, HandlerPtr &shmHdl, boost::interprocess::offset_ptr<T> data = NULL) {
+    int construct ( const std::string &shm_instance_name, HandlerPtr &shmHdl, boost::interprocess::offset_ptr<T> data = NULL ) {
 #if __cplusplus > 199711L
         size_t type_hash_code = typeid ( Alloc<T> ).hash_code();
         const char *type_name = typeid ( Alloc<T> ).name();
@@ -90,17 +91,17 @@ public:
                 ScopedLock myLock ( header_shared->mutex );
                 header_shared->container = ShmFw::Header::CONTAINER_ALLOC;
                 Allocator a ( header_local.shm_handler->getShm()->get_segment_manager() );
-		if(data){
-		  header_shared->data = data;
-		} else {
-		  header_shared->data = header_local.shm_handler->getShm()->construct< T > ( bi::anonymous_instance ) (a);
-		}
+                if ( data ) {
+                    header_shared->data = data;
+                } else {
+                    header_shared->data = header_local.shm_handler->getShm()->construct< T > ( bi::anonymous_instance ) ( a );
+                }
             } catch ( ... ) {
                 std::cerr << "Error when constructing shared data" << std::endl;
                 return ERROR;
             }
         }
-        data_element = (T*) header_shared->data.get();
+        data_element = ( T* ) header_shared->data.get();
         return OK;
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
@@ -149,11 +150,13 @@ public:
      * Returns a human readable string to show the context
      * @return string
      **/
+    /*
     virtual std::string human_readable() const {
         std::stringstream ss;
         ss << name() << " = " << *get();
         return ss.str();
     };
+    */
     /** UNSAVE!! (user have to lock and to update timestamp)
      * destroies the shared memory
      **/
@@ -166,56 +169,73 @@ public:
      *  @param o vector for comparison
      **/
     template<typename T1>
-    bool operator == (const T1 &o ) const {
-	return (*get() == o);
+    bool operator == ( const T1 &o ) const {
+        return ( *get() == o );
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
      *  @param o vector for comparison
      **/
     template<typename T1>
-    bool operator != (const T1 &o ) const {
-	return (*get() != o);
+    bool operator != ( const T1 &o ) const {
+        return ( *get() != o );
     }
-    
+
     /**
      * overloads the << and calls the varalible overloades operator
      **/
     friend std::ostream &operator << ( std::ostream &os, const Alloc<T> &o ) {
         return os << o.ref();
     };
-
-    template<class ForwardIt>
-    static ForwardIt next ( ForwardIt it, typename std::iterator_traits<ForwardIt>::difference_type n = 1 ) {
-        std::advance ( it, n );
-        return it;
-    }
-
-    template <typename V, typename Element /*= typename V::value_type*/>
-    static void resize ( V& vect, size_t newsize, Element const& element ) {
-        if ( vect.size() < newsize ) {
-            vect.insert (
-                vect.end(),
-                newsize - vect.size(),
-                element
-            );
-        } else {
-            vect.erase (
-                next ( vect.begin(), newsize ),
-                vect.end()
-            );
-        }
-    }
-
-    template <typename V>
-    static void resize ( V& vect, size_t newsize, typename V::allocator_type const& alloc_inst ) {
-        resize ( vect, newsize, typename V::value_type ( alloc_inst ) );
-    }
-
-    template <typename V>
-    static void resize ( V& vect, size_t newsize ) {
-        resize ( vect, newsize, typename V::value_type ( vect.get_allocator() ) );
-    }
 };
+
+/** Return the nth successor of iterator it. 
+ * on C+11 one can use std::next
+  **/
+template<class ForwardIt>
+inline ForwardIt next ( ForwardIt it, typename std::iterator_traits<ForwardIt>::difference_type n = 1 ) {
+    std::advance ( it, n );
+    return it;
+}
+
+/** this fnc can be used to allocate a vector of containers 
+  * @see http://stackoverflow.com/questions/26280041/how-to-i-create-a-boost-interprocess-vector-of-interprocess-containers
+  **/
+template <typename T, typename Allocator, typename Element /*= typename V::value_type*/>
+inline void resize ( boost::container::vector<T, Allocator>& vect, size_t newsize, Element const& element ) {
+    if ( vect.size() == newsize ) return;
+    if ( vect.size() < newsize ) {
+        vect.insert (
+            vect.end(),
+            newsize - vect.size(),
+            element
+        );
+    } else {
+        vect.erase (
+#if __cplusplus > 199711L
+            std::next ( vect.begin(), newsize ),
+#else
+            next ( vect.begin(), newsize ),
+#endif
+            vect.end()
+        );
+    }
+}
+
+/** this fnc can be used to allocate a vector of containers 
+  * @see http://stackoverflow.com/questions/26280041/how-to-i-create-a-boost-interprocess-vector-of-interprocess-containers
+  **/
+template <typename T, typename Allocator>
+inline void resize ( boost::container::vector<T, Allocator> & vect, size_t newsize, typename boost::container::vector<T, Allocator>::allocator_type const& alloc_inst ) {
+    ShmFw::resize ( vect, newsize, typename boost::container::vector<T, Allocator>::value_type ( alloc_inst ) );
+}
+
+/** this fnc can be used to allocate a vector of containers 
+  * @see http://stackoverflow.com/questions/26280041/how-to-i-create-a-boost-interprocess-vector-of-interprocess-containers
+  **/
+template <typename T, typename Allocator>
+inline void resize ( boost::container::vector<T, Allocator >& vect, size_t newsize ) {
+    ShmFw::resize ( vect, newsize, typename boost::container::vector<T, Allocator >::value_type ( vect.get_allocator() ) );
+}
 };
 #endif //SHARED_MEM_CONTAINER_H
 

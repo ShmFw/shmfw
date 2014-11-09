@@ -39,14 +39,15 @@
 #include <shmfw/objects/base_object.h>
 #include <shmfw/objects/vector2.h>
 #include <boost/algorithm/string.hpp>
+#include <opencv/cv.h>
 
 namespace ShmFw {
-class Point2D : public ShmFw::BaseObject {
+class Point2D : public cv::Point_<double> {
 public:
-    double x, y;
-    Point2D(): x(0), y(0){};
-    Point2D(const Point2D &p): x(p.x), y(p.y) {};
-    Point2D(double _x, double _y): x(_x), y(_y) {};
+    Point2D(): cv::Point_<double>(){};
+    Point2D(const Point2D &p): cv::Point_<double>(p) {};
+    Point2D(const cv::Vec<double, 2> &v): cv::Point_<double>(v) {};
+    Point2D(double x, double y): cv::Point_<double>(x, y) {};
     std::string getToStringFormat(const std::string &format) const{
       char buf[0xFF];
       sprintf(buf, format.c_str(), x, y); 

@@ -297,7 +297,7 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     
 #define RETURN_IF_TYPE_ALLOC( TYPE ) if(shmHeader.isType<ShmFw::Alloc< TYPE > >()) return HandlerObjectPtr( new ShmFw::HandlerAlloc< TYPE >( name, shmHdl));
  
-    RETURN_IF_TYPE_ALLOC ( Points<AllocatorShmT> );
+    RETURN_IF_TYPE_ALLOC ( Points<Allocator> );
     RETURN_IF_TYPE_ALLOC ( ros::Header );
     RETURN_IF_TYPE_ALLOC ( ros::VisualizationMarker );
     RETURN_IF_TYPE_ALLOC ( ros::VisualizationMarkerArray );

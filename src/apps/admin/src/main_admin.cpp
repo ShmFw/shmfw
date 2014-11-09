@@ -98,10 +98,21 @@ int main ( int argc, char **argv ) {
     if ( params.clear ) {
         ShmFw::Handler::removeSegment ( params.shm_memory_name );
         std::cout << "Shared Memory " << params.shm_memory_name << " cleared" << std::endl;
+	exit(0);
     }
     std::vector<std::string> varNames;
     std::vector < ShmFw::HandlerObjectPtr > objects;
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
+    bi::managed_shared_memory::segment_manager *seg_manager = shmHdl->getShm()->get_segment_manager();
+    std::cout << std::endl;
+    std::cout << "Segment name                    : " << std::setw(10) << params.shm_memory_name << std::endl;
+    std::cout << "Wegment size                    : " << std::setw(10) << seg_manager->get_size()        << " bytes = " << seg_manager->get_size()/(1024.*1024.) << " MByte" << std::endl;
+    std::cout << "Free memory                     : " << std::setw(10) << seg_manager->get_free_memory() << " bytes = " << seg_manager->get_free_memory()/(1024.*1024.) << " MByte = " << seg_manager->get_free_memory()*100/seg_manager->get_size() <<  " %" << std::endl;
+    std::cout << "All memory has been deallocated : " << std::setw(10) << (seg_manager->all_memory_deallocated()?"ture":"false") <<  std::endl;
+    std::cout << "Internal structures             : " << std::setw(10) << (seg_manager->check_sanity()?"OK":"errors") <<  std::endl;
+    std::cout << "Number of named objects         : " << std::setw(10) << seg_manager->get_num_named_objects() <<  std::endl;
+    std::cout << "Number of unique objects        : " << std::setw(10) << seg_manager->get_num_unique_objects() <<  std::endl;
+    std::cout << std::endl;
     shmHdl->listNames ( varNames, params.show_hidden);
     for ( unsigned int i = 0; i < varNames.size(); i++ ) {
         ShmFw::Header shmHeader ( shmHdl, varNames[i] );

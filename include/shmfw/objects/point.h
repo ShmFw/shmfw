@@ -37,14 +37,15 @@
 #include <shmfw/objects/base_object.h>
 #include <shmfw/objects/vector3.h>
 #include <boost/algorithm/string.hpp>
+#include <opencv/cv.h>
 
 namespace ShmFw {
-class Point : public ShmFw::BaseObject{
+class Point : public cv::Point3_<double>{
 public:
-    double x, y, z;
-    Point(): x(0), y(0), z(0) {};
-    Point(double x, double y, double z): x(x), y(y), z(z) {};
-    Point(const Point &p): x(p.x), y(p.y), z(p.z) {};
+    Point(): cv::Point3_<double>() {};
+    Point(double x, double y, double z): cv::Point3_<double>(x,y,z) {};
+    Point(const cv::Vec<double, 3> &v): cv::Point3_<double>(v) {};
+    Point(const Point &p): cv::Point3_<double>(p) {};
     std::string getToStringFormat(const std::string &format) const{
       char buf[0xFF];
       sprintf(buf, format.c_str(), x, y, z); 

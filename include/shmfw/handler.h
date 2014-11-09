@@ -93,7 +93,7 @@ inline std::string DEFAULT_SEGMENT_NAME() {
     return "ShmFw";
 };
 inline unsigned int DEFAULT_SEGMENT_SIZE() {
-    return 16*1048576; //16MB;
+    return 16*1024*1024; //16MB;
 };
 
 class Handler;
@@ -333,6 +333,7 @@ private:
     CharAllocatorPtr pCharAllocator_;
     StringAllocatorPtr pStringAllocator_;
 };
+
 
 };
 

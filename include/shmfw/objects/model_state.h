@@ -36,6 +36,7 @@
 #include <shmfw/objects/pose.h>
 #include <shmfw/objects/pose2d.h>
 #include <shmfw/objects/twist.h>
+#include <boost/interprocess/containers/vector.hpp>
 
 namespace ShmFw {
 
@@ -117,6 +118,8 @@ protected:
     }
 };
 
+template <template<typename...> class Allocator>
+using ModelStates = boost::interprocess::vector<ModelState, Allocator<ModelState> >;
 
 };
 #endif //SHARED_MEM_OBJECTS_MODEL_STATE_H

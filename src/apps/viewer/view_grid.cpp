@@ -50,6 +50,8 @@ struct Prarmeters {
     std::string title;
     std::string arguments;
     std::string plot_type;
+    double z_min;
+    double z_max;
     unsigned int update_time;
 };
 Prarmeters params;
@@ -69,6 +71,8 @@ void readArgs ( int argc, char **argv, Prarmeters &params ) {
     ( "help", "get this help message" )
     ( "clear,c", "clears the shared memory" )
     ( "loop,l", "loops writing data" )
+    ( "z_min", po::value<double> ( &params.z_min )->default_value ( 0.), "min z" )
+    ( "z_max", po::value<double> ( &params.z_max )->default_value ( 0.), "max z" )
     ( "title,t", po::value<std::string> ( &params.title )->default_value ( "2D" ), "plot title" )
     ( "plot_type,p", po::value<std::string> ( &params.plot_type )->default_value ( "mesh" ), "plot type: mesh, fall, belt, boxs, tile ... " )
     ( "arguments,a", po::value<std::string> ( &params.arguments )->default_value ( "" ), "plot arguments" )
@@ -100,6 +104,7 @@ int sample ( mglGraph *gr ) {
     mglData a;
     srand ( time ( NULL ) );
     ShmFw::Alloc<ShmFw::DynamicGridMap64FShm> dynamic_grid ( params.variable_name, params.shmHdl );
+    std::cout << *dynamic_grid << std::endl;
     size_t col, row, columns = dynamic_grid->getSizeX(), rows = dynamic_grid->getSizeY();
     mgl_data_create ( &a, rows, columns, 1 );
     for ( col = 0; col < columns; col++ )  {
@@ -123,7 +128,11 @@ int sample ( mglGraph *gr ) {
         gr->Tile ( a, params.arguments.c_str() );
     if ( boost::iequals ( "cont", params.plot_type ) )
         gr->Cont ( a, params.arguments.c_str() );
-    gr->SetRanges ( dynamic_grid->getXMin(),dynamic_grid->getXMax(),dynamic_grid->getYMin(),dynamic_grid->getYMax() );
+    if ((fabs(params.z_max) > std::numeric_limits<double>::min()) ||   (fabs(params.z_min) > std::numeric_limits<double>::min())){      
+      gr->SetRanges ( dynamic_grid->getXMin(),dynamic_grid->getXMax(),dynamic_grid->getYMin(),dynamic_grid->getYMax(), params.z_min, params.z_max );
+    } else {
+      gr->SetRanges ( dynamic_grid->getXMin(),dynamic_grid->getXMax(),dynamic_grid->getYMin(),dynamic_grid->getYMax() );
+    }
     gr->Axis();
     gr->Grid();
     return 0;

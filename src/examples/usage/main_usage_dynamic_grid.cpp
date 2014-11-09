@@ -98,7 +98,7 @@ int main ( int argc, char *argv[] ) {
     ShmFw::DynamicGridMap64FHeap gridHeap2;
     ShmFw::Alloc<ShmFw::DynamicGridMap64FShm> gridShm ( "Grid", shmHdl);
 
-    gridHeap1.setSize ( 0, 50, 0, 40, 1, 0 );
+    gridHeap1.setSizeWithResolution ( 0, 50, 0, 40, 1., 1., 0 );
     std::cout << gridHeap1 << std::endl;
     int count = 0;
     do {

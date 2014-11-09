@@ -27,3 +27,6 @@ target_link_libraries(shmfw-example_usage_container_of_container ${Boost_LIBRARI
 add_executable(shmfw-example_usage_object_in_heap_or_shm main_usage_object_in_heap_or_shm.cpp )
 target_link_libraries(shmfw-example_usage_object_in_heap_or_shm ${Boost_LIBRARIES} rt)
 
+
+add_executable(shmfw-example_usage_copy_between_heap_and_shm main_usage_copy_between_heap_and_shm.cpp )
+target_link_libraries(shmfw-example_usage_copy_between_heap_and_shm ${Boost_LIBRARIES} rt)
