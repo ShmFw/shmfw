@@ -48,6 +48,7 @@ SHMFW_INIT_LOG;
 struct Prarmeters {
     std::string shm_memory_name;
     unsigned int shm_memory_size;
+    std::string ns;
     std::vector<std::string> variable_name;
     bool close;
 };
@@ -59,6 +60,7 @@ Prarmeters readArgs ( int argc, char **argv ) {
     po::options_description desc ( "Allowed Parameters" );
     desc.add_options()
     ( "help", "get this help message" )
+    ( "namespace", po::value<std::string> ( &params.ns ), "shm namespace (robot name) " )
     ( "variable_name,n", po::value<std::vector<std::string> > ( &params.variable_name ), "shared variable name" )
     ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
     ( "shm_memory_size,s", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" );
@@ -116,6 +118,9 @@ int main ( int argc, char *argv[] ) {
 
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create( params.shm_memory_name, params.shm_memory_size );
 
+    if(params.ns.size() > 0){
+      shmHdl->setNamespace(params.ns);
+    }
     /*
             ShmFw::HandlerParameterBasePtr parameter = ShmFw::parameterEntryHdl("param_double", shmHdl);
             std::cout << parameter->getString() << std::endl;

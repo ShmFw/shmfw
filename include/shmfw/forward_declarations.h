@@ -33,9 +33,11 @@
 #ifndef SHARED_MEM_FORWARD_DECLARATIONS_H
 #define SHARED_MEM_FORWARD_DECLARATIONS_H
 
+#include <boost/smart_ptr.hpp>
 
 namespace ShmFw {
   class Handler;
+  typedef boost::shared_ptr<Handler> HandlerPtr;
   template <class> class Var;
   template <class> class Deque;
   template <class> class Vector;
@@ -45,6 +47,7 @@ namespace ShmFw {
   template <class> class Vector3;
   template <class> class Vector4;
   template <class> class Matrix3x3;
+  template <class> class ParameterEntry;
   class Image;
   class LaserScan;
   class Points;

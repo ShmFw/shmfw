@@ -34,8 +34,11 @@
 #define SHARED_MEM_OBJECT_PARAMETER_ENTRY
 
 #include <iostream>
+#include <iomanip>
 #include <string.h>
 #include <typeinfo>
+#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/nvp.hpp>
 
 namespace ShmFw {
 

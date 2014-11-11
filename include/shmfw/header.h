@@ -311,13 +311,6 @@ public:
         return ss.str();
     }
     /**
-     * Sets the local time stamp to now
-     * Should after you just accessed the image (reading)
-     **/
-    void updateTimestampLocal() {
-        header_local.timestamp = now();
-    }
-    /**
      * Returns the local time stamp
      * @return timestamp of the local header
      **/
@@ -332,12 +325,11 @@ public:
         return header_shared->timestamp;
     }
     /**
-     * Sets the shared time stamp to now
-     * Should after you just wrote into the shared image (writing)
-     * But please consider to use updateTimestamps to set both local and shared
+     * Sets the local time stamp to now
+     * Should after you just accessed the image (reading)
      **/
-    void updateTimestampShared() {
-        header_shared->timestamp = now();
+    void updateTimestampLocal() {
+        header_local.timestamp = now();
     }
     /**
      * Sets the shared and local time stamp to now
@@ -348,11 +340,12 @@ public:
     }
     /**
      * Should be called after a process changed the context of the shared variable \n
+     * The function differs to dataModified() by notitying subsribers
      * it will update all timestamps and send a notify signal
-     * @see waitForChange
+     * @see hasChanged
      **/
     void itHasChanged() {
-        updateTimestamps();
+        dataModified();
         header_shared->condition.notify_all();
     }
     /**
@@ -376,17 +369,26 @@ public:
         return header_shared->condition.timed_wait ( lock, timeout );
     }
     /**
+     * Sets the local time stamps to now
+     * Should after you just accessed the image (reading)
+     * @see updateTimestampLocal
+     **/
+    void dataProcessed() {
+        updateTimestampLocal();
+    }
+    /**
      * Sets the time stamps to now
      * Should after you just accessed the image (reading)
      * @see updateTimestamps
      **/
-    void dataProcessed() {
+    void dataModified() {
         updateTimestamps();
     }
     /**
      * Checks if the context of shared variable has changed by checking the timestamps
+     * call dataProcessed or dataModified
      * @return true if a changed happend
-     * @post dataProcessed
+     * @post dataModified or dataProcessed
      **/
     bool hasChanged() const {
         if ( header_local.timestamp == header_shared->timestamp ) return false;
