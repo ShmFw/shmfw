@@ -160,6 +160,7 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_VAR ( Pose2DAGV );
     RETURN_IF_TYPE_VAR ( RouteSegment );
     RETURN_IF_TYPE_VAR ( Twist );
+    RETURN_IF_TYPE_VAR ( Twist2D );
     RETURN_IF_TYPE_VAR ( ModelState );
     RETURN_IF_TYPE_VAR ( AgentState );
     RETURN_IF_TYPE_VAR ( GridMap<uint8_t> );
@@ -264,6 +265,7 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_DEQUE ( Pose2DAGV );
     RETURN_IF_TYPE_DEQUE ( RouteSegment );
     RETURN_IF_TYPE_DEQUE ( Twist );
+    RETURN_IF_TYPE_DEQUE ( Twist2D );
     RETURN_IF_TYPE_DEQUE ( ModelState );
     RETURN_IF_TYPE_DEQUE ( AgentState );
     RETURN_IF_TYPE_DEQUE ( GridMap<uint8_t> );
@@ -334,6 +336,7 @@ HandlerObjectPtr HandlerObject::create ( const std::string &name, HandlerPtr &sh
     CREATE_TYPE_VAR ( Pose2D );
     CREATE_TYPE_VAR ( Pose2DAGV );
     CREATE_TYPE_VAR ( Twist );
+    CREATE_TYPE_VAR ( Twist2D );
     CREATE_TYPE_VAR ( ModelState );
     CREATE_TYPE_VAR ( ModelState );
     CREATE_TYPE_VAR ( AgentState );

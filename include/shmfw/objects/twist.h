@@ -102,7 +102,7 @@ protected:
 class Twist2D : public Twist {
 public:
     Twist2D() : Twist() {};
-    Twist2D ( const Twist2D &p ) : Twist ( p ) {};
+    Twist2D ( const Twist &p ) : Twist ( p ) {};
     Twist2D ( double v, double w ) : Twist ( v, 0, 0, 0, 0, w ) {};
     const double &v() const{
       return linear.x;

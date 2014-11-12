@@ -32,8 +32,11 @@
 #ifndef SHARED_MEM_OBJECTS_RGB_H
 #define SHARED_MEM_OBJECTS_RGB_H
 
+#include <time.h>     
 #include <opencv2/core/core.hpp>
-#include <time.h>       /* time */
+#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/nvp.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace ShmFw {
 

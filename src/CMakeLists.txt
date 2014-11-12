@@ -24,7 +24,12 @@ SET(SHMFW_DYNAMIC_LIBRARIES
   shmfw-pose2d_agv
 )
 
-add_library(shmfw SHARED shmfw.cpp)
+SET(SHMFW_OBJECTS
+  shmfw/objects/mrpt.cpp
+)
+
+add_library(shmfw SHARED shmfw.cpp ${SHMFW_OBJECTS})
+
 target_link_libraries(shmfw ${Boost_LIBRARIES} rt  ${SHMFW_DYNAMIC_LIBRARIES})
 IF(MRPT_FOUND)
 target_link_libraries(shmfw ${MRPT_LIBS})

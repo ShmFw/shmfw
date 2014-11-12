@@ -45,6 +45,13 @@
 #include <mrpt/poses/CPose3D.h>
 #include <mrpt/utils/bits.h>
 
+namespace ShmFw {
+mrpt::poses::CPoint2D& copy ( const ShmFw::Point2D& src, mrpt::poses::CPoint2D &des );
+mrpt::poses::CPoint3D& copy ( const ShmFw::Point& src, mrpt::poses::CPoint3D &des );
+mrpt::poses::CPose2D& copy ( const ShmFw::Pose2D& src, mrpt::poses::CPose2D &des );
+mrpt::poses::CPose2D& copy ( const ShmFw::Pose& src, mrpt::poses::CPose2D &des );
+};
+
 namespace mrpt {
 namespace poses {
 inline std::istream& operator>> ( std::istream &input, CPoint2D &o ) {
