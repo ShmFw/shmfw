@@ -41,7 +41,7 @@ class Twist {
 public:
     Vector3<double> linear;
     Vector3<double> angular;
-    Twist() : linear(), angular() {};
+    Twist() : linear(0,0,0), angular(0,0,0) {};
     Twist ( const Twist &p ) : linear ( p.linear ), angular ( p.angular ) {};
     Twist ( Vector3<double> linear, Vector3<double> angular ) : linear ( linear ), angular ( angular ) {};
     Twist ( double vx, double vy, double vz, double wx, double wy, double wz ) : linear ( vx, vy, vz ), angular ( wx, wy, wz ) {};
