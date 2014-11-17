@@ -169,6 +169,7 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_VAR ( GridMap<int16_t> );
     RETURN_IF_TYPE_VAR ( GridMap<float> );
     RETURN_IF_TYPE_VAR ( GridMap<double> );
+    RETURN_IF_TYPE_VAR ( boost::posix_time::ptime );
 #ifdef MRPT_FOUND
     RETURN_IF_TYPE_VAR ( mrpt::poses::CPoint2D );
     RETURN_IF_TYPE_VAR ( mrpt::poses::CPoint3D );
@@ -221,6 +222,7 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_VECTOR ( GridMap<int16_t> );
     RETURN_IF_TYPE_VECTOR ( GridMap<float> );
     RETURN_IF_TYPE_VECTOR ( GridMap<double> );
+    RETURN_IF_TYPE_VECTOR ( boost::posix_time::ptime );
 #ifdef MRPT_FOUND
     RETURN_IF_TYPE_VECTOR ( mrpt::poses::CPoint2D );
     RETURN_IF_TYPE_VECTOR ( mrpt::poses::CPoint3D );
@@ -274,6 +276,7 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_DEQUE ( GridMap<int16_t> );
     RETURN_IF_TYPE_DEQUE ( GridMap<float> );
     RETURN_IF_TYPE_DEQUE ( GridMap<double> );
+    RETURN_IF_TYPE_DEQUE ( boost::posix_time::ptime );
 
 #ifdef MRPT_FOUND
     RETURN_IF_TYPE_DEQUE ( mrpt::poses::CPoint2D );

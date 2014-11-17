@@ -162,15 +162,6 @@ public:
         *get() = *v.get();
         return *get();
     }
-    /** UNSAVE!! (user have to lock and to update timestamp)
-     * Returns a human readable string to show the context
-     * @return string
-     **/
-    virtual std::string human_readable() const {
-        std::stringstream ss;
-        ss << name() << " = " << *get();
-        return ss.str();
-    };
     /** SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
      * copies data to the shared variable and updated the timestamps and locks the variable while accessing
      * @param source
