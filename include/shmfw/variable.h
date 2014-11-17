@@ -180,7 +180,7 @@ public:
         lock();
         destination = *get();
         unlock();
-        updateTimestampLocal();
+        dataProcessed();
     }
     /** SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
      *  copies data form the shared variable into a local varaiable and sets local timestamps and locks the variable while accessing

@@ -85,8 +85,6 @@ int main ( int argc, char *argv[] ) {
     signal ( SIGABRT,	terminate );
     signal ( SIGTERM,	terminate );
 
-
-
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
     if ( shmHdl->findName ( params.variable_name ) == NULL ) {
         std::cerr << "No variable: " << params.variable_name;
@@ -101,18 +99,23 @@ int main ( int argc, char *argv[] ) {
 	t0 = t0 + boost::posix_time::seconds(1);
 	std::vector<boost::posix_time::time_duration> cycles;
 	while(boost::posix_time::microsec_clock::local_time() < t0){
-	  header.wait();
-	  cycles.push_back(boost::posix_time::microsec_clock::local_time() - header->timestampLocal());
-	  header->dataProcessed();
+	  if(header.timed_wait(5000)){
+	    cycles.push_back(boost::posix_time::microsec_clock::local_time() - header->timestampLocal());
+	    header->dataProcessed();
+	  } else {
+	    std::cerr << "No signal within 5sec: " << std::endl;
+	  }
 	}
-	double sum = 0;
-	for(size_t i = 0; i < cycles.size(); i++){
-	  sum += cycles[i].total_microseconds() / ( double ) boost::posix_time::seconds ( 1 ).total_microseconds();
+	if(cycles.size() > 0){
+	  double sum = 0;
+	  for(size_t i = 0; i < cycles.size(); i++){
+	    sum += cycles[i].total_microseconds() / ( double ) boost::posix_time::seconds ( 1 ).total_microseconds();
+	  }
+	  double cycleAVR = sum / (double) cycles.size();
+	  
+	  printf ( "%4i: %6.2fHz = %8.2fms :  %s \n", count, 1.0/cycleAVR, cycleAVR*1000, params.variable_name.c_str());
+	  count++;
 	}
-	double cycleAVR = sum / (double) cycles.size();
-	
-        printf ( "%4i: %6.2fHz = %8.2fms :  %s \n", count, 1.0/cycleAVR, cycleAVR*1000, params.variable_name.c_str());
-	count++;
     };
     exit ( 0 );
 
