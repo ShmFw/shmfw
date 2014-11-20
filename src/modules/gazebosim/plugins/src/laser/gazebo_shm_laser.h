@@ -40,7 +40,9 @@
 namespace ShmFw{
   class Handler;
   template<typename T>  class Alloc;
-  class LaserScan;
+  namespace ros {
+    class LaserScan;
+  }
 }
 
 namespace gazebo
@@ -62,7 +64,7 @@ namespace gazebo
     
     private: void OnNewLaserScans();
     boost::shared_ptr<ShmFw::Handler> shmHdl;
-    boost::shared_ptr< ShmFw::Alloc<ShmFw::LaserScan> > shmScan ;
+    boost::shared_ptr< ShmFw::Alloc<ShmFw::ros::LaserScan> > shmScan ;
     boost::posix_time::ptime tstamp;        
 
   };

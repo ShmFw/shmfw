@@ -30,8 +30,8 @@
  *   POSSIBILITY OF SUCH DAMAGE.                                           *
  ***************************************************************************/
 
-#ifndef SHARED_MEM_LASER_SCAN
-#define SHARED_MEM_LASER_SCAN
+#ifndef SHARED_MEM_ROS_LASER_SCAN
+#define SHARED_MEM_ROS_LASER_SCAN
 
 #include <vector>
 #include <string>
@@ -46,6 +46,7 @@
 namespace bi = boost::interprocess;
 
 namespace ShmFw {
+namespace ros {
 
 /**
  * This class is used for laser range scanners
@@ -94,10 +95,10 @@ public:
         return input;
     }
 };
-
+};
 };
 
 
-#endif //SHARED_MEM_LASER_SCAN
+#endif //SHARED_MEM_ROS_LASER_SCAN
 
 

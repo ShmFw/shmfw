@@ -98,6 +98,7 @@ int main ( int argc, char *argv[] ) {
     while ( params.loop ) {           // Don't echo() while we do getch
 	t0 = t0 + boost::posix_time::seconds(1);
 	std::vector<boost::posix_time::time_duration> cycles;
+	std::vector<boost::posix_time::time_duration> cycles_times;
 	while(boost::posix_time::microsec_clock::local_time() < t0){
 	  if(header.timed_wait(5000)){
 	    cycles.push_back(boost::posix_time::microsec_clock::local_time() - header->timestampLocal());
@@ -113,7 +114,7 @@ int main ( int argc, char *argv[] ) {
 	  }
 	  double cycleAVR = sum / (double) cycles.size();
 	  
-	  printf ( "%4i: %6.2fHz = %8.2fms :  %s \n", count, 1.0/cycleAVR, cycleAVR*1000, params.variable_name.c_str());
+	  printf ( "%4i: %6.2fHz = %8.2fms :  %s", count, 1.0/cycleAVR, cycleAVR*1000, params.variable_name.c_str());
 	  count++;
 	}
     };

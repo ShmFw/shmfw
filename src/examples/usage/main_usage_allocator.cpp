@@ -32,7 +32,7 @@
 #include <iostream>
 #include <stdlib.h>
 
-#include <shmfw/objects/laser_scan.h>
+#include <shmfw/objects/ros/laser_scan.h>
 #include <shmfw/objects/points.h>
 #include <shmfw/variable.h>
 #include <shmfw/allocator.h>
@@ -90,7 +90,7 @@ int main ( int argc, char *argv[] ) {
         std::cout << "Shared Memory " << params.shm_memory_name << " cleared" << std::endl;
     }
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
-    ShmFw::Alloc<ShmFw::LaserScan> l("scan", shmHdl);
+    ShmFw::Alloc<ShmFw::ros::LaserScan> l("scan", shmHdl);
     srand (time(NULL));
     
     l.get()->ranges.push_back(rand_01());

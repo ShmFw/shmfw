@@ -34,7 +34,7 @@
 #include <gazebo/physics/physics.hh>
 #include "gazebo_shm_laser.h"
 #include <shmfw/allocator.h>
-#include <shmfw/objects/laser_scan.h>
+#include <shmfw/objects/ros/laser_scan.h>
 
 
 using namespace gazebo;
@@ -48,7 +48,7 @@ GazeboShmLaser::GazeboShmLaser()
 : RayPlugin()
 {
     shmHdl = ShmFw::Handler::create ( ShmFw::DEFAULT_SEGMENT_NAME(), ShmFw::DEFAULT_SEGMENT_SIZE() );
-    shmScan.reset(new ShmFw::Alloc<ShmFw::LaserScan>( "scan", shmHdl ));
+    shmScan.reset(new ShmFw::Alloc<ShmFw::ros::LaserScan>( "scan", shmHdl ));
     tstamp = boost::posix_time::microsec_clock::local_time();
 }
 
@@ -75,7 +75,7 @@ void GazeboShmLaser::OnNewLaserScans()
   boost::posix_time::ptime t = boost::posix_time::microsec_clock::local_time();       
   boost::posix_time::time_duration d = t - tstamp;
   tstamp = t;  
-  ShmFw::LaserScan &scan = *shmScan->get();
+  ShmFw::ros::LaserScan &scan = *shmScan->get();
   std::vector<double> ranges;
   parentSensor->GetRanges(ranges);
   scan.ranges.resize(ranges.size());

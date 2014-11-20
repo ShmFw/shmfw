@@ -78,9 +78,16 @@ protected:
     }
     /// Sets the bounderies and rounds the values to integers and to multipliers of the given resolution
     void setBounderies ( const double x_min, const double x_max, const double y_min, const double y_max, const size_t size_x, const size_t size_y ) {
-	m_x_resolution = (x_max-x_min) / (double) size_x;
-	m_y_resolution = (y_max-y_min) / (double) size_y;
-	setBounderies ( x_min, x_max, y_min, y_max, m_x_resolution, m_y_resolution );
+        m_x_min = x_min;
+        m_y_min = y_min;
+        m_x_max = x_max;
+        m_y_max = y_max;
+	m_size_x = size_x;
+	m_size_y = size_y;
+        m_x_resolution = (m_x_max-m_x_min) / (double) m_size_x;
+	m_y_resolution = (m_y_max-m_y_min) / (double) m_size_y;
+	
+	//setBounderies ( x_min, x_max, y_min, y_max, m_x_resolution, m_y_resolution );
     }
 public:
     GridMap ()

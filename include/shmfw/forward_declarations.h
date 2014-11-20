@@ -49,7 +49,6 @@ namespace ShmFw {
   template <class> class Matrix3x3;
   template <class> class ParameterEntry;
   class Image;
-  class LaserScan;
   class Points;
   class Marker;
   class Point;
@@ -66,6 +65,9 @@ namespace ShmFw {
   class AgentState;
   template <typename T> class GridMap;
   template <typename T, template<typename...> class Allocator> class DynamicGridMap;
+  namespace ros{
+    class LaserScan;
+  }
 };
 
 

@@ -35,7 +35,7 @@
 
 #include "shmfw/variable.h"
 #include "shmfw/allocator.h"
-#include "shmfw/objects/laser_scan.h"
+#include "shmfw/objects/ros/laser_scan.h"
 #include <ncurses.h>
 
 
@@ -85,7 +85,7 @@ int main ( int argc, char *argv[] ) {
 
     Prarmeters params = readArgs ( argc, argv );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
-    ShmFw::Alloc<ShmFw::LaserScan> scan ( params.variable_name, shmHdl );
+    ShmFw::Alloc<ShmFw::ros::LaserScan> scan ( params.variable_name, shmHdl );
 
     initscr();                        // Start curses mode
     raw();                            // Line buffering disabled
