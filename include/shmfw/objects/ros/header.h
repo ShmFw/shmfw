@@ -110,11 +110,16 @@ public:
         stamp = src.stamp;
         return *this;
     }
-#ifdef INCLUDE_ROS_HEADERS  
+#ifdef ROSCPP_ROS_H  
     void copyTo ( std_msgs::Header& des ) const {
-        des.frame_id = frame_id.c_str();
-        des.seq = seq;
+        des.frame_id = this->frame_id.c_str();
+        des.seq = this->seq;
         des.stamp = des.stamp.fromBoost(stamp);
+    }
+    void copyFrom (const std_msgs::Header& src )  {
+        this->frame_id = src.frame_id.c_str();
+        this->seq = src.seq;
+        this->stamp = src.stamp.toBoost();
     }
 #endif
 };

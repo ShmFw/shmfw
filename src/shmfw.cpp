@@ -65,6 +65,7 @@
 
 #include "shmfw/objects/points.h"
 #include "shmfw/objects/ros/header.h"
+#include "shmfw/objects/ros/laser_scan.h"
 #include "shmfw/objects/ros/visualization_marker.h"
 
 using namespace ShmFw;

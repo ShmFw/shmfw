@@ -109,23 +109,35 @@ int main ( int argc, char *argv[] ) {
     attron ( COLOR_PAIR ( 1 ) );
     int firstRow = 3;
     while ( params.close == false ) {           // Don't echo() while we do getch
+        attron ( COLOR_PAIR ( 1 ) );
         std::stringstream message;
         std::stringstream message_error;
         getmaxyx ( stdscr,rows,cols );
-	int row = firstRow;
-        mvprintw ( row++, 0, "frame: %s", scan->frame.c_str());
-        mvprintw ( row++, 0, "range: %fm - %fm", scan->range_min, scan->range_max);
-        mvprintw ( row++, 0, "angle: %frad - %frad", scan->angle_min, scan->angle_max);
-        mvprintw ( row++, 0, "angle_increment: %f", scan->angle_increment);
-        mvprintw ( row++, 0, "time_increment: %f", scan->time_increment);
-        mvprintw ( row++, 0, "scan_time: %4.2f  --> %4.2fHz", scan->scan_time, 1000/scan->scan_time);
-        mvprintw ( row++, 0, "size:  %i", scan->ranges.size());
-	int step_col = 5;
-	int step_size = scan->ranges.size() / (cols / step_col);
-	for(size_t i = 0, col = 0; i < scan->ranges.size(); i+=step_size, col += step_col) {
-	    mvprintw ( row,   col, "%d", i);
-	    mvprintw ( row+1, col, "%4.1f", scan->ranges[i]);
-	}   
+        int row = firstRow;
+        mvprintw ( row++, 0, "header: %s", scan->header.getToString().c_str() );
+        mvprintw ( row++, 0, "range: %fm - %fm", scan->range_min, scan->range_max );
+        mvprintw ( row++, 0, "angle: %frad - %frad", scan->angle_min, scan->angle_max );
+        mvprintw ( row++, 0, "angle_increment: %f", scan->angle_increment );
+        mvprintw ( row++, 0, "time_increment: %f", scan->time_increment );
+        mvprintw ( row++, 0, "scan_time: %4.2f  --> %4.2fHz", scan->scan_time, 1000/scan->scan_time );
+        mvprintw ( row++, 0, "size:  %i", scan->ranges.size() );
+        int step_col = 5;
+        int step_size = scan->ranges.size() / ( cols / step_col );
+        for ( size_t i = 0, col = 0; i < scan->ranges.size(); i+=step_size, col += step_col ) {
+            mvprintw ( row,   col, "%d", i );
+            mvprintw ( row+1, col, "%4.1f", scan->ranges[i] );
+        }
+        row+=2;
+        attron ( COLOR_PAIR ( 2 ) );
+        int drow = ( rows-2 - row );
+        double scale = ( ( double ) drow ) /  scan->range_max;
+        for ( int r = 0; r < drow; r++ ) {
+            for ( size_t i = 0, col = 0; i < scan->ranges.size(); i+=step_size, col += step_col ) {
+                int t = round(scan->ranges[i] * scale);
+		if (t > r)   mvprintw ( row+r,   col, "#");
+		else mvprintw ( row+r,   col, " ", i );
+            }
+        }
         timeout ( 100 );
         key = getch();
         switch ( key ) {

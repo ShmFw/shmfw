@@ -37,6 +37,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <shmfw/objects/ros/header.h>
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/sync/interprocess_condition.hpp>
@@ -60,7 +61,7 @@ class LaserScan {
     typedef bi::basic_string<char, std::char_traits<char>, AllocatorChar>   CharString;
     typedef bi::vector<double, AllocatorDouble > VectorDouble;
 public:
-    CharString frame;
+    Header header;
     double angle_min;        // start angle of the scan [rad]
     double angle_max;        // end angle of the scan [rad]
     double angle_increment;  // angular distance between measurements [rad]
@@ -75,13 +76,13 @@ public:
     VectorDouble intensities;// intensity data [device-specific units].  If your
     // device does not provide intensities, please leave the array empty.
     LaserScan ( const AllocatorVoid &void_alloc )
-        : frame ( void_alloc ), range_min ( 0 ), range_max ( 0 ), ranges ( void_alloc ), intensities ( void_alloc )
+        : header ( void_alloc ), range_min ( 0 ), range_max ( 0 ), ranges ( void_alloc ), intensities ( void_alloc )
     {}
 
     std::string getToString() const {
         char header[0xFF];
-        sprintf ( header, "%s: %frad <-> %frad\n", frame.c_str(), range_min, range_max );
-        std::stringstream ss ( header );
+        std::stringstream ss;
+	ss << header << "range: " << range_min << " <-> " << range_max << std::endl;
         for ( size_t i = 0; i < ranges.size(); i++ ) {
             ss << ranges[i] << ( ( i != ranges.size()-1 ) ?", ":";\n" );
         }
@@ -94,6 +95,32 @@ public:
     friend std::istream& operator>> ( std::istream &input, LaserScan &o ) {
         return input;
     }
+#ifdef ROSCPP_ROS_H  
+    void copyTo ( sensor_msgs::LaserScan& des ) const {
+	this->header.copyTo(des.header);
+	des.angle_min = this->angle_min;
+	des.angle_max = this->angle_max;
+	des.angle_increment = this->angle_increment;
+	des.time_increment = this->time_increment;
+	des.scan_time = this->scan_time;
+	des.range_min = this->range_min;
+	des.range_max = this->range_max;
+	des.ranges.assign(this->ranges.begin(), this->ranges.end());
+	des.intensities.assign(this->intensities.begin(), this->intensities.end());
+    }
+    void copyFrom (const sensor_msgs::LaserScan& src ) {
+	this->header.copyFrom(src.header);
+	this->angle_min = src.angle_min;
+	this->angle_max = src.angle_max;
+	this->angle_increment = src.angle_increment;
+	this->time_increment = src.time_increment;
+	this->scan_time = src.scan_time;
+	this->range_min = src.range_min;
+	this->range_max = src.range_max;
+	this->ranges.assign(src.ranges.begin(), src.ranges.end());
+	this->intensities.assign(src.intensities.begin(), src.intensities.end());
+    }
+#endif
 };
 };
 };
