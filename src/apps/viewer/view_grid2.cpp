@@ -38,7 +38,7 @@
 #include <mgl2/qt.h>
 //#include <mgl2/fltk.h>
 //#include <mgl2/window.h>
-#include <shmfw/objects/grid_map.h>
+#include <shmfw/objects/dynamic_grid_map.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <shmfw/allocator.h>
 #include <boost/program_options.hpp>

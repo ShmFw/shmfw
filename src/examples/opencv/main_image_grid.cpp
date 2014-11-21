@@ -37,7 +37,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <boost/program_options.hpp>
 #include <shmfw/objects/image.h>
-#include <shmfw/objects/grid_map.h>
+#include <shmfw/objects/dynamic_grid_map.h>
 #include <shmfw/objects/rgb.h>
 #include <shmfw/allocator.h>
 

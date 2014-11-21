@@ -36,7 +36,7 @@
 
 
 #include <mgl2/qt.h>
-#include <shmfw/objects/grid_map.h>
+#include <shmfw/objects/dynamic_grid_map.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <shmfw/allocator.h>
 #include <boost/program_options.hpp>
