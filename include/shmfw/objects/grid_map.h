@@ -510,6 +510,14 @@ public:
     static cv::Scalar cvRed() {
         return cv::Scalar ( 0,0,255 );
     }
+    /** Compared the entry type
+     * @return true if the type T1 is equal to T
+     */
+    template <typename T1>
+    bool isType() const {
+      size_t type_hash_code =( typeid ( T1 ).hash_code() );
+      return (m_type_hash_code == type_hash_code);
+    }
 };
 };
 
