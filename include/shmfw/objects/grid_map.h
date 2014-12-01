@@ -421,8 +421,14 @@ public:
     }
     /** Returns a metric pose as cell pose.
       */
-    inline cv::Point cvCellPoint ( double &x, double &y ) {
+    inline cv::Point cvCellPoint (double x, double y ) const {
         return cv::Point ( x2idx ( x ), y2idx ( y ) );
+    }
+    /** Returns a metric pose as cell pose.
+      */
+    template <typename T1>
+    inline cv::Point cvCellPoint ( cv::Point_<T1> p ) {
+        return cv::Point ( x2idx ( p.x ), y2idx ( p.y ) );
     }
     /** Returns a cell pose as metric pose.
       */
@@ -463,6 +469,16 @@ public:
         return cv::LineIterator ( img, cvCellPoint ( x0,y0 ), cvCellPoint ( x1,y1 ), connectivity, leftToRight );
     }
 
+    /** Returns transformation matrix
+      */
+    cv::Mat_<double> getTf ( ) const {
+        cv::Mat_<double> m = cv::Mat_<double>::eye(3,3);
+	double sx = 1./m_x_resolution;
+	double sy = 1./m_x_resolution;
+	m(0,0) = sx, m(0,2) = -m_x_min*sx; 
+	m(1,1) = sx, m(1,2) = -m_y_min*sy; 
+	return m;
+    }
     /** draws a line based on metrc coordinate
       */
     void cvLine ( cv::Point2d p0, cv::Point2d p1, const cv::Scalar& color, int thickness=1, int lineType=8, int shift=0 ) {

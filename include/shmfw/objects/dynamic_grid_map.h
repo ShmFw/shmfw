@@ -144,6 +144,7 @@ public:
     void  clear() {
         m_map.clear();
         m_map.resize ( this->m_size_x*this->m_size_y );
+        this->m_data = &m_map[0];
     }
 
     /** Changes the size of the grid, maintaining previous contents.

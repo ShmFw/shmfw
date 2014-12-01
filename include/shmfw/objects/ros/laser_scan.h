@@ -121,6 +121,22 @@ public:
 	this->intensities.assign(src.intensities.begin(), src.intensities.end());
     }
 #endif
+#ifdef __OPENCV_CORE_HPP__
+    std::vector<cv::Point2d> &convert(std::vector<cv::Point2d> &scan) const{
+      scan.resize(ranges.size());
+      double dAngle = (angle_max - angle_min) / (double) ranges.size();
+      for(size_t i = 0; i < ranges.size(); i++){
+	double a = angle_min + dAngle * (double) i;
+	scan[i].x = cos(a) * ranges[i];
+	scan[i].y = sin(a) * ranges[i];
+      }
+      return scan;
+    }
+    std::vector<cv::Point2d> convert() const{
+      std::vector<cv::Point2d> scan;
+      return convert(scan);
+    }
+#endif
 };
 };
 };

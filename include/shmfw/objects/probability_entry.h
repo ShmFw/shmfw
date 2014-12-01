@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Software License Agreement (BSD License)                              *  
- *   Copyright (C) 2012 by Markus Bader <markus.bader@tuwien.ac.at>        *
+ *   Software License Agreement (BSD License)                              *
+ *   Copyright (C) 2014 by Markus Bader <markus.bader@tuwien.ac.at>        *
  *                                                                         *
  *   Redistribution and use in source and binary forms, with or without    *
  *   modification, are permitted provided that the following conditions    *
@@ -30,75 +30,34 @@
  *   POSSIBILITY OF SUCH DAMAGE.                                           *
  ***************************************************************************/
 
-#include <iostream>
-#include <stdlib.h>
-#include <signal.h>
-#include <stdarg.h>
+#ifndef SHARED_MEM_OBJECTS_PROBABILTY_ENTRY_H
+#define SHARED_MEM_OBJECTS_PROBABILTY_ENTRY_H
 
+#include <math.h>
 
-#include "shmfw/log.h"
-#include <boost/program_options.hpp>
-
-SHMFW_INIT_LOG;
-
-bool loop_program = true;
-
-struct Prarmeters {
-    std::string shm_memory_name;
-    unsigned int shm_memory_size;
-    std::string variable_name;
+namespace shmfw {
+class ProbabilityEntry {
+public:
+    typedef int8_t  cellType;
+    typedef uint8_t cellTypeUnsigned;
+    cellType entry;
+    operator int() {
+        return entry;    // cast operator
+    }
+    ProbabilityEntry &operator = ( const double& p );
+    ProbabilityEntry &operator = ( const float& p );
+    float getProbability() const;
+    void setProbability ( const float& p );
+    const cellType &getEntry () const;
+    cellType &getEntry ();
+    friend std::ostream& operator<< ( std::ostream &output, const ProbabilityEntry &o ) {
+        output << o.getProbability();
+        return output;
+    }
+    static float &l2p ( const cellType &l, float &p );
+    static cellType &p2l ( const float &p, cellType &l );
+private:
+    static mrpt::slam::CLogOddsGridMapLUT<cellType>  m_logodd_lut;
 };
-
-Prarmeters readArgs ( int argc, char **argv ) {
-    namespace po = boost::program_options;
-
-    Prarmeters params;
-    po::options_description desc ( "Allowed Parameters" );
-    desc.add_options()
-    ( "help", "get this help message" )
-    ( "shm_log,l", po::value<std::string> ( &params.variable_name )->default_value ( "log" ), "shared variable name of the logger" )
-    ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_LOG_SEGMENT_NAME() ), "shared memory segment name" )
-    ( "shm_memory_size,s", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_LOG_SEGMENT_SIZE() ), "shared memory segment size" );
-
-    po::variables_map vm;
-    try {
-        po::store ( po::parse_command_line ( argc, argv, desc ), vm );
-    } catch ( const std::exception &ex ) {
-        std::cout << desc << std::endl;;
-        exit ( 1 );
-    }
-    po::notify ( vm );
-
-    if ( vm.count ( "help" ) )  {
-        std::cout << desc << std::endl;
-        exit ( 1 );
-    }
-
-    return params;
-}
-
-void terminate ( int param ) {
-    std::cout << "Closing program!" << std::endl;
-    loop_program = false;
-}
-
-int main ( int argc, char *argv[] ) {
-
-    signal ( SIGINT, terminate );
-    signal ( SIGKILL, terminate );
-    Prarmeters params = readArgs ( argc, argv );
-    
-    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create( params.shm_memory_name, params.shm_memory_size );
-    ShmFw::Log log ( shmHdl, params.variable_name );
-    std::cout << log->max_size() << std::endl;
-    for ( unsigned int i = 0; loop_program; i++ ) {
-        int us = rand() % 10;
-        SHMFW_Info_FNC ( "debug" );
-        SHMFW_Debug_FNC ( "info" );
-        usleep ( us );
-    }
-
-    exit ( 0 );
-
-
-}
+};
+#endif // SHARED_MEM_OBJECTS_PROBABILTY_ENTRY_H
