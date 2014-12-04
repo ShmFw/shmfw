@@ -38,6 +38,7 @@
 #include <mgl2/qt.h>
 #include <shmfw/objects/dynamic_grid_map.h>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include <shmfw/allocator.h>
 #include <boost/program_options.hpp>
 
@@ -46,6 +47,7 @@ struct Prarmeters {
     unsigned int shm_memory_size;
     std::string variable_name;
     ShmFw::HandlerPtr shmHdl;
+    bool normalize;
     bool loop;
     std::string title;
     std::string arguments;
@@ -71,6 +73,7 @@ void readArgs ( int argc, char **argv, Prarmeters &params ) {
     ( "help", "get this help message" )
     ( "clear,c", "clears the shared memory" )
     ( "loop,l", "loops writing data" )
+    ( "normalize", "normalize the entries between [0 1] to the maximum entry" )
     ( "z_min", po::value<double> ( &params.z_min )->default_value ( 0.), "min z" )
     ( "z_max", po::value<double> ( &params.z_max )->default_value ( 0.), "max z" )
     ( "title,t", po::value<std::string> ( &params.title )->default_value ( "2D" ), "plot title" )
@@ -95,24 +98,48 @@ void readArgs ( int argc, char **argv, Prarmeters &params ) {
         exit ( 1 );
     }
     params.loop = ( vm.count ( "loop" ) > 0 );
+    params.normalize = (vm.count ( "normalize" ) > 0); 
 }
 
 void prepare_grid ( mglData* data ) {
 }
 
-int sample ( mglGraph *gr ) {
-    mglData a;
-    srand ( time ( NULL ) );
-    ShmFw::Alloc<ShmFw::DynamicGridMap64FShm> dynamic_grid ( params.variable_name, params.shmHdl );
-    std::cout << *dynamic_grid << std::endl;
-    size_t col, row, columns = dynamic_grid->getSizeX(), rows = dynamic_grid->getSizeY();
-    mgl_data_create ( &a, rows, columns, 1 );
+
+template <typename T>
+void updateData(const ShmFw::GridMap<T> &src, mglData &des){    
+    std::cout << src << std::endl;
+    size_t col, row, columns = src.getSizeX(), rows = src.getSizeY();
+    T min = 1., max = 1.;
+    if(params.normalize){
+      src.getMinMax(min, max);
+    }
+    mgl_data_create ( &des, rows, columns, 1 );
     for ( col = 0; col < columns; col++ )  {
         for ( row=0; row < rows; row++ ) {
-            double v = dynamic_grid->cellByIndex_nocheck ( col,row );
-            mgl_data_set_value ( &a, v, row, col, 0 );
+            double v = src.cellByIndex_nocheck ( col,row );
+            mgl_data_set_value ( &des, v/max, row, col, 0 );
         }
     }
+}
+
+int sample ( mglGraph *gr ) {
+    mglData a;
+    double minX, maxX, minY, maxY;
+    ShmFw::Header shmHeader ( params.variable_name, params.shmHdl );
+    if(shmHeader.isType< ShmFw::Alloc< ShmFw::DynamicGridMap64FShm > > ()){
+      ShmFw::Alloc<ShmFw::DynamicGridMap64FShm> grid ( params.variable_name, params.shmHdl );
+      minX = grid->getXMin(), maxX = grid->getXMax(), minY = grid->getYMin(), maxY = grid->getYMax();
+      updateData(*grid, a);
+    } else if(shmHeader.isType< ShmFw::Alloc< ShmFw::DynamicGridMap32FShm > > ()){
+      ShmFw::Alloc<ShmFw::DynamicGridMap32FShm> grid ( params.variable_name, params.shmHdl );
+      minX = grid->getXMin(), maxX = grid->getXMax(), minY = grid->getYMin(), maxY = grid->getYMax();
+      updateData(*grid, a);
+    } else {
+      std::cout << "unsupported data type!" << std::endl;
+      return 0;
+    }
+    
+
     gr->Title ( params.title.c_str() );
     gr->Rotate ( 50,60 );
     gr->Box();
@@ -129,9 +156,9 @@ int sample ( mglGraph *gr ) {
     if ( boost::iequals ( "cont", params.plot_type ) )
         gr->Cont ( a, params.arguments.c_str() );
     if ((fabs(params.z_max) > std::numeric_limits<double>::min()) ||   (fabs(params.z_min) > std::numeric_limits<double>::min())){      
-      gr->SetRanges ( dynamic_grid->getXMin(),dynamic_grid->getXMax(),dynamic_grid->getYMin(),dynamic_grid->getYMax(), params.z_min, params.z_max );
+      gr->SetRanges ( minX, maxX, minY, maxY, params.z_min, params.z_max );
     } else {
-      gr->SetRanges ( dynamic_grid->getXMin(),dynamic_grid->getXMax(),dynamic_grid->getYMin(),dynamic_grid->getYMax() );
+      gr->SetRanges ( minX, maxX, minY, maxY );
     }
     gr->Axis();
     gr->Grid();

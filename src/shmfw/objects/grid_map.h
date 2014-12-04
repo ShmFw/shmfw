@@ -498,6 +498,18 @@ public:
         return type;
     }
 
+    /// parses over all entries and looks for the min an max entry
+    template <typename T1>
+    void getMinMax(T1 &min, T1 &max) const{
+      max = min = cellByIndex_nocheck(0);
+      T* p = &m_data[0];
+      T* end = &m_data[size()];
+      while(p != end){
+	if(*p < min) min = *p;
+	if(*p > max) max = *p;
+	p++;
+      }
+    }
     /// return a opencv color for drawing
     static cv::Scalar cvGreen() {
         return cv::Scalar ( 0,255,0 );
@@ -523,6 +535,7 @@ public:
 
 
 #endif //SHARED_MEM_OBJECT_GRID_MAP_H
+
 
 
 

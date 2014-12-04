@@ -117,11 +117,9 @@ int main ( int argc, char **argv ) {
     for ( unsigned int i = 0; i < varNames.size(); i++ ) {
         ShmFw::Header shmHeader ( shmHdl, varNames[i] );
         std::cout << std::setw ( 3 ) << i << ": " << std::setw ( 30 ) << varNames[i];
+        std::cout << ( shmHeader.locked() ? ", x" : ", o" );
         if ( params.show_container ) {
             std::cout << ", " << std::setw ( 12 ) << shmHeader.containerName();
-        }
-        if ( params.show_context ) {
-            std::cout << ( shmHeader.locked() ? ", locked  " : ", unlocked" );
         }
         if ( params.show_context ) {
             if ( ( shmHeader.container() == ShmFw::Header::CONTAINER_VARIABLE ) ||

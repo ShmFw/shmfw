@@ -44,10 +44,8 @@
 
 struct Prarmeters {
     int reload;
-    std::string  cvtype;
-    double grid;
     bool on_change;
-    int border;
+    bool normalize;
     std::string shm_memory_name;
     unsigned int shm_memory_size;
     std::string variable_name;
@@ -61,10 +59,8 @@ Prarmeters readArgs ( int argc, char **argv ) {
     desc.add_options()
     ( "help", "get this help message" )
     ( "on_change,c", "updates only on change" )
-    ( "border", po::value< int > ( &params.border )->default_value ( 20 ), "view border" )
+    ( "normalize", "normalize the entries between [0 1] to the maximum entry" )
     ( "reload,r", po::value< int > ( &params.reload )->default_value ( 100 ), "reload time in ms, 0 means reload on signal, -1 means relaod owns to load image into shm" )
-    ( "cvtype,t", po::value<std::string> ( &params.cvtype ), "opencv type: CV_8UC3, CV_8U, ..." )
-    ( "grid,g", po::value< double > ( &params.grid )->default_value ( 1.0 ), "grid size, -1 means no grid" )
     ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
     ( "shm_memory_size,s", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" )
     ( "variable_name,v", po::value<std::string> ( &params.variable_name )->default_value ( "image_grid" ), "shared variable name" );
@@ -83,6 +79,7 @@ Prarmeters readArgs ( int argc, char **argv ) {
         exit ( 1 );
     }
     params.on_change = (vm.count ( "on_change" ) > 0); 
+    params.normalize = (vm.count ( "normalize" ) > 0); 
 
     return params;
 }
@@ -116,10 +113,20 @@ void view_image ( const Prarmeters &params, ShmFw::HandlerPtr &shmHdl ) {
     }
     std::cout << std::endl;
     
+    
+    
     cv::namedWindow ( params.variable_name.c_str() );
     int key;
+	double min, max;
     do {
-        cv::imshow ( params.variable_name.c_str(), img );
+      cv::Mat tmp = img;
+      if(params.normalize){
+	tmp = img.clone();
+	cv::minMaxLoc(img, &min, &max);
+	tmp = img / max;
+	std::cout << "[" << min << ", " << max << " ]" << std::endl;
+      }
+        cv::imshow ( params.variable_name.c_str(), tmp );
 	if(params.on_change){
 	  key = cv::waitKey ( params.reload );
 	  while(grid.timed_wait(10000) == false){

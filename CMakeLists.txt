@@ -1,5 +1,13 @@
 cmake_minimum_required ( VERSION 2.6 )
 project(ShmFw)
+
+include(macros.cmake)
+
+_version(2014 11 30)
+_output_prefix()    
+_set_output_paths()
+_installation_destinations() # must be befor add_subdirectory
+
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 include(PCHSupport.cmake)
 
@@ -53,15 +61,20 @@ else()
   MESSAGE( STATUS "--> MathGL: Ubuntu 14.04: \"sudo apt-get install mathgl-dev\" ")
 endif()
 
-SET(LIBRARY_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/lib")
-SET(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin")
-SET(LIBRARY_INSTALL_PATH "ShmFw/lib")
 
-
-include_directories(include)
-include_directories(src/dynamic/include)
+include_directories(src)
+add_subdirectory(include)
 add_subdirectory(src)
+#add_subdirectory(apps)
+#add_subdirectory(samples)
+#add_subdirectory(sandbox)
+#add_subdirectory(unittests)
+
 
 #install routine
-install(DIRECTORY "include/shmfw"  DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
-add_custom_target(uninstall COMMAND rm -rfv "${CMAKE_INSTALL_PREFIX}/include/shmfw/*" "${CMAKE_INSTALL_PREFIX}/bin/shmfw*" "${CMAKE_INSTALL_PREFIX}/lib/libshmfw*")
+#install(DIRECTORY "include/shmfw"  DESTINATION src FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
+#add_custom_target(uninstall COMMAND rm -rfv "${CMAKE_INSTALL_PREFIX}/include/shmfw/*" "${CMAKE_INSTALL_PREFIX}/bin/shmfw*" "${CMAKE_INSTALL_PREFIX}/lib/libshmfw*")
+
+_generate_find_package() # must be after add_subdirectory
+_uninstall()    
+_doxygen()

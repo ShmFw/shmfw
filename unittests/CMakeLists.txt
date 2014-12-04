@@ -1,4 +1,6 @@
 
+SET(UNITTEST 0 CACHE BOOL "shmfw unittests" )
+IF(UNITTEST )
 add_subdirectory(gtest)
 
 include_directories(${GTEST_INCLUDE_DIR})
@@ -64,3 +66,5 @@ add_test(
     NAME shmfw-unittest_opencv
     COMMAND shmfw-unittest_opencv
 )
+
+ENDIF(UNITTEST )

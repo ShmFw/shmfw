@@ -126,7 +126,8 @@ public:
     }
     /** Changes the size of the grid, ERASING all previous contents.
       */
-    void  setSize (const GridMap<T> &map, bool copy = false){
+    template <typename T1>
+    void  setSize (const GridMap<T1> &map, bool copy = false){
 
         // Sets the bounderies and rounds the values to integers if needed
         this->setBounderies ( map.getXMin(), map.getXMax(), map.getYMin(), map.getYMax(), map.getSizeX(),  map.getSizeY());
@@ -265,10 +266,6 @@ using DynamicGridMap32FShm = DynamicGridMap<float, Allocator>;
 using DynamicGridMap8UHeap  = DynamicGridMap<uchar, std::allocator>;
 // Variant to use in shared memory:
 using DynamicGridMap8UShm = DynamicGridMap<uchar, Allocator>;
-// Variant to use on the heap:
-using DynamicGridMap8U3CHeap  = DynamicGridMap<uchar[3], std::allocator>;
-// Variant to use in shared memory:
-using DynamicGridMap8U3CShm = DynamicGridMap<uchar[3], Allocator>;
 
 };
 
