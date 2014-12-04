@@ -26,6 +26,7 @@ endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
 set(Boost_USE_MULTITHREADED ON)
 find_package (Boost 1.40.0 REQUIRED COMPONENTS date_time thread program_options serialization regex filesystem signals system chrono)
+link_libraries(${Boost_LIBRARIES} rt)
 
 find_package( MRPT ) 
 IF(MRPT_FOUND)
@@ -65,10 +66,10 @@ endif()
 include_directories(src)
 add_subdirectory(include)
 add_subdirectory(src)
-#add_subdirectory(apps)
-#add_subdirectory(samples)
+add_subdirectory(apps)
+add_subdirectory(samples)
 #add_subdirectory(sandbox)
-#add_subdirectory(unittests)
+add_subdirectory(unittests)
 
 
 #install routine

@@ -5,9 +5,9 @@ set(CURSES_NEED_NCURSES TRUE)
 find_package(Curses REQUIRED)
 message(${CURSES_LIBRARY})
 
-add_executable(shmfw-reconfigure src/main_reconfigure.cpp )
-target_link_libraries(shmfw-reconfigure  ${Boost_LIBRARIES} rt ${CURSES_LIBRARY})
-install (TARGETS shmfw-reconfigure DESTINATION bin)
+add_executable(${PREFIX_BIN}reconfigure src/main_reconfigure.cpp )
+target_link_libraries(${PREFIX_BIN}reconfigure ${CURSES_LIBRARY})
+_install_binary (${PREFIX_BIN}reconfigure)
 
 add_subdirectory(example)
 ENDIF(APPS_RECONFIGURE )

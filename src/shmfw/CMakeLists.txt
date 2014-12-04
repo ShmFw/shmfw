@@ -17,9 +17,6 @@ SET(FILES_H
 )
 SET(FILES_CPP
   shmfw.cpp
-  objects/mrpt.cpp
-  objects/grid_layer_map.cpp
-  objects/pose2d_agv.cpp 
 )
 
 add_library(${PREFIX_LIB}core SHARED ${FILES_H} ${FILES_CPP})

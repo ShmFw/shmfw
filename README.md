@@ -1,31 +1,42 @@
-shmfw
+v4r_geometry
 =====
 
- A fast dynamic framework for interprocess communication (based on boost)
-
  
-INSTALL:
- run:
+## INSTALL:
+``` 
  mkdir build
  cd build
- cmake ..
+ cmake ..  
+ # cmake -D CMAKE_INSTALL_PREFIX=/usr/ ..  # suggested on ubuntu
+ # cmake -D CMAKE_BUILD_TYPE=DEBUG ..
+ # cmake -D UNIT_TEST=OFF ..
  make
  sudo make install
- sudo vim /etc/ld.so.conf.d/shmfw.conf
-   --> add the libpath, something like /usr/local/ShmFw/lib/
- ldconfig
- 
- 
-DEVELOPER:
-Developer can add the following statement to your there CMakeList.txt 
+``` 
 
-if (DEFINED ENV{SHMFW})
-  include_directories($ENV{SHMFW}/include/)
-  include_directories($ENV{SHMFW}/src/dynamic/include)
-  FIND_LIBRARY(SHMFW_LIBRARY libshmfw.so PATHS $ENV{SHMFW}/lib )
-  MESSAGE( STATUS "ShmFw found: ${SHMFW_LIBRARY}" )
-else()
-  FIND_LIBRARY(SHMFW_LIBRARY libshmfw.so PATHS /usr/ )
-  message("SHMFW NOT defined -> Using system ShmFw if installed: ${SHMFW_LIBRARY}")
-endif()
-link_libraries(rt ${SHMFW_LIBRARY})
+## UNINSTALL:
+``` 
+sudo make uninstall 
+```
+ 
+## UNITTESTING:
+### On Ubuntu
+The ubuntu package management installs only gtest sources, because of this you have to compile gtest first.
+http://askubuntu.com/questions/145887/why-no-library-files-installed-for-google-test
+``` 
+sudo apt-get install libgtest-dev
+cd /usr/src/gtest && sudo cmake -DBUILD_SHARED_LIBS=ON . && sudo make && sudo mv libg* /usr/lib/
+``` 
+## Doxygen
+For doxygen run
+``` 
+make doc
+``` 
+The documentation will be generated into ./doc
+
+## DEVELOPER:
+### find_package
+shmfw supports the cmake find_package command use
+```
+find_package(ShmFw)
+```

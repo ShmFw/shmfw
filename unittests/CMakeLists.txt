@@ -8,7 +8,7 @@ enable_testing()
 
 # Add test cpp file
 add_executable(shmfw-unittest_shm unittest_shm.cpp)
-target_link_libraries(shmfw-unittest_shm gtest ${Boost_LIBRARIES} rt shmfw)
+target_link_libraries(shmfw-unittest_shm gtest ${PREFIX_LIB}core)
 
 add_test(
     NAME shmfw-unittest
@@ -32,7 +32,7 @@ SET(UNITTEST_OBJECTS_SOURCES
 add_executable(shmfw-unittest_objects ${UNITTEST_OBJECTS_SOURCES})
 
 
-target_link_libraries(shmfw-unittest_objects gtest ${Boost_LIBRARIES} rt shmfw)
+target_link_libraries(shmfw-unittest_objects gtest ${PREFIX_LIB}core)
 
 add_test(
     NAME shmfw-unittest_objects
@@ -40,7 +40,7 @@ add_test(
 )
 
 add_executable(shmfw-unittest_eigen unittest_eigen.cpp)
-target_link_libraries(shmfw-unittest_eigen gtest ${Boost_LIBRARIES} rt shmfw)
+target_link_libraries(shmfw-unittest_eigen gtest ${PREFIX_LIB}core)
 
 add_test(
     NAME shmfw-unittest_eigen
@@ -50,7 +50,7 @@ add_test(
 IF(MRPT_FOUND)
 
 add_executable(shmfw-unittest_mrpt unittest_mrpt.cpp)
-target_link_libraries(shmfw-unittest_mrpt gtest ${Boost_LIBRARIES} rt shmfw ${MRPT_LIBS})
+target_link_libraries(shmfw-unittest_mrpt gtest ${PREFIX_LIB}core ${MRPT_LIBS})
 
 add_test(
     NAME shmfw-unittest_mrpt

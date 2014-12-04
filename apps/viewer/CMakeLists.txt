@@ -6,39 +6,39 @@ set(CURSES_NEED_NCURSES TRUE)
 find_package(Curses REQUIRED)
 message(${CURSES_LIBRARY})
 
-add_executable(shmfw-view_laser_scan view_laser_scan.cpp )
-target_link_libraries(shmfw-view_laser_scan  shmfw ${Boost_LIBRARIES} rt ${CURSES_LIBRARY})
-install (TARGETS shmfw-view_laser_scan DESTINATION bin)
+add_executable(${PREFIX_BIN}view_laser_scan view_laser_scan.cpp )
+target_link_libraries(${PREFIX_BIN}view_laser_scan  ${PREFIX_LIB}core ${CURSES_LIBRARY})
+_install_binary (${PREFIX_BIN}view_laser_scan)
 
-add_executable(shmfw-view_twist view_twist.cpp )
-target_link_libraries(shmfw-view_twist  shmfw ${Boost_LIBRARIES} rt ${CURSES_LIBRARY})
-install (TARGETS shmfw-view_twist DESTINATION bin)
+add_executable(${PREFIX_BIN}view_twist view_twist.cpp )
+target_link_libraries(${PREFIX_BIN}view_twist  ${PREFIX_LIB}core ${CURSES_LIBRARY})
+_install_binary (${PREFIX_BIN}view_twist)
 
 IF( OpenCV_FOUND ) 
-add_executable(shmfw-view_image view_image.cpp )
-target_link_libraries(shmfw-view_image  ${Boost_LIBRARIES} rt ${OpenCV_LIBS})
-install (TARGETS shmfw-view_image DESTINATION bin)
+add_executable(${PREFIX_BIN}view_image view_image.cpp )
+target_link_libraries(${PREFIX_BIN}view_image  ${OpenCV_LIBS})
+_install_binary (${PREFIX_BIN}view_image)
 
-add_executable(shmfw-view_grid_as_image view_grid_as_image.cpp )
-target_link_libraries(shmfw-view_grid_as_image  ${Boost_LIBRARIES} rt ${OpenCV_LIBS})
-install (TARGETS shmfw-view_grid_as_image DESTINATION bin)
+add_executable(${PREFIX_BIN}view_grid_as_image view_grid_as_image.cpp )
+target_link_libraries(${PREFIX_BIN}view_grid_as_image  ${OpenCV_LIBS})
+_install_binary (${PREFIX_BIN}view_grid_as_image)
 
-add_executable(shmfw-view_grid_as_plot view_grid_as_plot.cpp )
-target_link_libraries(shmfw-view_grid_as_plot  ${Boost_LIBRARIES} rt ${OpenCV_LIBS})
-install (TARGETS shmfw-view_grid_as_plot DESTINATION bin)
+add_executable(${PREFIX_BIN}view_grid_as_plot view_grid_as_plot.cpp )
+target_link_libraries(${PREFIX_BIN}view_grid_as_plot  ${OpenCV_LIBS})
+_install_binary (${PREFIX_BIN}view_grid_as_plot)
 
 ENDIF(OpenCV_FOUND)
 
 
 if(MATHGL_FOUND)
 
-add_executable(shmfw-view_grid view_grid.cpp)
-target_link_libraries(shmfw-view_grid ${Boost_LIBRARIES} -pthread rt ${MATHGL_LIBRARIES})
-install (TARGETS shmfw-view_grid DESTINATION bin)
+add_executable(${PREFIX_BIN}view_grid view_grid.cpp)
+target_link_libraries(${PREFIX_BIN}view_grid -pthread ${MATHGL_LIBRARIES})
+_install_binary (${PREFIX_BIN}view_grid)
 
-add_executable(shmfw-view_grid2 view_grid2.cpp)
-target_link_libraries(shmfw-view_grid2 ${Boost_LIBRARIES} -pthread rt ${MATHGL_LIBRARIES})
-#install (TARGETS shmfw-view_grid2 DESTINATION bin)
+add_executable(${PREFIX_BIN}view_grid2 view_grid2.cpp)
+target_link_libraries(${PREFIX_BIN}view_grid2 -pthread ${MATHGL_LIBRARIES})
+#_install_binary (${PREFIX_BIN}view_grid2)
 
 endif(MATHGL_FOUND)
 

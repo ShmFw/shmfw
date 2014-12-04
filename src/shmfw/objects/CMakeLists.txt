@@ -21,6 +21,7 @@ SET(FILES_H
   points.h
   pose.h
   pose2d.h
+  pose2d_agv.h
   probability_entry.h
   quaternion.h
   rgb.h
@@ -32,7 +33,18 @@ SET(FILES_H
   vector3.h
   vector4.h
 )
+SET(FILES_CPP
+  mrpt.cpp
+  grid_layer_map.cpp
+  pose2d_agv.cpp 
+)
 
-install(FILES ${FILES_H} DESTINATION "${INSTALL_INCLUDE_DIR}/shmfw/objects")
+add_library(${PREFIX_LIB}objects SHARED ${FILES_H} ${FILES_CPP})
+target_link_libraries(${PREFIX_LIB}objects)
+IF(MRPT_FOUND)
+target_link_libraries(${PREFIX_LIB}objects ${MRPT_LIBS})
+ENDIF(MRPT_FOUND)
+
+_install_library(${PREFIX_LIB}objects "${FILES_H}" "/shmfw/objects")
 
 
