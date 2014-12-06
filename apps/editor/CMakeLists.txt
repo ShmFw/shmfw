@@ -7,7 +7,7 @@ find_package(Curses REQUIRED)
 message(${CURSES_LIBRARY})
 
 add_executable(${PREFIX_BIN}editor src/main_editor.cpp )
-target_link_libraries(${PREFIX_BIN}editor ${PREFIX_LIB}core ${CURSES_LIBRARY})
+target_link_libraries(${PREFIX_BIN}editor ${PREFIX_LIB}core  ${PREFIX_LIB}objects ${CURSES_LIBRARY})
 _install_binary (${PREFIX_BIN}editor)
 
 ENDIF(APPS_EDITOR )

@@ -33,113 +33,17 @@
 #ifndef SHARED_MEM_OBJECT_GRID_LAYER_MAP_H
 #define SHARED_MEM_OBJECT_GRID_LAYER_MAP_H
 
-#include <opencv/cxcore.h>
 #include <shmfw/objects/grid_map.h>
+#include <shmfw/objects/grid_map_header.h>
 
 #define SHMFW_UNUSED_PARAM(a)		(void)(a)
 namespace ShmFw {
 
-
-/** A 2D grid of dynamic size which stores any kind of data at each cell.
- * @tparam T The type of each cell in the 2D grid.
- * @note This class is based on the mrpt::slam::CDynamicGridMap which was published unter BSD many thanks to the mrpt team
- */
-class GridLayerMapHeader  {
-protected:
-    double m_x_min; /// min x in metric units
-    double m_x_max; /// max x in metric units
-    double m_y_min; /// min y in metric units
-    double m_y_max; /// max y in metric units
-    double m_x_resolution;  /// resolution: metric unit = cell * resolution
-    double m_y_resolution;  /// resolution: metric unit = cell * resolution
-    size_t m_size_x; /// size x in cells
-    size_t m_size_y; /// size y in cells
-    size_t m_depth;  /// number of bytes per cell (sizeof(T))
-    size_t m_type_hash_code; /// type hash code only for C+11;
-    size_t m_layers; /// number of layers
-    /// Sets the bounderies and rounds the values to integers and to multipliers of the given resolution
-    void setBounderies ( const double x_min, const double x_max, const double y_min, const double y_max, const double x_resolution, const double y_resolution );
-    /// Sets the bounderies and rounds the values to integers and to multipliers of the given resolution
-    void setBounderies ( const double x_min, const double x_max, const double y_min, const double y_max, const size_t size_x, const size_t size_y );
-public:
-
-    GridLayerMapHeader ()
-        : m_x_min ( 0 )
-        , m_x_max ( 0 )
-        , m_y_min ( 0 )
-        , m_y_max ( 0 )
-        , m_x_resolution ( 0 )
-        , m_y_resolution ( 0 )
-        , m_size_x ( 0 )
-        , m_size_y ( 0 )
-        , m_depth ( 0 )
-        , m_type_hash_code ( 0 )
-        , m_layers(0)  {
-    }    
-    /// Returns the horizontal size of grid map in cells count. @return m_size_x
-    size_t getSizeX() const;
-    /// Returns the horizontal size of grid map in cells count. @return m_size_x
-    size_t getColumns() const;
-    /// Returns the vertical size of grid map in cells count. @return m_size_y
-    size_t getSizeY() const;
-    /// Returns the vertical size of grid map in cells count. @return m_size_y
-    size_t getRows() const;
-    /// Returns the number of bytes per cell. @return m_depth
-    size_t getDepth() const;
-    /// Returns the number of layers. @return m_layers
-    size_t getLayers() const;
-    /// Returns the type hash code. @return m_depth 
-    size_t getTypeHashCode() const;
-    /// Returns the "x" coordinate of left side of grid map.  @return m_x_min 
-    double getXMin() const;
-    /// Returns the "x" coordinate of right side of grid map.  @return m_x_max 
-    double getXMax() const ;
-    /// Returns the "y" coordinate of top side of grid map.  @return m_y_min
-    double getYMin() const;
-    /// Returns the "y" coordinate of bottom side of grid map.  @return m_y_max 
-    double getYMax() const;
-    /// Returns the resolution of the grid map.  @return m_x_resolution 
-    double getResolutionX() const ;
-    /// Returns the resolution of the grid map.  @return m_y_resolution 
-    double getResolutionY() const;      
-    /// Transform a coordinate x values into cell index. @return cell index x
-    int x2idx ( double x ) const;
-    /// Transform a coordinate y values into cell index. @return cell index y
-    int y2idx ( double y ) const;
-    /// Transforms x y coordinates a cell index. @return index
-    int xy2idx ( double x, double y ) const;
-    /// Transform a global (linear) cell index value into its corresponding (x,y) cell indexes.
-    void idx2cxcy ( const int &idx,  int &cx, int &cy ) const;
-    /// Transform a cell index into a coordinate value.
-    double idx2x ( int cx ) const;
-    /// Transform a cell index into a coordinate value.
-    double idx2y ( int cy ) const;
-    /// Transform a coordinate value into a cell index, using a diferent "x_min" value
-    int x2idx ( double x,double x_min ) const;
-    /// Transform a coordinate value into a cell index, using a diferent "y_min" value
-    int y2idx ( double y, double y_min ) const;
-
-    /// tries to identify the cvtype. @return cvtype or -1
-    int cvtype() const;  
-    
-    cv::Point cvCellPoint (double x, double y ) const;
-    cv::Point cvCellPoint ( const cv::Point &p ) const;
-    cv::Point cvCellPoint ( const cv::Point2f &p ) const;
-    cv::Point cvCellPoint ( const cv::Point2d &p ) const;
-    cv::Point2d cvPosePoint ( int &x, int &y ) const;
-    cv::Point2d cvPosePoint ( const cv::Point &p ) const;
-    
-    /// Returns the number of cells on one layer. @return m_size_x*m_size_y
-    size_t size() const;
-    friend std::ostream& operator<< ( std::ostream &output, const GridLayerMapHeader &o );
-    friend std::istream& operator>> ( std::istream &input, GridLayerMapHeader &o );
-};
 template <typename T>
-class GridLayerMap : public GridLayerMapHeader {
+class GridLayerMap : public GridMapHeader {
 protected:
     T *m_origin_data; /// pointer to fist layer
     T *m_data; /// cells  
-
 public:
     GridLayerMap () 
         : GridLayerMapHeader()

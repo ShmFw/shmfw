@@ -94,7 +94,7 @@ int main ( int argc, char **argv ) {
         if ( !params.file_to_load.empty() ) {
 	    cv::Mat img = cv::imread(params.file_to_load, CV_LOAD_IMAGE_COLOR);
 	    ShmFw::Alloc<ShmFw::DynamicGridMap<ShmFw::RGB, ShmFw::Allocator> > shm_grid( params.variable_name, shmHdl );
-	    shm_grid->setSizeWithResolution(0.005 * -img.cols, 0.015 * img.cols, 0.005 * -img.rows, 0.015 * img.rows, 0.02, 0.02);
+	    shm_grid->setSizeWithResolution(0.005 * -img.cols, 0.015 * img.cols, 0.005 * -img.rows, 0.015 * img.rows, 0.02, 0.02, 1);
 	    std::cout << *shm_grid << std::endl;
 	    if((img.rows != (int) shm_grid->getRows()) ||  (img.cols != (int) shm_grid->getColumns())){
 	      std::cout << params.file_to_load << " " << img.cols << ", " << img.rows << std::endl;

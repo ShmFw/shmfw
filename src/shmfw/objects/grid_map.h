@@ -34,6 +34,7 @@
 #define SHARED_MEM_OBJECT_GRID_MAP_H
 
 #include <opencv/cxcore.h>
+#include <shmfw/objects/grid_map_header.h>
 #include <boost/interprocess/offset_ptr.hpp>
 
 #define SHMFW_UNUSED_PARAM(a)		(void)(a)
@@ -45,100 +46,56 @@ namespace ShmFw {
  * @note This class is based on the mrpt::slam::CDynamicGridMap which was published unter BSD many thanks to the mrpt team
  */
 template <typename T>
-class GridMap  {
+class GridMap : public ShmFw::GridMapHeader {
 protected:
-    double m_x_min; /// min x in metric units
-    double m_x_max; /// max x in metric units
-    double m_y_min; /// min y in metric units
-    double m_y_max; /// max y in metric units
-    double m_x_resolution;  /// resolution: metric unit = cell * resolution
-    double m_y_resolution;  /// resolution: metric unit = cell * resolution
-    size_t m_size_x; /// size x in cells
-    size_t m_size_y; /// size y in cells
-    size_t m_depth;  /// number of bytes per cell (sizeof(T))
-    size_t m_type_hash_code; /// type hash code only for C+11;
-    boost::interprocess::offset_ptr<T>  m_data; /// cells
-
-    /// Sets the bounderies and rounds the values to integers and to multipliers of the given resolution
-    void setBounderies ( const double x_min, const double x_max, const double y_min, const double y_max, const double x_resolution, const double y_resolution ) {
-        m_x_min = x_resolution*round ( x_min/x_resolution );
-        m_y_min = y_resolution*round ( y_min/y_resolution );
-        m_x_max = x_resolution*round ( x_max/x_resolution );
-        m_y_max = y_resolution*round ( y_max/y_resolution );
-        // Res:
-        m_x_resolution = x_resolution;
-        m_y_resolution = y_resolution;
-        // Now the number of cells should be integers:
-        m_size_x = round ( ( m_x_max-m_x_min ) /m_x_resolution );
-        m_size_y = round ( ( m_y_max-m_y_min ) /m_y_resolution );
-    }
-    /// Sets the bounderies and rounds the values to integers and to multipliers of the given resolution
-    void setBounderies ( const double x_min, const double x_max, const double y_min, const double y_max, const size_t size_x, const size_t size_y ) {
-        m_x_min = x_min;
-        m_y_min = y_min;
-        m_x_max = x_max;
-        m_y_max = y_max;
-	m_size_x = size_x;
-	m_size_y = size_y;
-        m_x_resolution = (m_x_max-m_x_min) / (double) m_size_x;
-	m_y_resolution = (m_y_max-m_y_min) / (double) m_size_y;
-	
-	//setBounderies ( x_min, x_max, y_min, y_max, m_x_resolution, m_y_resolution );
-    }
+    boost::interprocess::offset_ptr<T>  m_origin_data; /// cells
+    boost::interprocess::offset_ptr<T>  m_data;        /// cells
 public:
     GridMap ()
-        : m_x_min ( 0 )
-        , m_x_max ( 0 )
-        , m_y_min ( 0 )
-        , m_y_max ( 0 )
-        , m_x_resolution ( 0 )
-        , m_y_resolution ( 0 )
-        , m_size_x ( 0 )
-        , m_size_y ( 0 )
-        , m_depth ( sizeof ( T ) )
-#if __cplusplus > 199711L
-        , m_type_hash_code ( typeid ( T ).hash_code() )
-#else
-        ,m_type_hash_code ( 0 )
-#endif
+        : GridMapHeader (  )
         , m_data () {
     }
-    GridMap ( const double x_min, const double x_max, const double y_min, const double y_max, const double x_resolution, const double y_resolution, T *data, const T * fill_value = NULL ) {
-        init ( x_min, x_max, y_min, y_max, x_resolution, y_resolution, data, fill_value );
+    GridMap ( const double x_min, const double x_max, const double y_min, const double y_max, const double x_resolution, const double y_resolution, const size_t layers, T *data, const T * fill_value = NULL ) {
+      size_t type_hash_code;
+#if __cplusplus > 199711L
+        type_hash_code = typeid ( T ).hash_code();
+#else
+        type_hash_code = 0;
+#endif
+      initHeader ( x_min, x_max, y_min, y_max, x_resolution, y_resolution, sizeof ( T ), layers, type_hash_code);
+      initData(data, fill_value);
     }
     /** Initilialies a given data array
       */
-    void init (
-        const double x_min, const double x_max,
-        const double y_min, const double y_max,
-        const double x_resolution,
-        const double y_resolution, T *data, const T * fill_value = NULL ) {
-        setBounderies ( x_min, x_max, y_min, y_max, x_resolution, y_resolution, data, fill_value );
+    void initData (T *data, const T * fill_value = NULL ) {
         m_data = data;
-        m_depth = sizeof ( T );
-#if __cplusplus > 199711L
-        m_type_hash_code = typeid ( T ).hash_code();
-#else
-        m_type_hash_code = 0;
-#endif
         if ( fill_value ) fill ( fill_value );
     }
-    template<typename T1>
-    void copyDataTo ( T1& des ) const {
-        /// works as long as the data is aligned
-        if ( size() != des.size() ) throw 0;
-        memcpy ( &des[0], data(), sizeof ( T ) * size() );
+    /// copies only the active layer to des. @param des destination
+    template<typename T1> void copyLayerTo ( T1& des ) const {
+        memcpy ( &des[0], data(), bytes() );
     }
-    template<typename T1>
-    GridMap& copyDataFrom ( const T1& src ) {
-        /// works as long as the data is aligned
-        if ( size() != src.size() ) throw 0;
-        memcpy ( data(), &src[0], sizeof ( T ) * size() );
+    /// copies only the active layer from src. @param src source
+    template<typename T1> GridMap& copyLayerFrom ( const T1& src ) {
+        memcpy ( data(), &src[0], bytes() );
         return *this;
     }
+    /// copies only the active layer from src. @param src source
+    void copyLayerFromArray ( const void *src ) {
+        memcpy ( data(), src, bytes_total() );
+    }
+    /// copies all layers layer to des. @param des destination
+    template<typename T1> void copyDataTo ( T1& des ) const {
+        memcpy ( &des[0], data(), bytes_total() );
+    }
+    /// copies all layers from src. @param src source
+    template<typename T1> GridMap& copyDataFrom ( const T1& src ) {
+        memcpy ( origin_data(), &src[0], bytes_total() );
+        return *this;
+    }
+    /// copies all layers from src. @param src source
     void copyDataFromArray ( const void *src ) {
-        /// works as long as the data is aligned
-        memcpy ( data(), src, sizeof ( T ) * size() );
+        memcpy ( origin_data(), src, bytes_total() );
     }
 
     /** Fills all the cells with the same value
@@ -170,81 +127,48 @@ public:
     T *data() {
         return m_data.get();
     }
-    /** Returns the number of cells.
+    /** Returns a reference to a cell, no boundary checks are performed.
       */
-    size_t size() const {
-        return m_size_x*m_size_y;
+    T *data(size_t i) {
+        return m_data.get() + i;
     }
-
-    /** Returns the horizontal size of grid map in cells count.
-        */
-    inline size_t getSizeX() const {
-        return m_size_x;
+    /** Returns a reference to a cell, no boundary checks are performed.
+      */
+    T *origin_data() {
+        return m_origin_data.get();
     }
-    inline size_t getColumns() const {
-        return getSizeX();
+    /** Returns a reference to a cell, no boundary checks are performed.
+      */
+    const T *origin_data() const {
+        return m_origin_data.get();
     }
-
-    /** Returns the vertical size of grid map in cells count.
-        */
-    inline size_t getSizeY() const {
-        return m_size_y;
+    /** Returns a reference to a cell, no boundary checks are performed.
+      */
+    T *origin_data(size_t i) {
+        return m_origin_data.get() + i;
     }
-    inline size_t getRows() const {
-        return getSizeY();
+    /** Returns a reference to a cell, no boundary checks are performed.
+      */
+    const T *origin_data(size_t i) const {
+        return m_origin_data.get() + i;
     }
-    /** Returns the number of bytes per cell
-        */
-    inline size_t getDepth() const {
-        return m_depth;
-    }
-    /** Returns the type hash code
-     */
-    inline size_t getTypeHashCode() const {
-        return m_type_hash_code;
-    }
-
-    /** Returns the "x" coordinate of left side of grid map.
-        */
-    inline double getXMin() const  {
-        return m_x_min;
-    }
-
-    /** Returns the "x" coordinate of right side of grid map.
-        */
-    inline double getXMax() const  {
-        return m_x_max;
-    }
-
-    /** Returns the "y" coordinate of top side of grid map.
-        */
-    inline double getYMin() const  {
-        return m_y_min;
-    }
-
-    /** Returns the "y" coordinate of bottom side of grid map.
-        */
-    inline double getYMax() const  {
-        return m_y_max;
-    }
-
-    /** Returns the resolution of the grid map.
-        */
-    inline double getResolutionX() const  {
-        return m_x_resolution;
-    }
-    /** Returns the resolution of the grid map.
-        */
-    inline double getResolutionY() const  {
-        return m_y_resolution;
-    }
-
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
       */
     inline T& cellByIndex_nocheck ( int idx )  {
         return m_data[idx];
     };
-
+    /** Returns a pointer to a layer @return pointer ot layer data
+      */
+    T* data_layer(size_t layer){
+	if(layer >= getLayers()) throw 0;
+        return origin_data(size() * layer);
+    }
+    /** Returns a pointer to a layer @return pointer ot layer data
+      */
+    const T* data_layer(size_t layer) const {
+	if(layer >= getLayers()) throw 0;
+        return origin_data(this->size() * layer);
+    }
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
       */
     inline const T& cellByIndex_nocheck ( int idx ) const {
@@ -254,13 +178,13 @@ public:
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
       */
     inline T& cellByIndex_nocheck ( int cx, int cy ) {
-        return m_data[ cx + cy*this->m_size_x ];
+        return m_data[ xy2idx(cx,cy) ];
     };
 
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
       */
     inline const T& cellByIndex_nocheck ( int cx, int cy ) const {
-        return m_data[ cx + cy*this->m_size_x ];
+        return m_data[ xy2idx(cx,cy) ];
     };
 
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
@@ -281,8 +205,8 @@ public:
         int cx = x2idx ( x );
         int cy = y2idx ( y );
 
-        if ( cx<0 || cx>=static_cast<int> ( this->m_size_x ) ) return NULL;
-        if ( cy<0 || cy>=static_cast<int> ( this->m_size_y ) ) return NULL;
+        if ( cx<0 || cx>=static_cast<int> ( getSizeX() ) ) return NULL;
+        if ( cy<0 || cy>=static_cast<int> ( getSizeY() ) ) return NULL;
 
         return cellByIndex_nocheck ( cx, cy );
     }
@@ -293,8 +217,8 @@ public:
         int cx = x2idx ( x );
         int cy = y2idx ( y );
 
-        if ( cx<0 || cx>=static_cast<int> ( this->m_size_x ) ) return NULL;
-        if ( cy<0 || cy>=static_cast<int> ( this->m_size_y ) ) return NULL;
+        if ( cx<0 || cx>=static_cast<int> ( getSizeX() ) ) return NULL;
+        if ( cy<0 || cy>=static_cast<int> ( getSizeY() ) ) return NULL;
 
         return cellByIndex_nocheck ( cx, cy );
     }
@@ -304,8 +228,8 @@ public:
         int cx = x2idx ( x );
         int cy = y2idx ( y );
 
-        if ( cx<0 || cx>=static_cast<int> ( this->m_size_x ) ) return;
-        if ( cy<0 || cy>=static_cast<int> ( this->m_size_y ) ) return;
+        if ( cx<0 || cx>=static_cast<int> ( getSizeX() ) ) return;
+        if ( cy<0 || cy>=static_cast<int> ( getSizeY() ) ) return;
 
         cellByIndex_nocheck ( cx, cy ) = src;
     }
@@ -315,8 +239,8 @@ public:
         int cx = x2idx ( x );
         int cy = y2idx ( y );
 
-        if ( cx<0 || cx>=static_cast<int> ( this->m_size_x ) ) return;
-        if ( cy<0 || cy>=static_cast<int> ( this->m_size_y ) ) return;
+        if ( cx<0 || cx>=static_cast<int> ( getSizeX() ) ) return;
+        if ( cy<0 || cy>=static_cast<int> ( getSizeY() ) ) return;
 
         des = cellByIndex_nocheck ( cx, cy );
     }
@@ -324,7 +248,7 @@ public:
     /** Returns a pointer to the contents of a cell given by its cell indexes, or NULL if it is out of the map extensions.
       */
     inline  T*	cellByIndex ( unsigned int cx, unsigned int cy ) {
-        if ( cx>=this->m_size_x || cy>=this->m_size_y )
+        if ( cx>=getSizeX() || cy>=getSizeY() )
             return NULL;
         else	return &cellByIndex_nocheck ( cx, cy );
     }
@@ -332,14 +256,14 @@ public:
     /** Returns a pointer to the contents of a cell given by its cell indexes, or NULL if it is out of the map extensions.
       */
     inline const T* cellByIndex ( unsigned int cx, unsigned int cy ) const {
-        if ( cx>=this->m_size_x || cy>=this->m_size_y )
+        if ( cx>=getSizeX() || cy>=getSizeY() )
             return NULL;
         else	return &cellByIndex_nocheck ( cx, cy );
     }
     /** set the contents of a cell given by its cell indexes if the indexes are with the range.
       */
     inline void setCellByIndex ( unsigned int cx, unsigned int cy, const T &src ) {
-        if ( cx>=this->m_size_x || cy>=this->m_size_y )
+        if ( cx>=getSizeX() || cy>=getSizeY() )
             return;
         else
             cellByIndex_nocheck ( cx, cy ) = src;
@@ -347,67 +271,10 @@ public:
     /** set the contents of a cell given by its cell indexes if the indexes are with the range.
       */
     inline void getCellByIndex ( unsigned int cx, unsigned int cy, T &des ) const {
-        if ( cx>=this->m_size_x || cy>=this->m_size_y )
+        if ( cx>=getSizeX() || cy>=getSizeY() )
             return;
         else
             des = cellByIndex_nocheck ( cx, cy );
-    }
-    /** Transform a coordinate values into cell indexes.
-      */
-    inline int   x2idx ( double x ) const {
-        return static_cast<int> ( ( x-this->m_x_min ) /this->m_x_resolution );
-    }
-    inline int   y2idx ( double y ) const {
-        return static_cast<int> ( ( y-this->m_y_min ) /this->m_y_resolution );
-    }
-    inline int   xy2idx ( double x,double y ) const {
-        return x2idx ( x ) + y2idx ( y ) *this->m_size_x;
-    }
-
-    /** Transform a global (linear) cell index value into its corresponding (x,y) cell indexes. */
-    inline void  idx2cxcy ( const int &idx,  int &cx, int &cy ) const {
-        cx = idx % this->m_size_x;
-        cy = idx / this->m_size_x;
-    }
-
-    /** Transform a cell index into a coordinate value.
-      */
-    inline double   idx2x ( int cx ) const {
-        return this->m_x_min+ ( cx+0.5f ) *this->m_x_resolution;
-    }
-    inline double   idx2y ( int cy ) const {
-        return this->m_y_min+ ( cy+0.5f ) *this->m_y_resolution;
-    }
-
-    /** Transform a coordinate value into a cell index, using a diferent "x_min" value
-        */
-    inline int   x2idx ( double x,double x_min ) const {
-        SHMFW_UNUSED_PARAM ( x_min );
-        return static_cast<int> ( ( x-this->m_x_min ) / this->m_x_resolution );
-    }
-    inline int   y2idx ( double y, double y_min ) const {
-        SHMFW_UNUSED_PARAM ( y_min );
-        return static_cast<int> ( ( y-this->m_y_min ) /this->m_y_resolution );
-    }
-
-    /** The user must implement this in order to provide "saveToTextFile" a way to convert each cell into a numeric value */
-    double cell2double ( const T& c ) const {
-        SHMFW_UNUSED_PARAM ( c );
-        return 0;
-    }
-    friend std::ostream& operator<< ( std::ostream &output, const GridMap &o ) {
-        char msg[0xFF];
-        sprintf ( msg, "[%zu, %zu] @ [%4.3f, %4.3f]m/px of %zu bytes, range x:  %4.3f -> %4.3f, y: %4.3f -> %4.3f, type_hash_code: %zu",
-                  o.getSizeX(), o.getSizeY(), o.getResolutionX(), o.getResolutionY(),
-                  o.getDepth (),
-                  o.getXMin(), o.getXMax(),
-                  o.getYMin(), o.getYMax(),
-                  o.getTypeHashCode() );
-        output << msg;
-        return output;
-    }
-    friend std::istream& operator>> ( std::istream &input, GridMap &o ) {
-        return input;
     }
     /** Returns a reference to a cell, no boundary checks are performed.
       */
@@ -419,32 +286,20 @@ public:
     T &operator() ( int cx, int cy ) {
         return cellByIndex_nocheck ( cx, cy );
     }
-    /** Returns a metric pose as cell pose.
+    /** Returns the data as opencv matrix
       */
-    inline cv::Point cvCellPoint (double x, double y ) const {
-        return cv::Point ( x2idx ( x ), y2idx ( y ) );
-    }
-    /** Returns a metric pose as cell pose.
-      */
-    template <typename T1>
-    inline cv::Point cvCellPoint ( cv::Point_<T1> p ) {
-        return cv::Point ( x2idx ( p.x ), y2idx ( p.y ) );
-    }
-    /** Returns a cell pose as metric pose.
-      */
-    inline cv::Point2d cvPosePoint ( int &x, int &y ) {
-        return cv::Point2d ( idx2x ( x ), idx2y ( y ) );
-    }
-    /** Returns a cell pose as metric pose.
-      */
-    inline cv::Point2d cvPosePoint ( const cv::Point &p ) {
-        return cv::Point2d ( idx2x ( p.x ), idx2y ( p.y ) );
+    cv::Mat_<T> cvMatLayer(size_t layer) {
+        return cv::Mat_<T> ( getSizeY(), getSizeX(), data_layer(layer) );
     }
     /** Returns the data as opencv matrix
       */
-    cv::Mat_<T> &cvMat ( cv::Mat_<T> &m ) {
-        m = cvMat();
-        return m;
+    const cv::Mat_<T> cvMatLayer(size_t layer) const {
+        return cv::Mat_<T> ( getSizeY(), getSizeX(), (T*) data_layer(layer) );
+    }
+    /** Returns the data as opencv matrix
+      */
+    cv::Mat_<T> cvMat() {
+        return cv::Mat_<T> ( getSizeY(), getSizeX(), m_data.get() );
     }
     /** Returns the data as opencv matrix
       */
@@ -453,14 +308,19 @@ public:
     }
     /** Returns the data as opencv matrix
       */
-    cv::Mat &cvMat ( cv::Mat &m, int cvtype ) {
-        m = cvMat ( cvtype );
+    cv::Mat cvMat ( int cvtype ) const {
+        return cv::Mat ( getSizeY(), getSizeX(), cvtype, m_data.get() );
+    }
+    /** Returns the data as opencv matrix
+      */
+    cv::Mat_<T> &cvMatTotal ( cv::Mat_<T> &m ) {
+        m = cvMatTotal();
         return m;
     }
     /** Returns the data as opencv matrix
       */
-    cv::Mat cvMat ( int cvtype ) const {
-        return cv::Mat ( getSizeY(), getSizeX(), cvtype, m_data.get() );
+    cv::Mat_<T> cvMatTotal() const {
+        return cv::Mat_<T> ( getSizeY()*getLayers(), getSizeX(), (T*) m_origin_data.get() );
     }
     /** creates a opencv line iterator based on a metric start and endpoint
       */
@@ -487,17 +347,6 @@ public:
             cv::line ( img, cvCellPoint ( p0.x,p0.y ), cvCellPoint ( p1.x,p1.y ), color, thickness, lineType, shift );
         }
     }
-    /** tries to identify the cvtype
-     * @return cvtype or -1
-      */
-    int cvtype() const {
-        int type = -1;
-        if ( m_depth == 1 ) type = CV_8U;
-        else if ( m_depth == 2 ) type = CV_16U;
-        else if ( m_depth == 3 ) type = CV_8UC3;
-        return type;
-    }
-
     /// parses over all entries and looks for the min an max entry
     template <typename T1>
     void getMinMax(T1 &min, T1 &max) const{
@@ -510,26 +359,31 @@ public:
 	p++;
       }
     }
-    /// return a opencv color for drawing
-    static cv::Scalar cvGreen() {
-        return cv::Scalar ( 0,255,0 );
+    
+    /** returns the current active layer
+     * @returns current layer
+      */
+    int activeLayer() const {
+      unsigned long memory_address_orgion_data = (unsigned long) m_origin_data.get();
+      unsigned long memory_address_current_data = (unsigned long) m_data.get();
+      unsigned long memory_address_difference = memory_address_current_data - memory_address_orgion_data;
+      unsigned long memory_size_layer =  size() * getDepth();
+      return memory_address_difference / memory_size_layer;
     }
-    /// return a opencv color for drawing
-    static cv::Scalar cvBlue() {
-        return cv::Scalar ( 0,0,255 );
+    /** changes the active layer
+     * @returns the new active layer
+      */
+    int activateLayer(size_t i) {
+	m_data = (m_origin_data + size() * i);
+        return activeLayer();
     }
-    /// return a opencv color for drawing
-    static cv::Scalar cvRed() {
-        return cv::Scalar ( 0,0,255 );
+    
+    /** Erase the contents of all the cells. */
+    void  clear() {
+        memset ( data(), 0, this->size_total() );
     }
-    /** Compared the entry type
-     * @return true if the type T1 is equal to T
-     */
-    template <typename T1>
-    bool isType() const {
-      size_t type_hash_code =( typeid ( T1 ).hash_code() );
-      return (m_type_hash_code == type_hash_code);
-    }
+
+    
 };
 };
 

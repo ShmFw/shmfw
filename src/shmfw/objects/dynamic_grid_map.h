@@ -58,14 +58,14 @@ public:
 
     template<typename T1>
     void copyTo ( T1& des ) const {
-        des.setSizeWithResolution ( this->getXMin(), this->getXMax(), this->getYMin(), this->getYMax(), this->getResolutionX(), this->getResolutionY() );
+        des.setSizeWithResolution ( this->getXMin(), this->getXMax(), this->getYMin(), this->getYMax(), this->getResolutionX(), this->getResolutionY(), 1 );
         this->copyDataTo ( des );
     }
 
 
     template<typename T1>
     DynamicGridMap& copyFrom ( const T1& src ) {
-        setSizeWithResolution ( src.getXMin(), src.getXMax(), src.getYMin(), src.getYMax(), src.getResolutionX(), src.getResolutionY()  );
+        setSizeWithResolution ( src.getXMin(), src.getXMax(), src.getYMin(), src.getYMax(), src.getResolutionX(), src.getResolutionY(),1  );
         return this->copyDataFrom ( src );
     }
 
@@ -74,55 +74,63 @@ public:
     void  setSizeWithResolution (
         const double x_min, const double x_max,
         const double y_min, const double y_max,
-        const double x_resolution, const double y_resolution) {
+        const double x_resolution, const double y_resolution,
+	const size_t layers) {
 
         // Sets the bounderies and rounds the values to integers if needed
-        this->setBounderies ( x_min, x_max, y_min, y_max, x_resolution, y_resolution );
+        this->initHeader ( x_min, x_max, y_min, y_max, x_resolution, y_resolution, sizeof(T), layers );
 
         // Cells memory:
-        m_map.resize ( this->m_size_x*this->m_size_y );
-        this->m_data = &m_map[0];
+        m_map.resize ( this->size_total());
+        this->m_origin_data = &m_map[0];
+	this->activateLayer(0);
     }
     /** Changes the size of the grid, ERASING all previous contents.
       */
     void  setSizeWithResolution (
         const double x_min, const double x_max,
         const double y_min, const double y_max,
-        const double x_resolution, const double y_resolution, const T &fill_value ) {
+        const double x_resolution, const double y_resolution,
+	const size_t layers, const T &fill_value ) {
 
         // Sets the bounderies and rounds the values to integers if needed
-        this->setBounderies ( x_min, x_max, y_min, y_max, x_resolution, y_resolution );
+        this->initHeader ( x_min, x_max, y_min, y_max, x_resolution, y_resolution, sizeof(T), layers);
 
-        m_map.assign ( this->m_size_x*this->m_size_y, fill_value );
-        this->m_data = &m_map[0];
+        m_map.assign ( this->size_total(), fill_value );
+        this->m_origin_data = &m_map[0];
+	this->activateLayer(0);
     }
     /** Changes the size of the grid, ERASING all previous contents.
       */
     void  setSizeWithNrOfCells (
         const double x_min, const double x_max,
         const double y_min, const double y_max,
-        const size_t size_x, const size_t size_y ) {
+        const size_t size_x, const size_t size_y,
+	const size_t layers ) {
 
         // Sets the bounderies and rounds the values to integers if needed
-        this->setBounderies ( x_min, x_max, y_min, y_max, size_x,  size_y);
+        this->initHeader ( x_min, x_max, y_min, y_max, size_x,  size_y, sizeof(T), layers);
 
         // Cells memory:
-        m_map.resize ( this->m_size_x*this->m_size_y );
-        this->m_data = &m_map[0];
+        m_map.resize ( this->size_total() );
+        this->m_origin_data = &m_map[0];
+	this->activateLayer(0);
     }
     /** Changes the size of the grid, ERASING all previous contents.
       */
     void  setSizeWithNrOfCells (
         const double x_min, const double x_max,
         const double y_min, const double y_max,
-        const size_t size_x, const size_t size_y, const T &fill_value  ) {
+        const size_t size_x, const size_t size_y,
+	const size_t layers, const T &fill_value  ) {
 
         // Sets the bounderies and rounds the values to integers if needed
-        this->setBounderies ( x_min, x_max, y_min, y_max, size_x,  size_y);
+        this->initHeader ( x_min, x_max, y_min, y_max, size_x,  size_y, sizeof(T), layers);
 
         // Cells memory:
-        m_map.assign ( this->m_size_x*this->m_size_y, fill_value );
-        this->m_data = &m_map[0];
+        m_map.assign (  this->size_total(), fill_value );
+        this->m_origin_data = &m_map[0];
+	this->activateLayer(0);
     }
     /** Changes the size of the grid, ERASING all previous contents.
       */
@@ -130,102 +138,18 @@ public:
     void  setSize (const GridMap<T1> &map, bool copy = false){
 
         // Sets the bounderies and rounds the values to integers if needed
-        this->setBounderies ( map.getXMin(), map.getXMax(), map.getYMin(), map.getYMax(), map.getSizeX(),  map.getSizeY());
+        this->initHeader ( map.getXMin(), map.getXMax(), map.getYMin(), map.getYMax(), map.getSizeX(),  map.getSizeY(), 
+			      map.getDepth(), map.getLayers());
 
         // Cells memory:
-        m_map.resize ( this->m_size_x*this->m_size_y);
-        this->m_data = &m_map[0];
+        m_map.resize (this->size_total());
+        this->m_origin_data = &m_map[0];
+	this->activateLayer(0);
 	if(copy){
 	  this->copyDataFrom(map);
 	}
     }
 
-
-    /** Erase the contents of all the cells. */
-    void  clear() {
-        m_map.clear();
-        m_map.resize ( this->m_size_x*this->m_size_y );
-        this->m_data = &m_map[0];
-    }
-
-    /** Changes the size of the grid, maintaining previous contents.
-      * \sa setSize
-      */
-    void  resize (
-        double new_x_min, double new_x_max,
-        double new_y_min, double new_y_max,
-        const T& defaultValueNewCells, double additionalMarginMeters = 2.0f ) {
-        // Is resize really necesary?
-        if ( new_x_min >= this->m_x_min &&
-                new_y_min >= this->m_y_min &&
-                new_x_max <= this->m_x_max &&
-                new_y_max <= this->m_y_max )	return;
-
-        if ( new_x_min > this->m_x_min ) new_x_min = this->m_x_min;
-        if ( new_x_max < this->m_x_max ) new_x_max = this->m_x_max;
-        if ( new_y_min > this->m_y_min ) new_y_min = this->m_y_min;
-        if ( new_y_max < this->m_y_max ) new_y_max = this->m_y_max;
-
-        // Additional margin:
-        if ( additionalMarginMeters>0 ) {
-            if ( new_x_min < this->m_x_min ) new_x_min = floor ( new_x_min-additionalMarginMeters );
-            if ( new_x_max > this->m_x_max ) new_x_max = ceil ( new_x_max+additionalMarginMeters );
-            if ( new_y_min < this->m_y_min ) new_y_min = floor ( new_y_min-additionalMarginMeters );
-            if ( new_y_max > this->m_y_max ) new_y_max = ceil ( new_y_max+additionalMarginMeters );
-        }
-
-        // Adjust sizes to adapt them to full sized cells acording to the resolution:
-        if ( fabs ( new_x_min/this->m_x_resolution - round ( new_x_min/this->m_x_resolution ) ) >0.05f )
-            new_x_min = this->m_x_resolution*round ( new_x_min/this->m_x_resolution );
-        if ( fabs ( new_y_min/this->m_y_resolution - round ( new_y_min/this->m_y_resolution ) ) >0.05f )
-            new_y_min = this->m_y_resolution*round ( new_y_min/this->m_y_resolution );
-        if ( fabs ( new_x_max/this->m_x_resolution - round ( new_x_max/this->m_x_resolution ) ) >0.05f )
-            new_x_max = this->m_x_resolution*round ( new_x_max/this->m_x_resolution );
-        if ( fabs ( new_y_max/this->m_y_resolution - round ( new_y_max/this->m_y_resolution ) ) >0.05f )
-            new_y_max = this->m_y_resolution*round ( new_y_max/this->m_y_resolution );
-
-        // Change the map size: Extensions at each side:
-        unsigned int extra_x_izq = round ( ( this->m_x_min-new_x_min ) / this->m_x_resolution );
-        unsigned int extra_y_arr = round ( ( this->m_y_min-new_y_min ) / this->m_y_resolution );
-
-        unsigned int new_size_x = round ( ( new_x_max-new_x_min ) / this->m_x_resolution );
-        unsigned int new_size_y = round ( ( new_y_max-new_y_min ) / this->m_y_resolution );
-
-        // Reserve new memory:
-        VectorT new_map ( m_map.get_allocator() );
-        new_map.resize ( this->new_size_x*this->new_size_y,defaultValueNewCells );
-
-        // Copy previous rows:
-        unsigned int x,y;
-        typename VectorT::iterator itSrc;
-        typename VectorT::iterator itDst;
-        for ( y = 0; y < this->m_size_y; y++ ) {
-            for ( x = 0,itSrc = ( m_map.begin() +y*this->m_size_x ),itDst= ( new_map.begin() +extra_x_izq + ( y+extra_y_arr ) *new_size_x );
-                    x<this->m_size_x;
-                    x++,itSrc++,itDst++ ) {
-                *itDst = *itSrc;
-            }
-        }
-
-        // Update the new map limits:
-        this->m_x_min = new_x_min;
-        this->m_x_max = new_x_max;
-        this->m_y_min = new_y_min;
-        this->m_y_max = new_y_max;
-
-        this->m_size_x = new_size_x;
-        this->m_size_y = new_size_y;
-
-        // Keep the new map only:
-        m_map.swap ( new_map );
-        //copyDataFrom( new_map );
-        this->m_data = &m_map[0];
-    }
-    /** Returns the number of cells.
-      */
-    size_t size() const {
-        return m_map.size();
-    }
 };
 
 // Variant to use on the heap:

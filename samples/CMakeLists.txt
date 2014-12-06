@@ -1,5 +1,7 @@
 
 
+link_libraries(${PREFIX_LIB}core ${PREFIX_LIB}objects )
+
 add_subdirectory(usage)
 add_subdirectory(serialization)
 add_subdirectory(ros)

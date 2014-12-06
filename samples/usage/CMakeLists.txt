@@ -9,7 +9,7 @@ add_executable(shmfw-example_usage_vector main_usage_vector.cpp )
 target_link_libraries(shmfw-example_usage_vector )
 
 add_executable(shmfw-example_usage_dynamic_grid main_usage_dynamic_grid.cpp )
-target_link_libraries(shmfw-example_usage_dynamic_grid )
+target_link_libraries(shmfw-example_usage_dynamic_grid ${PREFIX_LIB}core ${PREFIX_LIB}objects)
 
 
 add_executable(shmfw-example_usage_and_tests main_usage_and_tests.cpp )
