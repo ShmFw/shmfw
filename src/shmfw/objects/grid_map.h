@@ -178,13 +178,13 @@ public:
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
       */
     inline T& cellByIndex_nocheck ( int cx, int cy ) {
-        return m_data[ xy2idx(cx,cy) ];
+        return m_data[ cxcy2idx(cx,cy) ];
     };
 
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
       */
     inline const T& cellByIndex_nocheck ( int cx, int cy ) const {
-        return m_data[ xy2idx(cx,cy) ];
+        return m_data[ cxcy2idx(cx,cy) ];
     };
 
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.

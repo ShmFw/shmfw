@@ -169,8 +169,8 @@ int   GridMapHeader::x2idx ( double x ) const {
 int   GridMapHeader::y2idx ( double y ) const {
   return static_cast<int> ( ( y-this->m_y_min ) /this->m_y_resolution );
 }
-int GridMapHeader::xy2idx ( double x,double y ) const {
-  return x2idx ( x ) + y2idx ( y ) *this->m_size_x;
+int GridMapHeader::cxcy2idx ( int x,int y ) const {
+  return x + y * this->m_size_x;
 }
 void  GridMapHeader::idx2cxcy ( const int &idx,  int &cx, int &cy ) const {
   cx = idx % this->m_size_x;

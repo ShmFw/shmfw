@@ -135,7 +135,7 @@ protected:
     /// Transform a coordinate y values into cell index. @return cell index y
     int y2idx ( double y ) const;
     /// Transforms x y coordinates a cell index. @return index
-    int xy2idx ( double x, double y ) const;
+    int cxcy2idx ( int x, int y ) const;
     /// Transform a global (linear) cell index value into its corresponding (x,y) cell indexes.
     void idx2cxcy ( const int &idx,  int &cx, int &cy ) const;
     /// Transform a cell index into a coordinate value.
@@ -150,11 +150,17 @@ protected:
     /// tries to identify the cvtype. @return cvtype or -1
     int cvtype() const;  
     
+    /// Transform a coordinate values into cell index. @param x metric value, @param y metric value  @return cell index
     cv::Point cvCellPoint (double x, double y ) const;
+    /// Transform a coordinate values into cell index. @param p metric value  @return cell index
     cv::Point cvCellPoint ( const cv::Point &p ) const;
+    /// Transform a coordinate values into cell index. @param p metric value  @return cell index
     cv::Point cvCellPoint ( const cv::Point2f &p ) const;
+    /// Transform a coordinate values into cell index. @param p metric value  @return cell index
     cv::Point cvCellPoint ( const cv::Point2d &p ) const;
+    /// Transform a cell index into a coordinate value. @param x cell index @param y cell index  @return metric value
     cv::Point2d cvPosePoint ( int &x, int &y ) const;
+    /// Transform a cell index into a coordinate value. @param p cell index  @return metric value
     cv::Point2d cvPosePoint ( const cv::Point &p ) const;
     static cv::Scalar cvGreen();
     static cv::Scalar cvBlue();
