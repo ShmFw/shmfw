@@ -68,6 +68,10 @@ const double& GridMapHeader::getYMin() const  {
 const double& GridMapHeader::getYMax() const  {
   return m_y_max;
 }
+const double& GridMapHeader::getResolution() const  {
+  if(m_x_resolution == m_y_resolution) return m_x_resolution;
+  else throw 0;
+}
 const double& GridMapHeader::getResolutionX() const  {
   return m_x_resolution;
 }

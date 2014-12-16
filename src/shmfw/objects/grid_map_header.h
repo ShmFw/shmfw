@@ -130,6 +130,8 @@ protected:
     const double& getResolutionX() const ;
     /// Returns the resolution of the grid map.  @return m_y_resolution 
     const double& getResolutionY() const;      
+    /// Returns the resolution of the grid map. it thows an exception if m_x_resolution != m_y_resolution  @return resolution 
+    const double& getResolution() const;      
     /// Transform a coordinate x values into cell index. @return cell index x
     int x2idx ( double x ) const;
     /// Transform a coordinate y values into cell index. @return cell index y
