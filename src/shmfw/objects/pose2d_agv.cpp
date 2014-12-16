@@ -31,13 +31,14 @@
  ***************************************************************************/
 
 #include <shmfw/objects/pose2d_agv.h>
-#include <shmfw/handler_variable.h>
+#include <shmfw/gerneralization/handler_variable.h>
 
+/*
 ShmFw::HandlerObjectPtr openShmObject ( const std::string &name, ShmFw::HandlerPtr &shmHdl ) {
     if(shmHdl->findName(name) == NULL ) {
       return ShmFw::HandlerObjectPtr();
     }
     return ShmFw::HandlerObjectPtr ( new ShmFw::HandlerVar< ShmFw::Pose2DAGV > ( name, shmHdl ) );
 }
-
+*/
 

@@ -33,7 +33,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include "shmfw/header.h"
-#include "shmfw/handler_variable.h"
+#include "shmfw/gerneralization/handler_variable.h"
 
 #include <boost/program_options.hpp>
 

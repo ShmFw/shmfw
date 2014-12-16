@@ -34,7 +34,7 @@
 #define SHARED_MEM_VARIABLE_H
 
 #include <shmfw/header.h>
-#include "handler.h"
+#include <shmfw/handler.h>
 
 /**
  * Namespace for the fast and dynamic shared memory framework

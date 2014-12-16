@@ -33,7 +33,7 @@
 #ifndef SHARED_MEM_HANDLER_VECTOR
 #define SHARED_MEM_HANDLER_VECTOR
 
-#include <shmfw/handler_object.h>
+#include <shmfw/gerneralization/handler_object.h>
 #include <shmfw/vector.h>
 
 namespace ShmFw {

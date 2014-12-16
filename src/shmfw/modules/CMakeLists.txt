@@ -1,3 +1,4 @@
+
 SET(MODULE_COM 0 CACHE BOOL "com modul" )
 IF(MODULE_COM )
 add_subdirectory(com)
@@ -9,18 +10,18 @@ add_subdirectory(v4lcam)
 ENDIF(MODULE_V4LCAM )
 
 
-SET(MODULE_OPENCV_CAMERA 1 CACHE BOOL "opencv camera modul" )
+SET(MODULE_OPENCV_CAMERA 0 CACHE BOOL "opencv camera modul" )
 IF(MODULE_OPENCV_CAMERA )
 add_subdirectory(cvcam)
 ENDIF(MODULE_OPENCV_CAMERA )
 
 
-SET(MODULE_OPENCV_FIGURE 1 CACHE BOOL "opencv figure modul" )
+SET(MODULE_OPENCV_FIGURE 0 CACHE BOOL "opencv figure modul" )
 IF(MODULE_OPENCV_FIGURE )
 add_subdirectory(figure)
 ENDIF(MODULE_OPENCV_FIGURE )
 
-SET(MODULE_GAZEBOSIM 1 CACHE BOOL "gazebo sim plugins" )
+SET(MODULE_GAZEBOSIM 0 CACHE BOOL "gazebo sim plugins" )
 IF(MODULE_GAZEBOSIM )
 add_subdirectory(gazebosim)
 ENDIF(MODULE_GAZEBOSIM )

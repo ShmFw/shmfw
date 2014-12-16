@@ -32,11 +32,11 @@ ENDIF(OpenCV_FOUND)
 if(MATHGL_FOUND)
 
 add_executable(${PREFIX_BIN}view_grid view_grid.cpp)
-target_link_libraries(${PREFIX_BIN}view_grid ${PREFIX_LIB}core ${PREFIX_LIB}objects ${PREFIX_LIB}objects -pthread ${MATHGL_LIBRARIES})
+target_link_libraries(${PREFIX_BIN}view_grid ${PREFIX_LIB}objects ${PREFIX_LIB}core -pthread ${MATHGL_LIBRARIES})
 _install_binary (${PREFIX_BIN}view_grid)
 
 add_executable(${PREFIX_BIN}view_grid2 view_grid2.cpp)
-target_link_libraries(${PREFIX_BIN}view_grid2 ${PREFIX_LIB}core  ${PREFIX_LIB}objects ${PREFIX_LIB}objects -pthread ${MATHGL_LIBRARIES})
+target_link_libraries(${PREFIX_BIN}view_grid2 ${PREFIX_LIB}objects ${PREFIX_LIB}core -pthread ${MATHGL_LIBRARIES})
 #_install_binary (${PREFIX_BIN}view_grid2)
 
 endif(MATHGL_FOUND)

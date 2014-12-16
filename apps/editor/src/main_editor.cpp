@@ -34,7 +34,7 @@
 
 
 #include "shmfw/variable.h"
-#include "shmfw/handler_variable.h"
+#include "shmfw/gerneralization/handler_variable.h"
 #include "shmfw/deque.h"
 #include "shmfw/log.h"
 #include <ncurses.h>

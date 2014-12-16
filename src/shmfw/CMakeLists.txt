@@ -4,11 +4,6 @@ SET(FILES_H
   deque.h
   forward_declarations.h
   handler.h
-  handler_allocator.h
-  handler_deque.h
-  handler_object.h
-  handler_variable.h
-  handler_vector.h
   header.h
   log.h
   shmfw.h
@@ -19,7 +14,6 @@ SET(FILES_H
 SET(FILES_CPP
   shmfw.cpp
   handler.cpp
-  handler_object.cpp
   header.cpp
   string.cpp
 )
@@ -32,6 +26,9 @@ ENDIF(MRPT_FOUND)
 
 _install_library(shmfw_core "${FILES_H}" "/shmfw")
 
+
+
 add_subdirectory(objects)
+add_subdirectory(gerneralization)
 add_subdirectory(serialization)
-#add_subdirectory(modules)
+add_subdirectory(modules)

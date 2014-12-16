@@ -33,7 +33,7 @@
 #ifndef SHARED_MEM_HANDLER_DEQUE
 #define SHARED_MEM_HANDLER_DEQUE
 
-#include <shmfw/handler_object.h>
+#include <shmfw/gerneralization/handler_object.h>
 #include <shmfw/deque.h>
 
 namespace ShmFw {

@@ -33,7 +33,7 @@
 #ifndef SHARED_MEM_HANDLER_ALLOCATOR
 #define SHARED_MEM_HANDLER_ALLOCATOR
 
-#include <shmfw/handler_object.h>
+#include <shmfw/gerneralization/handler_object.h>
 #include <shmfw/allocator.h>
 
 namespace ShmFw {
