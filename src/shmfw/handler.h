@@ -34,6 +34,7 @@
 #ifndef SHARED_MEM_HANDLER_H
 #define SHARED_MEM_HANDLER_H
 
+#include <shmfw/shmfw.h>
 #include <stdexcept>
 #include <iostream>
 #include <boost/algorithm/string.hpp>
@@ -78,24 +79,6 @@ typedef bi::allocator<CharString, bi::managed_shared_memory::segment_manager> St
 typedef boost::shared_ptr<StringAllocator> StringAllocatorPtr;
 typedef boost::shared_ptr<std::stringstream> StringStreamPtr;
 
-inline bp::ptime now() {
-    return bp::microsec_clock::local_time();
-}
-
-enum SerializeFormat {
-    FORMAT_NA  = 0,
-    FORMAT_XML = 1,
-    FORMAT_BIN = 2,
-    FORMAT_TXT = 3
-};
-
-inline std::string DEFAULT_SEGMENT_NAME() {
-    return "ShmFw";
-};
-inline unsigned int DEFAULT_SEGMENT_SIZE() {
-    return 16*1024*1024; //16MB;
-};
-
 class Handler;
 typedef boost::shared_ptr<Handler> HandlerPtr;
 
@@ -105,99 +88,48 @@ public:
      * Default construtor creates a shm with default values
      * @post Handler::createSegment
      **/
-    Handler()
-        : valid_ ( false ), name_ ( DEFAULT_SEGMENT_NAME() ), size_ ( DEFAULT_SEGMENT_SIZE() ) {
-    }
+    Handler();
     /**
      * Construtor creates a shm
      * @param name
      * @param size
      **/
-    Handler ( const std::string &name, unsigned int size = DEFAULT_SEGMENT_SIZE() )
-        : valid_ ( false ), name_ ( name ), size_ ( size ) {
-        createSegment();
-    }
+    Handler ( const std::string &name, unsigned int size = DEFAULT_SEGMENT_SIZE() );
     /**
      * rerates a new handler
      * @post Handler::createSegment
      **/
-    static HandlerPtr create() {
-        return HandlerPtr ( new Handler );
-    }
+    static HandlerPtr create();
     /**
      * rerates a new handler
      * @param name
      * @param size
      **/
-    static HandlerPtr create ( const std::string &name, unsigned int size = DEFAULT_SEGMENT_SIZE() ) {
-        return HandlerPtr ( new Handler ( name, size ) );
-    }
+    static HandlerPtr create ( const std::string &name, unsigned int size = DEFAULT_SEGMENT_SIZE() );
     /**
     * @return managed memory
     **/
-    ShmPtr getShm() {
-        return pShm_;
-    }
+    ShmPtr getShm();
     /** creates a named shared memory segment with the current name and size
     **/
-    void createSegment() {
-        createSegment ( name_, size_ );
-    }
+    void createSegment();
     /** creates a named shared memory segment
     * @param name name of segment to remove
     * @param size size in bytes of the segment
     **/
-    void createSegment ( const std::string &name, unsigned int size = DEFAULT_SEGMENT_SIZE() ) {
-        name_ = name;
-        size_ = size;
-        try {
-            /// look if it allready exists
-            pShm_ = ShmPtr ( new bi::managed_shared_memory ( bi::open_only, name_.c_str() ) );
-            if ( pShm_->get_size() != size_ ) {
-                if ( pShm_->get_size() > size_ ) {
-                    std::cerr << "Shared memory segment: " << name_ << " exists but is bigger I will use this one";
-                } else {
-                    std::cerr << "Shared memory segment: " << name_ << " exists with a samller size that can be a problem: " << pShm_->get_size() << " != " << size_ << std::endl;
-                }
-            }
-        } catch ( ... ) {
-            /// it did not exist so I will create it
-            try {
-                pShm_ = ShmPtr ( new bi::managed_shared_memory ( bi::create_only, name_.c_str(), size_ ) );
-                /// Clear the memory
-                //std::memset(pShm->get_address(), 0, pShm->get_size());
-            } catch ( bi::interprocess_exception &ex ) {
-                std::cerr << "Problem on crationg the shared memory!" << std::endl;
-                std::cout << ex.what() << std::endl;
-                exit ( 1 );
-            }
-        }
-        pCharAllocator_ = CharAllocatorPtr ( new CharAllocator ( pShm_->get_segment_manager() ) );
-        pStringAllocator_ = StringAllocatorPtr ( new StringAllocator ( pShm_->get_segment_manager() ) );
-        valid_ = true;
-    }
+    void createSegment ( const std::string &name, unsigned int size = DEFAULT_SEGMENT_SIZE() );
     /**
      * @return shm name
      **/
-    const std::string &getName() const {
-        return name_;
-    };
+    const std::string &getName() const;
     /**
      * @return shm size
      **/
-    unsigned int getSize() const {
-        return size_;
-    };
-    bool isValid() {
-        valid_ = false;
-        try {
-            bi::managed_shared_memory shm ( bi::open_only, name_.c_str() );
-            valid_ = true;
-        } catch ( bi::interprocess_exception &ex ) {
-            std::cerr << "shared memory does not exist!: " << ex.what() << std::endl;
-        }
-        return valid_;
-    }
+    unsigned int getSize() const;
+    /**
+     * @return ture if the shm exists
+     **/
+    bool isValid();
     /**
      * used to create a anonymous shared string
      * @param pShm pointer to the shared memory segment
@@ -236,93 +168,37 @@ public:
     * @param list_hidden on true it will also list names starting with a . 
     * @author Markus Bader
     **/
-    void listNames ( std::vector< std::string> &rNames, bool list_hidden ) {
-        try {
-            typedef bi::managed_shared_memory::const_named_iterator const_named_it;
-            const_named_it named_beg = pShm_->named_begin();
-            const_named_it named_end = pShm_->named_end();
-            for ( ; named_beg != named_end; ++named_beg ) {
-                const bi::managed_shared_memory::char_type *name = named_beg->name();
-                std::string entryName ( name );
-                if ( list_hidden || (entryName.find_first_of ( "." ) != 0 )) {
-                    rNames.push_back ( name );
-                }
-            }
-        }    catch ( ... ) {
-            //AK_LOG_ERROR << "exception ShmManager::listNames()";
-            std::cerr << "exception ShmManager::listNames()";
-        }
-    }
+    void listNames ( std::vector< std::string> &rNames, bool list_hidden );
     /** Returns list with the names of the shared variables
     * @param rName search name
     * @return pointer ot the shared variable or NULL if it was not found
     * @author Markus Bader
     */
-    void *findName ( const std::string &rNames, const std::string &prefix = "" ) {
-        void *value = NULL;
-        std::string full_name = "";
-
-        if ( prefix.compare ( "" ) != 0 )
-            full_name = prefix + ":" + rNames;
-        else
-            full_name = rNames;
-
-        try {
-            typedef bi::managed_shared_memory::const_named_iterator const_named_it;
-            const_named_it named_beg = pShm_->named_begin();
-            const_named_it named_end = pShm_->named_end();
-            for ( ; named_beg != named_end; ++named_beg ) {
-                const bi::managed_shared_memory::char_type *name = named_beg->name();
-                if ( full_name.compare ( name ) == 0 ) {
-                    value = ( void* ) named_beg->value();
-                }
-            }
-        }    catch ( ... ) {
-            //AK_LOG_ERROR << "exception ShmManager::findName(): " << rNames;
-            std::cerr << "exception ShmManager::findName(): " << rNames;
-        }
-        return value;
-    }
+    void *findName ( const std::string &rNames, const std::string &prefix = "" );
     /** removes a named shared memory segment
     * @see bi
     * @param name name of segment to remove
     **/
-    static bool removeSegment ( const std::string &name ) {
-        return bi::shared_memory_object::remove ( name.c_str() );
-    }
-    bool removeSegment() {
-        return removeSegment ( name_ );
-    }
+    static bool removeSegment ( const std::string &name );
+    /** removes this related shared memory segment
+    * @see bi
+    **/
+    bool removeSegment();
 
     /** returns namespace
     * @return namespace
     **/
-    const std::string &getNamespace() const {
-        return namespace_;
-    }
+    const std::string &getNamespace() const;
     /** Defines a namespace for shared memory varaibles constructed with this handler
     * a "/" will allways present after calling this fnc
     * @param namespace name prefix
     **/
-    void setNamespace ( const std::string& ns ) {
-        namespace_ = ns;
-        boost::trim ( namespace_ );
-        boost::trim_left_if ( namespace_, boost::is_any_of ( "/" ) );
-        boost::trim_right_if ( namespace_, boost::is_any_of ( "/" ) );
-        if ( namespace_.empty() ) namespace_ = "/";
-        else namespace_ = "/" + namespace_ + "/";
-    }
+    void setNamespace ( const std::string& ns );
     /** adds the prefix to a name
     * @param name
     * @return prefix + name
     **/
-    std::string resolve_namespace ( const std::string &_name ) {
-        if ( namespace_.empty() ) return _name;
-        std::string n = _name;
-        boost::trim_left_if ( n, boost::is_any_of ( "/" ) );
-        boost::trim_right_if ( n, boost::is_any_of ( "/" ) );
-        return namespace_ + n;
-    }
+    std::string resolve_namespace ( const std::string &_name ) ;
 private:
     Handler ( const Handler & ) {};
     bool valid_;

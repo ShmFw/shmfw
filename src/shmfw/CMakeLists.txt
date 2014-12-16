@@ -17,15 +17,18 @@ SET(FILES_H
 )
 SET(FILES_CPP
   shmfw.cpp
+  handler.cpp
+  handler_object.cpp
+  header.cpp
 )
 
-add_library(${PREFIX_LIB}core SHARED ${FILES_H} ${FILES_CPP})
-target_link_libraries(${PREFIX_LIB}core ${Boost_LIBRARIES} rt)
+add_library(shmfw_core SHARED ${FILES_H} ${FILES_CPP})
+target_link_libraries(shmfw_core ${Boost_LIBRARIES} rt)
 IF(MRPT_FOUND)
-target_link_libraries(${PREFIX_LIB}core ${MRPT_LIBS})
+target_link_libraries(shmfw_core ${MRPT_LIBS})
 ENDIF(MRPT_FOUND)
 
-_install_library(${PREFIX_LIB}core "${FILES_H}" "/shmfw")
+_install_library(shmfw_core "${FILES_H}" "/shmfw")
 
 add_subdirectory(objects)
 add_subdirectory(serialization)

@@ -70,55 +70,17 @@
 
 using namespace ShmFw;
 
-template class ShmFw::Var<bool>;
-template class ShmFw::Var<char>;
-template class ShmFw::Var<short>;
-template class ShmFw::Var<int>;
-template class ShmFw::Var<long>;
-template class ShmFw::Var<unsigned char>;
-template class ShmFw::Var<unsigned short>;
-template class ShmFw::Var<unsigned int>;
-template class ShmFw::Var<unsigned long>;
-template class ShmFw::Var<float>;
-template class ShmFw::Var<double>;
+boost::posix_time::ptime ShmFw::now() {
+    return boost::posix_time::microsec_clock::local_time();
+}
 
-template class ShmFw::Vector<bool>;
-template class ShmFw::Vector<char>;
-template class ShmFw::Vector<short>;
-template class ShmFw::Vector<int>;
-template class ShmFw::Vector<long>;
-template class ShmFw::Vector<unsigned char>;
-template class ShmFw::Vector<unsigned short>;
-template class ShmFw::Vector<unsigned int>;
-template class ShmFw::Vector<unsigned long>;
-template class ShmFw::Vector<float>;
-template class ShmFw::Vector<double>;
-
-template class ShmFw::Deque<bool>;
-template class ShmFw::Deque<char>;
-template class ShmFw::Deque<short>;
-template class ShmFw::Deque<int>;
-template class ShmFw::Deque<long>;
-template class ShmFw::Deque<unsigned char>;
-template class ShmFw::Deque<unsigned short>;
-template class ShmFw::Deque<unsigned int>;
-template class ShmFw::Deque<unsigned long>;
-template class ShmFw::Deque<float>;
-template class ShmFw::Deque<double>;
-
-template class ShmFw::ParameterEntry<bool>;
-template class ShmFw::ParameterEntry<char>;
-template class ShmFw::ParameterEntry<short>;
-template class ShmFw::ParameterEntry<int>;
-template class ShmFw::ParameterEntry<long>;
-template class ShmFw::ParameterEntry<unsigned char>;
-template class ShmFw::ParameterEntry<unsigned short>;
-template class ShmFw::ParameterEntry<unsigned int>;
-template class ShmFw::ParameterEntry<unsigned long>;
-template class ShmFw::ParameterEntry<float>;
-template class ShmFw::ParameterEntry<double>;
-
-
+std::string ShmFw::DEFAULT_SEGMENT_NAME() {
+    return "ShmFw";
+};
+unsigned int ShmFw::DEFAULT_SEGMENT_SIZE() {
+    return 16*1024*1024; //16MB;
+};
+/*
 HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmHdl ) {
 
     if ( shmHdl->findName ( name ) == NULL ) {
@@ -376,3 +338,4 @@ HandlerObjectPtr HandlerObject::create ( const std::string &name, HandlerPtr &sh
 #endif
     return HandlerObjectPtr();
 }
+*/

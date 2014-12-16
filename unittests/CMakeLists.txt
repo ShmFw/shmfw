@@ -1,7 +1,6 @@
 
 SET(UNITTEST 0 CACHE BOOL "shmfw unittests" )
 IF(UNITTEST )
-add_subdirectory(gtest)
 
 include_directories(${GTEST_INCLUDE_DIR})
 enable_testing()
@@ -40,7 +39,7 @@ add_test(
 )
 
 add_executable(shmfw-unittest_eigen unittest_eigen.cpp)
-target_link_libraries(shmfw-unittest_eigen gtest ${PREFIX_LIB}core)
+target_link_libraries(shmfw-unittest_eigen gtest ${PREFIX_LIB}core ${PREFIX_LIB}objects)
 
 add_test(
     NAME shmfw-unittest_eigen
@@ -50,7 +49,7 @@ add_test(
 IF(MRPT_FOUND)
 
 add_executable(shmfw-unittest_mrpt unittest_mrpt.cpp)
-target_link_libraries(shmfw-unittest_mrpt gtest ${PREFIX_LIB}core ${MRPT_LIBS})
+target_link_libraries(shmfw-unittest_mrpt gtest ${PREFIX_LIB}core ${PREFIX_LIB}objects ${MRPT_LIBS})
 
 add_test(
     NAME shmfw-unittest_mrpt
@@ -60,7 +59,7 @@ add_test(
 ENDIF(MRPT_FOUND)
 
 add_executable(shmfw-unittest_opencv unittest_opencv.cpp)
-target_link_libraries(shmfw-unittest_opencv gtest ${Boost_LIBRARIES} ${OpenCV_LIBRARIES} rt)
+target_link_libraries(shmfw-unittest_opencv gtest ${PREFIX_LIB}core ${PREFIX_LIB}objects ${Boost_LIBRARIES} ${OpenCV_LIBRARIES} rt)
 
 add_test(
     NAME shmfw-unittest_opencv

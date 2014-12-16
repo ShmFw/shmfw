@@ -7,7 +7,7 @@ find_package(Curses REQUIRED)
 message(${CURSES_LIBRARY})
 
 add_executable(shmfw-log src/main_log.cpp )
-target_link_libraries(shmfw-log  ${CURSES_LIBRARY})
+target_link_libraries(shmfw-log  ${CURSES_LIBRARY}  ${PREFIX_LIB}core)
 install (TARGETS shmfw-log DESTINATION bin)
 
 add_subdirectory(example)

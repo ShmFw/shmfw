@@ -15,7 +15,7 @@ _install_binary (${PREFIX_BIN}view_twist)
 
 IF( OpenCV_FOUND ) 
 add_executable(${PREFIX_BIN}view_image view_image.cpp )
-target_link_libraries(${PREFIX_BIN}view_image  ${OpenCV_LIBS})
+target_link_libraries(${PREFIX_BIN}view_image  ${OpenCV_LIBS}  ${PREFIX_LIB}core)
 _install_binary (${PREFIX_BIN}view_image)
 
 add_executable(${PREFIX_BIN}view_grid_as_image view_grid_as_image.cpp )

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Software License Agreement (BSD License)                              *  
+ *   Software License Agreement (BSD License)                              *
  *   Copyright (C) 2012 by Markus Bader <markus.bader@tuwien.ac.at>        *
  *                                                                         *
  *   Redistribution and use in source and binary forms, with or without    *
@@ -30,25 +30,6 @@
  *   POSSIBILITY OF SUCH DAMAGE.                                           *
  ***************************************************************************/
 
-#ifndef SHARED_MEM_FW_H
-#define SHARED_MEM_FW_H
+#include "variable.h"
 
-#include <string>
-#include <boost/date_time/posix_time/ptime.hpp>
-
-namespace ShmFw {
-
-enum SerializeFormat {
-    FORMAT_NA  = 0,
-    FORMAT_XML = 1,
-    FORMAT_BIN = 2,
-    FORMAT_TXT = 3
-};
-
-boost::posix_time::ptime now();
-std::string DEFAULT_SEGMENT_NAME();
-unsigned int DEFAULT_SEGMENT_SIZE();
-
-};
-#endif //SHARED_MEM_FW_H
-
+using namespace ShmFw;

@@ -6,7 +6,7 @@ find_package(Curses REQUIRED)
 message(${CURSES_LIBRARY})
 
 add_executable(${PREFIX_BIN}reconfigure src/main_reconfigure.cpp )
-target_link_libraries(${PREFIX_BIN}reconfigure ${CURSES_LIBRARY})
+target_link_libraries(${PREFIX_BIN}reconfigure ${CURSES_LIBRARY}  ${PREFIX_LIB}core)
 _install_binary (${PREFIX_BIN}reconfigure)
 
 add_subdirectory(example)

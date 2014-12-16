@@ -1,5 +1,3 @@
-
-
 add_subdirectory(admin)
 add_subdirectory(editor)
 add_subdirectory(reconfigure)
