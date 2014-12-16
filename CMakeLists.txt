@@ -68,7 +68,7 @@ add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(apps)
 add_subdirectory(samples)
-#add_subdirectory(sandbox)
+add_subdirectory(sandbox)
 add_subdirectory(unittests)
 
 

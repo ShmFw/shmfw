@@ -49,24 +49,36 @@ template <class T = int>
 class ParameterEntry {
     friend class HandlerParameter<T>;
 protected:
-    bool enable_;
     T value_;
     T min_;
     T max_;
+    bool enable_;
+    uint8_t type_;
     T step_size_;
 public:
+    static const uint8_t TYPE_VALUE = 0;
+    static const uint8_t TYPE_TRACKBAR = 1;
+    static const uint8_t TYPE_CHECKBOX = 2;
+    static const uint8_t TYPE_TEXT = 3;
     static const int EXEPTION_TYPE_ASSIGNMENT = 10;
     static const int EXEPTION_TYPE_COMPARE = 20;
     ParameterEntry() {
     }
     ParameterEntry(const T &_value)
-        : value_(_value) {
+        : value_(_value)
+        , min_(_value)
+        , max_(_value)
+        , enable_(true)
+        , type_(TYPE_VALUE) {
     }
     ParameterEntry(const ParameterEntry<T> &p)
-        : enable_(p.enable_), value_(p.value_), min_(p.min_), max_(p.max_), step_size_(p.step_size_) {
+        : value_(p.value_), min_(p.min_), max_(p.max_), enable_(p.enable_), type_(TYPE_VALUE), step_size_(p.step_size_) {
     }
-    ParameterEntry(const T &_value, const T &_min, const T &_max, const T& _step_size, bool _enable = true)
-        : enable_(_enable), value_(_value), min_(_min), max_(_max), step_size_(_step_size) {
+    ParameterEntry(const T &_value, const T &_min, const T &_max, const bool &_enable = true)
+        : value_(_value), min_(_min), max_(_max), enable_(_enable), type_(TYPE_VALUE), step_size_() {
+    }
+    ParameterEntry(const T &_value, const T &_min, const T &_max, const T& _step_size, const bool &_enable = true)
+        : value_(_value), min_(_min), max_(_max), enable_(_enable), type_(TYPE_VALUE), step_size_(_step_size) {
     }
 
     /** sets enable
@@ -253,8 +265,9 @@ protected:
         ar & make_nvp ( "value", value_ );
         ar & make_nvp ( "min", min_ );
         ar & make_nvp ( "max", max_ );
-        ar & make_nvp ( "step_size", step_size_ );
         ar & make_nvp ( "enable", enable_ );
+        ar & make_nvp ( "type", type_ );
+        ar & make_nvp ( "step_size", step_size_ );
     }
 };
 
