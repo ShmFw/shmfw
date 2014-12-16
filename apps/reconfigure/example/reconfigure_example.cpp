@@ -104,9 +104,9 @@ int main ( int argc, char *argv[] ) {
     
     std::cout << std::endl;
     std::cout << "Created dummy parameters:" << std::endl;
-    std::cout << a.human_readable() << std::endl;
-    std::cout << c.human_readable() << std::endl;
-    std::cout << d.human_readable() << std::endl;
+    std::cout << a << std::endl;
+    std::cout << c << std::endl;
+    std::cout << d << std::endl;
         
     std::cout << std::endl;
     std::cout << "Start 'shmfw-reconfigure -n param_int -n param_double' to change parameters." << std::endl;

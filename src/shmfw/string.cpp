@@ -29,75 +29,20 @@
  *   WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE           *
  *   POSSIBILITY OF SUCH DAMAGE.                                           *
  ***************************************************************************/
-#include <iostream>
-#include <stdlib.h>
 
-#include <shmfw/vector.h>
-#include <boost/program_options.hpp>
-#include <boost/thread.hpp>
+#include "string.h"
 
-struct Prarmeters {
-    bool clear;
-    std::string shm_memory_name;
-    unsigned int shm_memory_size;
-    std::string variable_name;
-};
+using namespace ShmFw;
 
-Prarmeters readArgs ( int argc, char **argv ) {
-    namespace po = boost::program_options;
-
-    Prarmeters params;
-    po::options_description desc ( "Allowed Parameters" );
-    desc.add_options()
-    ( "help", "get this help message" )
-    ( "clear,c", "clears the shared memory" )
-    ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
-    ( "shm_memory_size,s", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" );
-
-    po::variables_map vm;
-    try {
-        po::store ( po::parse_command_line ( argc, argv, desc ), vm );
-    } catch ( const std::exception &ex ) {
-        std::cout << desc << std::endl;;
-        exit ( 1 );
-    }
-    po::notify ( vm );
-
-    if ( vm.count ( "help" ) )  {
-        std::cout << desc << std::endl;
-        exit ( 1 );
-    }
-    params.clear = ( vm.count ( "clear" ) > 0 );
-
-    return params;
+StringAnonymous::StringAnonymous ( const std::string &str, HandlerPtr &shmHdl )
+    : ShmFw::CharString ( ( CharAllocator ) shmHdl->getShm()->get_segment_manager() ) {
+    this->assign ( str.begin(), str.end() );
+}
+StringAnonymous::StringAnonymous ( HandlerPtr &shmHdl )
+    : ShmFw::CharString ( ( CharAllocator ) shmHdl->getShm()->get_segment_manager() ) {
 }
 
-double rand_01() {
-    return ( ( double ) rand() ) / RAND_MAX;
-}
-int main ( int argc, char *argv[] ) {
-
-
-    Prarmeters params = readArgs ( argc, argv );
-    if ( params.clear ) {
-        ShmFw::Handler::removeSegment ( params.shm_memory_name );
-        std::cout << "Shared Memory " << params.shm_memory_name << " cleared" << std::endl;
-    }
-    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
-    srand ( time ( NULL ) );
-
-    ShmFw::Vector<double> a ( "vector_a", shmHdl );
-    a.clear();
-    for ( int i = 0; i < 10; i++ ) {
-        a->push_back ( rand_01() );
-    }
-    std::cout << a.info_shm() << std::endl;
-    for ( size_t i = 0; i < a.size(); i++ )
-      std::cout << (i==0?"[":" ") << a[i] << ((i<a.size()-1)?", ":"]\n");
-    
 
 
 
-    exit ( 0 );
 
-}

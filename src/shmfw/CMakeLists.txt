@@ -14,12 +14,14 @@ SET(FILES_H
   shmfw.h
   variable.h
   vector.h
+  string.h
 )
 SET(FILES_CPP
   shmfw.cpp
   handler.cpp
   handler_object.cpp
   header.cpp
+  string.cpp
 )
 
 add_library(shmfw_core SHARED ${FILES_H} ${FILES_CPP})

@@ -69,9 +69,9 @@ class Log: public Deque<Message> {
 public:
 #if BOOST_VERSION / 100 % 1000 <= 40
     //typedef boost::interprocess_container::deque_base<ShmFw::Message, ShmFw::Deque<ShmFw::Message>::Allocator >::iterator Iterator;
-    typedef boost::container::deque_base<ShmFw::Message, ShmFw::Deque<ShmFw::Message>::Allocator >::iterator Iterator;
+    typedef boost::container::deque_base<ShmFw::Message, ShmFw::Allocator<ShmFw::Message> >::iterator Iterator;
 #else
-    typedef boost::container::deque_base<ShmFw::Message, ShmFw::Deque<ShmFw::Message>::Allocator >::iterator Iterator;
+    typedef boost::container::deque_base<ShmFw::Message, ShmFw::Allocator<ShmFw::Message> >::iterator Iterator;
 #endif
 
     /**

@@ -111,7 +111,7 @@ int main ( int argc, char **argv ) {
         for ( unsigned int i = 0, timeoutCounter = 0; ( params.reload >= 0 ) && loop_program; i++ ) {
 	    ShmFw::Alloc<ShmFw::ImageShm> shmImg( params.variable_name, shmHdl );
 
-            if ( i == 0 ) std::cout << shmImg.human_readable() << std::endl;
+            if ( i == 0 ) std::cout << shmImg << std::endl;
 
             if ( shmImg.timed_wait ( 1000 ) == false ) {
                 std::cout << std::setw ( 4 ) << timeoutCounter++ << ": waited 1000 ms" << std::endl;

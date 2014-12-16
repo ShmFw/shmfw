@@ -35,9 +35,19 @@
 #define SHARED_MEM_HEADER_H
 
 #include <shmfw/handler.h>
-#include <boost/iostreams/stream_buffer.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/back_inserter.hpp>
+#include <boost/interprocess/sync/interprocess_mutex.hpp>
+#include <boost/interprocess/sync/scoped_lock.hpp>
+#include <boost/interprocess/sync/interprocess_condition.hpp>
+#include <boost/interprocess/containers/string.hpp>
+#include <boost/interprocess/managed_shared_memory.hpp>
+/**
+ * Foward declaration for serialization fiend access
+ */
+namespace boost {
+namespace serialization {
+class access;
+};
+};
 
 /**
  * Namespace for the fast and dynamic shared memory framework
@@ -52,7 +62,7 @@ typedef bi::scoped_lock<bi::interprocess_mutex> ScopedLock;
 
 template <typename T> using Allocator = bi::allocator<T, bi::managed_shared_memory::segment_manager>;
 typedef Allocator<void> VoidAllocator;
-typedef Allocator<char>   CharAllocator;
+typedef Allocator<char> CharAllocator;
 typedef bi::basic_string<char, std::char_traits<char> , CharAllocator > CharString;
 
 class Handler;
@@ -305,14 +315,6 @@ public:
      * @see CONTAINER_HEADER, CONTAINER_VARIABLE, ...
      **/
     std::string containerName() const;
-    /**
-     * Returns a human readable string to show the context
-     **/
-    virtual std::string human_readable() const;
-    /**
-     * Destroies the shared variable
-     **/
-    virtual void destroy() const;
     /** compares the variable type entries
      * @return true on equal
      **/
@@ -359,6 +361,10 @@ public:
      * @return ref to shared data
      **/
     const HeaderShared &shared_header() const;
+    /**
+     * Destroies the shared variable
+     **/
+    virtual void destroy() const;
 };
 
 typedef boost::shared_ptr<Header> HeaderPtr;

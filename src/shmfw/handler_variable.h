@@ -34,6 +34,7 @@
 #define SHARED_MEM_HANDLER_VAR
 
 #include <shmfw/handler_object.h>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace ShmFw {
   

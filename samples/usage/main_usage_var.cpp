@@ -92,9 +92,9 @@ int main ( int argc, char *argv[] ) {
     ShmFw::Var<double> a ( "a", shmHdl);
     a.set ( 5.4 );
     std::cout << a.info_shm();
-    std::cout << a.human_readable() << std::endl;
+    std::cout << a << std::endl;
     *a.get() = 1.2;
-    std::cout << a.human_readable() << std::endl;
+    std::cout << a << std::endl;
     
     exit ( 0 );
 

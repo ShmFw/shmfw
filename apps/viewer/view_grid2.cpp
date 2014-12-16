@@ -43,6 +43,7 @@
 #include <shmfw/allocator.h>
 #include <boost/program_options.hpp>
 #include <boost/thread.hpp>
+#include <boost/algorithm/string.hpp>
 
 mglQT *gr=NULL;
 

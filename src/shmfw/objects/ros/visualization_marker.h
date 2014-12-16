@@ -46,10 +46,8 @@ namespace bi = boost::interprocess;
 
 namespace ShmFw {
 namespace ros {
-typedef bi::allocator<ShmFw::Point, SegmentManager> PointAllocator;
-typedef bi::vector<ShmFw::Point, PointAllocator > PointVector;
-typedef bi::allocator<ShmFw::RGBA, SegmentManager> RGBAAllocator;
-typedef bi::vector<ShmFw::RGBA,RGBAAllocator > RGBAVector;
+typedef bi::vector<ShmFw::Point, ShmFw::Allocator<ShmFw::Point> > PointVector;
+typedef bi::vector<ShmFw::RGBA, ShmFw::Allocator<ShmFw::RGBA> > RGBAVector;
 
 class VisualizationMarker {
 public:
@@ -437,10 +435,9 @@ public:
     }
 };
 
-typedef bi::allocator<VisualizationMarker, SegmentManager> VisualizationMarkerAllocator;
 
 class VisualizationMarkerArray {
-    typedef bi::vector<VisualizationMarker, VisualizationMarkerAllocator > MarkerVector;
+    typedef bi::vector<VisualizationMarker, Allocator<VisualizationMarker> > MarkerVector;
 public:
     VisualizationMarkerArray ( const VoidAllocator &void_alloc )
         : markers ( void_alloc ) {

@@ -189,9 +189,6 @@ Header::Header ( const std::string &name, HandlerPtr shmHdl, unsigned int header
             return "NA";
         }
     }
-    std::string Header::human_readable() const {
-        return std::string ( "virtual function human_readable() not implemented!" );
-    };
     void Header::destroy() const {
         char *p = ( char * ) header_shared;
         header_local.shm_handler->getShm()->destroy_ptr ( p );

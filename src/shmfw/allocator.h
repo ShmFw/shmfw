@@ -48,7 +48,6 @@ namespace ShmFw {
 template<typename T>
 class Alloc : public Header {
     friend class boost::serialization::access;
-    typedef bi::allocator<T, SegmentManager> Allocator;
     T *data_element;
 public:
 
@@ -90,7 +89,7 @@ public:
             try {
                 ScopedLock myLock ( header_shared->mutex );
                 header_shared->container = ShmFw::Header::CONTAINER_ALLOC;
-                Allocator a ( header_local.shm_handler->getShm()->get_segment_manager() );
+                Allocator<T> a ( header_local.shm_handler->getShm()->get_segment_manager() );
                 if ( data ) {
                     header_shared->data = data;
                 } else {
@@ -147,17 +146,6 @@ public:
         return *get();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
-     * Returns a human readable string to show the context
-     * @return string
-     **/
-    /*
-    virtual std::string human_readable() const {
-        std::stringstream ss;
-        ss << name() << " = " << *get();
-        return ss.str();
-    };
-    */
-    /** UNSAVE!! (user have to lock and to update timestamp)
      * destroies the shared memory
      **/
     virtual void destroy() const {
@@ -184,7 +172,7 @@ public:
      * overloads the << and calls the varalible overloades operator
      **/
     friend std::ostream &operator << ( std::ostream &os, const Alloc<T> &o ) {
-        return os << o.ref();
+        return os << *o.get();
     };
 };
 

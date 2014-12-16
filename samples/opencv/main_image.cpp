@@ -106,7 +106,9 @@ int main ( int argc, char **argv ) {
             if ( params.reload == 0 ) {
                 shm_image.wait();
             }
-            if ( i == 0 ) std::cout << shm_image.human_readable() << std::endl;
+            if ( i == 0 ) {
+              std::cout << shm_image << std::endl;
+            }
             cv::Mat img;
 	    shm_image->toCvMat ( img );
             cv::imshow ( params.variable_name.c_str(), img );

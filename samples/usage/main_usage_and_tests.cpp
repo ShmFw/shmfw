@@ -41,6 +41,7 @@
 #include <shmfw/vector.h>
 #include <shmfw/deque.h>
 #include <shmfw/log.h>
+#include <shmfw/string.h>
 #include <shmfw/serialization/variable.h>
 #include <shmfw/serialization/io_file.h>
 
@@ -93,7 +94,7 @@ void conditionThread ( ShmFw::HandlerPtr &shmHdl, const std::string &name ) {
     while ( xy.timed_wait ( 500 ) == false ) SHMFW_Debug_FNC ( "waiting 500ms" );
     xy.lock();
     xy->push_back ( 100 );
-    std::cout << xy.human_readable() << std::endl;
+    std::cout << xy << std::endl;
     xy.unlock();
     xy.itHasChanged();
     SHMFW_Info_FNC ( "finished" );
@@ -109,22 +110,23 @@ int main ( int argc, char *argv[] ) {
     }
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
 
-    ShmFw::Var<double> a ( "a", shmHdl);
-    a.set(5.4);
-    std::cout << a.info_shm();
-    std::cout << a.human_readable() << std::endl;
-    a.set(1.2);
-    std::cout << a.human_readable() << std::endl;
+    ShmFw::Var<double> a ( "a", shmHdl );
+    a.set ( 5.4 );
+    std::cout << a.info_shm() << std::endl;
+    std::cout << a << std::endl;
+    a.set ( 1.2 );
+    std::cout << a << std::endl;
 
-    ShmFw::Var<double> aa ( "a", shmHdl);
-    std::cout << a.human_readable() << std::endl;
+    ShmFw::Var<double> aa ( "a", shmHdl );
+    std::cout << a << std::endl;
 
     ShmFw::Vector<double> b ( "b", shmHdl );
     std::cout << b.info_shm();
     b->push_back ( 5 );
     b->push_back ( 3 );
     b[0] = 0.3;
-    std::cout << b.human_readable() << std::endl;
+    for ( size_t i = 0; i < b.size(); i++ )
+      std::cout << (i==0?"[":" ") << b[i] << ((i<b.size()-1)?", ":"]\n");
 
     ShmFw::Var<ShmFw::Point > point ( "point", shmHdl );
     std::cout << "point: " << *point << std::endl;
@@ -151,49 +153,50 @@ int main ( int argc, char *argv[] ) {
     pose2d_agv->setFromString ( "[[45.2,8.4],[3.14], [3]]" );
     std::cout << "pose2d_agv: " << *pose2d_agv << std::endl;
 
+    
+    ShmFw::Vector<ShmFw::CharString> log ( "log", shmHdl );
+    ShmFw::CharString mystring = ShmFw::StringAnonymous(shmHdl);
+    mystring = "Hello";
+    log->push_back ( mystring );
+    ShmFw::CharString xx = ShmFw::StringAnonymous(shmHdl);
+    xx = "-";
+    log->push_back ( xx );
+    log->push_back ( ShmFw::StringAnonymous("World", shmHdl ) );
+    mystring = "!";
+    log->push_back ( mystring );
+    log->push_back ( ShmFw::StringAnonymous(" How are you", shmHdl) );
+    std::cout << log << std::endl;
+
+    
     try {
-        ShmFw::Var<double> c ( "c", shmHdl);
+        ShmFw::Var<double> c ( "c", shmHdl );
         *c = 2;
-        std::cout << "This will produces an error: " << c.human_readable()  << " = " << a.human_readable()  << std::endl;
+        std::cout << "This will produces an error: " << c  << " = " << a  << std::endl;
         c = a;
-        std::cout << c.human_readable() << std::endl;
+        std::cout << c << std::endl;
     } catch ( std::runtime_error err ) {
         std::cout << err.what() << std::endl;
     }
 
     int testInt = std::rand() % 10;
     {
-        ShmFw::Var<int> xy ( "myInt", shmHdl);
+        ShmFw::Var<int> xy ( "myInt", shmHdl );
         *xy = testInt;
         ShmFw::write ( "test.xml", *xy, ShmFw::FORMAT_XML );
-        std::cout << "wrote: xy: " << xy.human_readable()  << std::endl;
+        std::cout << "wrote: xy: " << xy  << std::endl;
     }
 
     {
-        ShmFw::Var<int> xy ( "Other", shmHdl);
+        ShmFw::Var<int> xy ( "Other", shmHdl );
         std::cout << "goint to read xy: " << std::endl;
         ShmFw::read ( "test.xml", xy, ShmFw::FORMAT_XML );
         if ( *xy != testInt ) std::cout << "problem!"  << std::endl;
-        std::cout << "read xy: " << xy.human_readable()  << std::endl;
+        std::cout << "read xy: " << xy  << std::endl;
     }
 
     ShmFw::Vector<double> d ( "d", shmHdl );
     d->push_back ( 4.3 );
-    std::cout << d.human_readable() << std::endl;
-
-    ShmFw::VectorStr log ( "log", shmHdl );
-    ShmFw::CharAllocator allocator ( shmHdl->getShm()->get_segment_manager() );
-    ShmFw::CharString mystring ( allocator );
-    mystring = "Hello";
-    log->push_back ( mystring );
-    ShmFw::CharString xx = shmHdl->createString();
-    xx = "-";
-    log->push_back ( xx );
-    log->push_back ( shmHdl->createString ( "World" ) );
-    mystring = "!";
-    log->push_back ( mystring );
-    log.push_back ( " How are you" );
-    std::cout << log.human_readable() << std::endl;
+    std::cout << d << std::endl;
 
 
     log.destroy();

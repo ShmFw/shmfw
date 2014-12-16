@@ -34,11 +34,11 @@
 #ifndef  SHMFW_SERIALIZATION_VARIABLE_H
 #define SHMFW_SERIALIZATION_VARIABLE_H
 
-
-
 #include <shmfw/variable.h>
 #include <shmfw/serialization/header.h>
 #include <boost/serialization/array.hpp>
+#include <boost/archive/xml_oarchive.hpp>
+#include <boost/archive/xml_iarchive.hpp>
 #include <boost/date_time/posix_time/time_serialize.hpp>
 
 namespace boost {

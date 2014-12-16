@@ -38,6 +38,7 @@
 #include <boost/graph/graph_concepts.hpp>
 #include <glob.h>
 #include <shmfw/handler.h>
+#include <shmfw/header.h>
 
 #include <shmfw/objects/grid_map.h>
 

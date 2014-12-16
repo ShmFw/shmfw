@@ -42,8 +42,10 @@
 #include <boost/interprocess/sync/interprocess_condition.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/containers/string.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <shmfw/objects/point.h>
-#include <shmfw/handler.h>
+#include <shmfw/header.h>
+#include <shmfw/string.h>
 
 #ifdef INCLUDE_ROS_HEADERS  
   #include <ros/ros.h>
@@ -56,7 +58,7 @@ namespace ros {
 class Header {
 public:
     uint32_t seq;
-    bp::ptime stamp;
+    boost::posix_time::ptime stamp;
     CharString frame_id;
 
     Header ( const VoidAllocator &void_alloc )
@@ -72,7 +74,10 @@ public:
 
     std::string getToString() const {
         std::stringstream ss;
-        ss << "[ " << frame_id << ", " << seq << ", " << stamp << "]";
+        ss << "[ ";
+        ss << frame_id << ", ";
+        ss << seq << ", ";
+        ss << to_simple_string(stamp) << "]";
         return ss.str();
     }
     void getFromString ( const std::string &str ) {

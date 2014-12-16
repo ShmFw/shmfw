@@ -35,18 +35,8 @@
 #define SHARED_MEM_HANDLER_H
 
 #include <shmfw/shmfw.h>
-#include <stdexcept>
 #include <iostream>
-#include <boost/algorithm/string.hpp>
-#include <boost/interprocess/managed_shared_memory.hpp>
-#include <boost/interprocess/sync/interprocess_condition.hpp>
-#include <boost/interprocess/allocators/allocator.hpp>
-#include <boost/interprocess/containers/string.hpp>
-#include <boost/interprocess/sync/scoped_lock.hpp>
-#include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
-#include <boost/interprocess/sync/upgradable_lock.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <cassert>
+#include <boost/interprocess/interprocess_fwd.hpp>
 
 /**
  * Foward declaration for serialization fiend access
@@ -63,21 +53,7 @@ class access;
 namespace ShmFw {
   
 namespace bi = boost::interprocess;
-namespace bp = boost::posix_time;
-
-template <typename T> using Allocator = bi::allocator<T, bi::managed_shared_memory::segment_manager>;
-  
-typedef bi::scoped_lock<bi::interprocess_mutex> ScopedLock;
-typedef boost::shared_ptr<ScopedLock> ScopedLockPtr;
 typedef boost::shared_ptr<bi::managed_shared_memory> ShmPtr;
-typedef bi::managed_shared_memory::segment_manager SegmentManager;
-typedef bi::allocator<void,   SegmentManager> VoidAllocator;
-typedef bi::allocator<char, SegmentManager>   CharAllocator;
-typedef boost::shared_ptr<CharAllocator >   CharAllocatorPtr;
-typedef bi::basic_string<char, std::char_traits<char> , CharAllocator > CharString;
-typedef bi::allocator<CharString, bi::managed_shared_memory::segment_manager> StringAllocator;
-typedef boost::shared_ptr<StringAllocator> StringAllocatorPtr;
-typedef boost::shared_ptr<std::stringstream> StringStreamPtr;
 
 class Handler;
 typedef boost::shared_ptr<Handler> HandlerPtr;
@@ -130,39 +106,6 @@ public:
      * @return ture if the shm exists
      **/
     bool isValid();
-    /**
-     * used to create a anonymous shared string
-     * @param pShm pointer to the shared memory segment
-     * @see ShmFw::createSegment
-     * @return shared string
-     **/
-    CharString createString() {
-        return CharString ( *pCharAllocator_ );
-    }
-    /**
-     * crates a anonymous string with a context
-     * @param str context for the shared string
-     * @param pShm pointer to the shared memory segment
-     * @see ShmFw::createSegment
-     * @return shared string
-     **/
-    CharString createString ( const char *str ) {
-        CharString ret = createString();
-        ret = str;
-        return ret;
-    }
-    /**
-     * crates a anonymous string with a context
-     * @param str context for the shared string
-     * @param pShm pointer to the shared memory segment
-     * @see ShmFw::createSegment
-     * @return shared string
-     **/
-    CharString createString ( const std::string &str ) {
-        CharString ret = createString();
-        ret = str.c_str();
-        return ret;
-    }
     /** Returns list with the names of the shared variables
     * @param rNames vector which will be filled with the variables
     * @param list_hidden on true it will also list names starting with a . 
@@ -206,8 +149,6 @@ private:
     std::string name_;
     unsigned int size_;
     ShmPtr pShm_;
-    CharAllocatorPtr pCharAllocator_;
-    StringAllocatorPtr pStringAllocator_;
 };
 
 

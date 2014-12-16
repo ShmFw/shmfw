@@ -35,16 +35,14 @@
 
 #include <shmfw/header.h>
 #include <boost/interprocess/containers/deque.hpp>
-#include <shmfw/serialization/interprocess_deque.hpp>
 
 namespace ShmFw {
 
 /// Class to manage a shared vectors
 template<typename T>
 class Deque : public Header {
-    typedef bi::allocator<T, SegmentManager> Allocator;
-    typedef bi::deque<T, Allocator > DequeShm;
-    typedef typename Allocator::size_type size_type;
+    typedef bi::deque<T, Allocator<T> > DequeShm;
+    typedef typename Allocator<T>::size_type size_type;
     DequeShm *data_element;
 public:
 
@@ -85,7 +83,7 @@ public:
             try {
                 ScopedLock myLock ( header_shared->mutex );
                 header_shared->container = ShmFw::Header::CONTAINER_DEQUE;
-                Allocator a ( header_local.shm_handler->getShm()->get_segment_manager() );
+                Allocator<T> a ( header_local.shm_handler->getShm()->get_segment_manager() );
 		if(data){
 		  header_shared->data = data;
 		} else {
@@ -258,19 +256,6 @@ public:
         if ( locking ) updateTimestampLocal();
     }
     /** UNSAVE!! (user have to lock and to update timestamp)
-     * Returns a human readable string to show the context
-     * @return string
-     **/
-    virtual std::string human_readable() const {
-        std::stringstream ss;
-        ss << name() << " = [";
-        for ( size_t i = 0; i < get()->size(); i++ ) {
-            ss << ( ( i == 0 ) ? " " : ", " ) << std::setw ( 10 ) << get()->at ( i );
-        }
-        ss << "]";
-        return ss.str();
-    };
-    /** UNSAVE!! (user have to lock and to update timestamp)
      * @return vetor size
      **/
     size_t size() const {
@@ -402,7 +387,9 @@ public:
      * Inserts a copy of x at the end of the vector.
      **/
     void push_back ( const std::string &str ) {
-        CharString shmStr = header_local.shm_handler->createString ( str );
+        CharAllocator a ( header_local.shm_handler->getShm()->get_segment_manager() );
+        CharString shmStr(a);
+        shmStr = str.c_str();
         get()->push_back ( shmStr );
     }
 };

@@ -34,8 +34,7 @@
 #define SHARED_MEM_VARIABLE_H
 
 #include <shmfw/header.h>
-#include <boost/archive/xml_oarchive.hpp>
-#include <boost/archive/xml_iarchive.hpp>
+#include "handler.h"
 
 /**
  * Namespace for the fast and dynamic shared memory framework

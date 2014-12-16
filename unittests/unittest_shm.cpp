@@ -324,25 +324,6 @@ TEST_F ( ShmTest, TestSignals ) {
     shmHdl->removeSegment();
 }
 
-TEST_F ( ShmTest, StringVector ) {
-    std::string name ( "var0" );
-    std::string entry0 ( "Hello" );
-    std::string entry1 ( " " );
-    std::string entry2 ( "World" );
-    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
-    ShmFw::VectorStr a (name, shmHdl );
-    a.clear();
-    a.push_back(entry0);
-    a.push_back(entry1);
-    a.push_back(entry2);
-    ShmFw::VectorStr b (name, shmHdl );
-    EXPECT_TRUE ( (b[0].compare (entry0.c_str()) == 0) );
-    EXPECT_TRUE ( (b[1].compare (entry1.c_str()) == 0) );
-    EXPECT_FALSE ( (b[2].compare (entry0.c_str()) == 0) );  
-    shmHdl->removeSegment();
-}
-
-
 TEST_F ( ShmTest, TestSerializeXML ) {
     std::string filename ( "unittest.txt" );
     std::string name1 ( "myVar1" );

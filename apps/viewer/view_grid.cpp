@@ -41,6 +41,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <shmfw/allocator.h>
 #include <boost/program_options.hpp>
+#include <boost/algorithm/string.hpp>
 
 struct Prarmeters {
     std::string shm_memory_name;
