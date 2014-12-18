@@ -34,6 +34,7 @@
 #define SHARED_MEM_OBJECT_GRID_MAP_HEADER_H
 
 #include <opencv/cxcore.h>
+#include <typeinfo>  // Needed for typeid()
 
 #define SHMFW_UNUSED_PARAM(a)		(void)(a)
 namespace ShmFw {
