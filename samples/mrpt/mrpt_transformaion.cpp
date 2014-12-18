@@ -69,5 +69,6 @@ int main()
         cerr << "Untyped excepcion!!";
         return -1;
     }
+        cout << "Nothing was written into the shm!" << endl;
 }
 
