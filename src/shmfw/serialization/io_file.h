@@ -37,6 +37,7 @@
 
 #include <shmfw/handler.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #include <boost/serialization/serialization.hpp>
 #include <boost/archive/xml_oarchive.hpp>
@@ -49,19 +50,27 @@
 namespace ShmFw {
 
 
-inline SerializeFormat file_postix(const std::string &filename){
-  size_t i = filename.find_last_of ( "." );
+/**
+ * checks the file ending for xml, txt or bin and returns a cooresponding define
+ * @return FORMAT_XML, FORMAT_BIN, FORMAT_TXT or FORMAT_NA
+ **/
+inline SerializeFormat file_postix ( const std::string &filename ) {
+    size_t i = filename.find_last_of ( "." );
     if ( i == std::string::npos ) return FORMAT_NA;
-    if ( filename.length() - i < 2) return FORMAT_NA;
+    if ( filename.length() - i < 2 ) return FORMAT_NA;
     std::string postfix = filename.substr ( i+1, filename.length() );
-    if ( boost::iequals ( postfix, "xml" ) )return FORMAT_XML;
-    if ( boost::iequals ( postfix, "bin" ) )return FORMAT_BIN;
-    if ( boost::iequals ( postfix, "txt" ) )return FORMAT_TXT;
-    else return FORMAT_NA;    
-}  
+    if ( boost::iequals ( postfix, "xml" ) ) return FORMAT_XML;
+    if ( boost::iequals ( postfix, "bin" ) ) return FORMAT_BIN;
+    if ( boost::iequals ( postfix, "txt" ) ) return FORMAT_TXT;
+    else return FORMAT_NA;
+}
 
-template<class T>
-inline void write ( const std::string &filename, const T &src, SerializeFormat format ) {
+/**
+ * writes a file and checks the file ending supported are xml, txt, bin files
+ * @param filename 
+ * @param src 
+ **/
+template<class T> inline void write ( const std::string &filename, const T &src, SerializeFormat format ) {
     std::ofstream ofs ( filename.c_str() );
     assert ( ofs.good() );
     if ( format == FORMAT_XML ) {
@@ -76,8 +85,16 @@ inline void write ( const std::string &filename, const T &src, SerializeFormat f
     }
 }
 
-template<class T>
-inline T &read ( const std::string &filename, T &des, SerializeFormat format ) {
+/**
+ * reads a file and checks the file ending supported are xml, txt, bin files
+ * @param filename 
+ * @param des 
+ * @return true on success
+ **/
+template<class T> inline bool read ( const std::string &filename, T &des, SerializeFormat format ) {
+    using namespace boost::filesystem;
+    path dir_path = complete ( path ( filename ) );
+    if ( !exists ( dir_path ) || !is_regular_file ( dir_path ) ) return false;
     std::ifstream ifs ( filename.c_str() );
     assert ( ifs.good() );
     if ( format == FORMAT_XML ) {
@@ -90,20 +107,30 @@ inline T &read ( const std::string &filename, T &des, SerializeFormat format ) {
         boost::archive::binary_iarchive ia ( ifs );
         ia >> des;
     }
-    return des;
+    return true;
 }
 
-  
+
+/**
+ * writes a file and checks the file ending supported are xml, txt, bin files
+ * @param filename 
+ * @param src 
+ **/
 template<class T>
 inline void write ( const std::string &filename, const T &src ) {
-    SerializeFormat format = file_postix(filename);
-    write (filename, src, format);
+    SerializeFormat format = file_postix ( filename );
+    write ( filename, src, format );
 }
 
-template<class T>
-inline T read ( const std::string &filename, T &des ) {
-    SerializeFormat format = file_postix(filename);
-    return read (filename, des, format);
+/**
+ * reads a file and checks the file ending supported are xml, txt, bin files
+ * @param filename 
+ * @param des 
+ * @return true on success
+ **/
+template<class T> inline bool read ( const std::string &filename, T &des ) {
+    SerializeFormat format = file_postix ( filename );
+    return read ( filename, des, format );
 }
 
 };
