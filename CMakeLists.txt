@@ -59,7 +59,7 @@ IF(MATHGL_HEADER)
   MESSAGE( STATUS "MATHGL found" )
 else()
   MESSAGE( STATUS ${MATHGL_HEADER})
-  MESSAGE( STATUS "--> MathGL: Ubuntu 14.04: \"sudo apt-get install mathgl-dev\" ")
+  MESSAGE( STATUS "--> MathGL: Ubuntu 14.04: \"sudo apt-get install libmgl-dev\" ")
 endif()
 
 
