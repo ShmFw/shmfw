@@ -39,7 +39,6 @@
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/interprocess/sync/interprocess_condition.hpp>
 #include <boost/interprocess/containers/string.hpp>
-#include <boost/interprocess/managed_shared_memory.hpp>
 /**
  * Foward declaration for serialization fiend access
  */
@@ -324,9 +323,11 @@ public:
         const char* type_name_request = typeid ( T1 ).name();
         bool result_name = ( strcmp ( type_name_in_shm, type_name_request ) == 0 );
         bool result_hash_code = true;
+        
 #if __cplusplus > 199711L
         if ( header_shared->type_hash_code != 0 ) {
-            result_hash_code = ( header_shared->type_hash_code == typeid ( T1 ).hash_code() );
+            size_t hash_code_request = typeid ( T1 ).hash_code();
+            result_hash_code = ( header_shared->type_hash_code == hash_code_request );
         }
 #endif
         return result_name && result_hash_code;

@@ -2,9 +2,9 @@ SET(APPS_ADMIN 1 CACHE BOOL "admin modul" )
 IF(APPS_ADMIN )
 include_directories(./include)
 
-add_executable(${PREFIX_BIN}admin main_admin.cpp )
-target_link_libraries(${PREFIX_BIN}admin ${PREFIX_LIB}core  ${PREFIX_LIB}objects  ${PREFIX_LIB}gerneralization )
-_install_binary (${PREFIX_BIN}admin)
+add_executable(shmfw-admin main_admin.cpp )
+target_link_libraries(shmfw-admin shmfw_core  shmfw_objects  shmfw_gerneralization )
+_install_binary (shmfw-admin)
 
 ENDIF(APPS_ADMIN )
 

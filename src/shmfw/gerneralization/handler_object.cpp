@@ -62,6 +62,7 @@
 #include "shmfw/objects/mrpt.h"
 #include "shmfw/objects/eigen.h"
 
+#include "shmfw/objects/image.h"
 #include "shmfw/objects/points.h"
 #include "shmfw/objects/ros/header.h"
 #include "shmfw/objects/ros/laser_scan.h"
@@ -258,6 +259,7 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
 #define RETURN_IF_TYPE_ALLOC( TYPE ) if(shmHeader.isType<ShmFw::Alloc< TYPE > >()) return HandlerObjectPtr( new ShmFw::HandlerAlloc< TYPE >( name, shmHdl));
  
     RETURN_IF_TYPE_ALLOC ( Points<Allocator> );
+    RETURN_IF_TYPE_ALLOC ( ImageShm );
     RETURN_IF_TYPE_ALLOC ( ros::Header );
     RETURN_IF_TYPE_ALLOC ( ros::VisualizationMarker );
     RETURN_IF_TYPE_ALLOC ( ros::VisualizationMarkerArray );

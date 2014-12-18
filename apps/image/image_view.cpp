@@ -43,20 +43,18 @@
 struct Prarmeters {
     std::string file_to_load;
     int reload;
-    bool clear;
     std::string shm_memory_name;
     unsigned int shm_memory_size;
     std::string variable_name;
 };
 
 Prarmeters readArgs ( int argc, char **argv ) {
-namespace po = boost::program_options;
+    namespace po = boost::program_options;
 
     Prarmeters params;
     po::options_description desc ( "Allowed Parameters" );
     desc.add_options()
     ( "help", "get this help message" )
-    ( "clear,c", "clears the shm first, default is no" )
     ( "file_to_load,f", po::value<std::string> ( &params.file_to_load )->default_value ( "" ), "load a image and places it into shared memory" )
     ( "reload,r", po::value< int > ( &params.reload )->default_value ( 100 ), "reload time in ms, 0 means reload on signal, -1 means relaod owns to load image into shm" )
     ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
@@ -76,7 +74,6 @@ namespace po = boost::program_options;
         std::cout << desc << std::endl;
         exit ( 1 );
     }
-    params.clear = ( vm.count ( "clear" ) > 0 );
 
     return params;
 }
@@ -92,25 +89,25 @@ int main ( int argc, char **argv ) {
     signal ( SIGABRT,	terminate );
     signal ( SIGTERM,	terminate );
     Prarmeters params = readArgs ( argc, argv );
-    if ( params.clear ) {
-        ShmFw::Handler::removeSegment ( params.shm_memory_name );
-        std::cout << "Shared Memory " << params.shm_memory_name << " cleared" << std::endl;
-        exit ( 1 );
-    }
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
     if ( !params.file_to_load.empty() ) {
-        ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
         if ( !params.file_to_load.empty() ) {
-	    cv::Mat img = cv::imread(params.file_to_load.c_str(), CV_LOAD_IMAGE_COLOR);
-	    ShmFw::Alloc<ShmFw::ImageShm> shmImg( params.variable_name, shmHdl );
-	    shmImg->copyFrom(img, ShmFw::IMAGE_ENCODING_BGR8);
+            cv::Mat img = cv::imread ( params.file_to_load.c_str(), CV_LOAD_IMAGE_COLOR );
+            ShmFw::Alloc<ShmFw::ImageShm> shmImg ( params.variable_name, shmHdl );
+            shmImg->copyFrom ( img, ShmFw::IMAGE_ENCODING_BGR8 );
         }
     }
     if ( !params.variable_name.empty() ) {
-
-        ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
+        if ( shmHdl->findName ( params.variable_name ) == false ) {
+            std::cout << "no shared variable with the name: " << params.variable_name << std::endl;
+            exit ( 1 );
+        }
         for ( unsigned int i = 0, timeoutCounter = 0; ( params.reload >= 0 ) && loop_program; i++ ) {
-	    ShmFw::Alloc<ShmFw::ImageShm> shmImg( params.variable_name, shmHdl );
-
+            ShmFw::Alloc<ShmFw::ImageShm> shmImg ( params.variable_name, shmHdl );
+            if ( !shmImg.isType<ShmFw::Alloc<ShmFw::ImageShm> >() ) {
+                std::cout << "The shared variable: " << params.variable_name << ", is not a image!" << std::endl;
+                exit(1);
+            }
             if ( i == 0 ) std::cout << shmImg << std::endl;
 
             if ( shmImg.timed_wait ( 1000 ) == false ) {
@@ -122,7 +119,7 @@ int main ( int argc, char **argv ) {
             }
 
             cv::Mat img;
-	    shmImg->toCvMat(img);
+            shmImg->toCvMat ( img );
             cv::namedWindow ( params.variable_name.c_str(), CV_WINDOW_AUTOSIZE );
 
             cv::imshow ( params.variable_name.c_str(), img );

@@ -35,7 +35,6 @@
 
 #include <shmfw/header.h>
 #include <boost/interprocess/containers/vector.hpp>
-#include <shmfw/serialization/interprocess_vector.hpp>
 
 namespace ShmFw {
 

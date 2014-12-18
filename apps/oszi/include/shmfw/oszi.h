@@ -36,6 +36,7 @@
 #include <iostream>
 #include <opencv/cv.h>
 #include <shmfw/vector.h>
+#include <shmfw/serialization/vector.h>
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 #include <boost/thread.hpp>

@@ -40,10 +40,10 @@ SET(FILES_CPP
   pose2d_agv.cpp 
 )
 
-add_library(${PREFIX_LIB}objects SHARED ${FILES_H} ${FILES_CPP})
-target_link_libraries(${PREFIX_LIB}objects ${MRPT_LIBS})
+add_library(shmfw_objects SHARED ${FILES_H} ${FILES_CPP})
+target_link_libraries(shmfw_objects ${MRPT_LIBS})
 
 
-_install_library(${PREFIX_LIB}objects "${FILES_H}" "/shmfw/objects")
+_install_library(shmfw_objects "${FILES_H}" "/shmfw/objects")
 
 

@@ -19,7 +19,7 @@ SET(FILES_CPP
 )
 
 add_library(shmfw_core SHARED ${FILES_H} ${FILES_CPP})
-target_link_libraries(shmfw_core ${Boost_LIBRARIES} rt)
+target_link_libraries(shmfw_core)
 IF(MRPT_FOUND)
 target_link_libraries(shmfw_core ${MRPT_LIBS})
 ENDIF(MRPT_FOUND)

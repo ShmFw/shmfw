@@ -10,9 +10,9 @@ add_subdirectory(v4lcam)
 ENDIF(MODULE_V4LCAM )
 
 
-SET(MODULE_OPENCV_CAMERA 0 CACHE BOOL "opencv camera modul" )
+SET(MODULE_OPENCV_CAMERA 1 CACHE BOOL "opencv camera modul" )
 IF(MODULE_OPENCV_CAMERA )
-add_subdirectory(cvcam)
+add_subdirectory(opencv_camera)
 ENDIF(MODULE_OPENCV_CAMERA )
 
 

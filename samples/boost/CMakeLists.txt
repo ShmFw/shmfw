@@ -4,8 +4,10 @@ target_link_libraries(boost_raw )
 add_executable(boost_container_of_container boost_container_of_container.cpp )
 target_link_libraries(boost_container_of_container )
 
+add_executable(boost_container_of_container_scoped_allocator boost_container_of_container_scoped_allocator.cpp )
+target_link_libraries(boost_container_of_container_scoped_allocator )
+
 add_executable(boost_object_in_heap_or_shm boost_object_in_heap_or_shm.cpp )
 target_link_libraries(boost_object_in_heap_or_shm )
-
 add_executable(boost_copy_between_heap_and_shm boost_copy_between_heap_and_shm.cpp )
 target_link_libraries(boost_copy_between_heap_and_shm )

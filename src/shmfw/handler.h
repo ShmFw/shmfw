@@ -37,6 +37,7 @@
 #include <shmfw/shmfw.h>
 #include <iostream>
 #include <boost/interprocess/interprocess_fwd.hpp>
+#include <boost/interprocess/managed_shared_memory.hpp>
 
 /**
  * Foward declaration for serialization fiend access

@@ -35,7 +35,6 @@
 
 #include <shmfw/handler.h>
 #include <boost/interprocess/containers/string.hpp>
-#include <boost/interprocess/managed_shared_memory.hpp>
 /**
  * Namespace for the fast and dynamic shared memory framework
  */

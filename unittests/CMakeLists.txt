@@ -7,7 +7,7 @@ enable_testing()
 
 # Add test cpp file
 add_executable(unittest_shm unittest_shm.cpp)
-target_link_libraries(unittest_shm gtest ${PREFIX_LIB}core)
+target_link_libraries(unittest_shm gtest shmfw_core)
 
 add_test(
     NAME unittest
@@ -31,7 +31,7 @@ SET(UNITTEST_OBJECTS_SOURCES
 add_executable(unittest_objects ${UNITTEST_OBJECTS_SOURCES})
 
 
-target_link_libraries(unittest_objects gtest ${PREFIX_LIB}core)
+target_link_libraries(unittest_objects gtest shmfw_core)
 
 add_test(
     NAME unittest_objects
@@ -39,7 +39,7 @@ add_test(
 )
 
 add_executable(unittest_eigen unittest_eigen.cpp)
-target_link_libraries(unittest_eigen gtest ${PREFIX_LIB}core ${PREFIX_LIB}objects)
+target_link_libraries(unittest_eigen gtest shmfw_core shmfw_objects)
 
 add_test(
     NAME unittest_eigen
@@ -49,7 +49,7 @@ add_test(
 IF(MRPT_FOUND)
 
 add_executable(unittest_mrpt unittest_mrpt.cpp)
-target_link_libraries(unittest_mrpt gtest ${PREFIX_LIB}core ${PREFIX_LIB}objects ${MRPT_LIBS})
+target_link_libraries(unittest_mrpt gtest shmfw_core shmfw_objects ${MRPT_LIBS})
 
 add_test(
     NAME unittest_mrpt
@@ -59,7 +59,7 @@ add_test(
 ENDIF(MRPT_FOUND)
 
 add_executable(unittest_opencv unittest_opencv.cpp)
-target_link_libraries(unittest_opencv gtest ${PREFIX_LIB}core ${PREFIX_LIB}objects ${Boost_LIBRARIES} ${OpenCV_LIBRARIES} rt)
+target_link_libraries(unittest_opencv gtest shmfw_core shmfw_objects ${Boost_LIBRARIES} ${OpenCV_LIBRARIES} rt)
 
 add_test(
     NAME unittest_opencv

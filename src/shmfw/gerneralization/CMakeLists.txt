@@ -10,10 +10,10 @@ SET(FILES_CPP
   handler_object.cpp
 )
 
-add_library(${PREFIX_LIB}gerneralization SHARED ${FILES_H} ${FILES_CPP})
-target_link_libraries(${PREFIX_LIB}gerneralization ${PREFIX_LIB}objects ${Boost_LIBRARIES} rt)
+add_library(shmfw_gerneralization SHARED ${FILES_H} ${FILES_CPP})
+target_link_libraries(shmfw_gerneralization shmfw_objects)
 IF(MRPT_FOUND)
-target_link_libraries(${PREFIX_LIB}gerneralization ${MRPT_LIBS})
+target_link_libraries(shmfw_gerneralization ${MRPT_LIBS})
 ENDIF(MRPT_FOUND)
 
-_install_library(${PREFIX_LIB}gerneralization "${FILES_H}" "/shmfw/gerneralization")
+_install_library(shmfw_gerneralization "${FILES_H}" "/shmfw/gerneralization")
