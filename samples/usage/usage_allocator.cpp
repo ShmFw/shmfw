@@ -32,8 +32,12 @@
 #include <iostream>
 #include <stdlib.h>
 
-#include <shmfw/header.h>
+#include <shmfw/objects/ros/laser_scan.h>
 #include <shmfw/objects/points.h>
+#include <shmfw/variable.h>
+#include <shmfw/allocator.h>
+
+
 #include <boost/program_options.hpp>
 #include <boost/thread.hpp>
 
@@ -76,6 +80,7 @@ Prarmeters readArgs ( int argc, char **argv ) {
 double rand_01(){
   return ((double) rand()) / RAND_MAX;
 }
+
 int main ( int argc, char *argv[] ) {
 
 
@@ -85,10 +90,17 @@ int main ( int argc, char *argv[] ) {
         std::cout << "Shared Memory " << params.shm_memory_name << " cleared" << std::endl;
     }
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
+    ShmFw::Alloc<ShmFw::ros::LaserScan> l("scan", shmHdl);
     srand (time(NULL));
-
-    ShmFw::Header( "h", shmHdl);
     
+    l.get()->ranges.push_back(rand_01());
+    
+    ShmFw::Alloc<ShmFw::Points<ShmFw::Allocator> > p("points", shmHdl);
+    ShmFw::Point p0(rand_01(), rand_01(), rand_01());
+    p.get()->points.push_back(p0);
+    for(size_t i = 0; i < p->points.size(); i++) std::cout << i << ": " << p->points[i] << std::endl;
+    
+
     exit ( 0 );
 
 }

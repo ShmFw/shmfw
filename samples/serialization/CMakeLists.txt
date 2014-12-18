@@ -1,8 +1,8 @@
-add_executable(shmfw-example_serialization_variable main_serialization_variable.cpp )
-target_link_libraries(shmfw-example_serialization_variable)
+add_executable(serialization_variable serialization_variable.cpp )
+target_link_libraries(serialization_variable)
 
-add_executable(shmfw-example_serialization_containter main_serialization_container.cpp )
-target_link_libraries(shmfw-example_serialization_containter)
+add_executable(serialization_containter serialization_container.cpp )
+target_link_libraries(serialization_containter)
 
-add_executable(shmfw-example_serialization_raw main_serialization_raw.cpp )
-target_link_libraries(shmfw-example_serialization_raw ${PREFIX_LIB}core)
+add_executable(serialization_raw serialization_raw.cpp )
+target_link_libraries(serialization_raw ${PREFIX_LIB}core)

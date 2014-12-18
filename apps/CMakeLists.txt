@@ -4,6 +4,6 @@ add_subdirectory(reconfigure)
 add_subdirectory(log)
 add_subdirectory(oszi)
 add_subdirectory(viewer)
-
 add_subdirectory(info)
-
+add_subdirectory(grid)
+add_subdirectory(image)

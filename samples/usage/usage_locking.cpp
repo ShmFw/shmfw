@@ -31,31 +31,31 @@
  ***************************************************************************/
 #include <iostream>
 #include <stdlib.h>
-#include <signal.h>
 
-#include <shmfw/objects/dynamic_grid_map.h>
-#include <shmfw/allocator.h>
+#include <shmfw/vector.h>
+
 #include <boost/program_options.hpp>
 #include <boost/thread.hpp>
-#include <boost/chrono.hpp>
-#include <boost/chrono/thread_clock.hpp>
+
+#define COUT_DEFAULT std::cout << std::string("\033[0;0m")
+#define COUT_GREEN std::cout << std::string("\033[32m")
+#define COUT_BLUE std::cout << std::string("\033[33m")
 
 struct Prarmeters {
+    bool clear;
     std::string shm_memory_name;
     unsigned int shm_memory_size;
     std::string variable_name;
-    bool loop;
 };
-Prarmeters params;
 
-void readArgs ( int argc, char **argv, Prarmeters &params ) {
+Prarmeters readArgs ( int argc, char **argv ) {
     namespace po = boost::program_options;
 
+    Prarmeters params;
     po::options_description desc ( "Allowed Parameters" );
     desc.add_options()
     ( "help", "get this help message" )
     ( "clear,c", "clears the shared memory" )
-    ( "loop,l", "loops writing data" )
     ( "shm_memory_name,m", po::value<std::string> ( &params.shm_memory_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
     ( "shm_memory_size,s", po::value<unsigned int> ( &params.shm_memory_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" );
 
@@ -72,68 +72,64 @@ void readArgs ( int argc, char **argv, Prarmeters &params ) {
         std::cout << desc << std::endl;
         exit ( 1 );
     }
-    params.loop = ! ( vm.count ( "loop" ) > 0 );
+    params.clear = ( vm.count ( "clear" ) > 0 );
+
+    return params;
 }
 
-void terminate ( int s ) {
-    printf ( "Caught signal %d\n",s );
-    fflush ( stdout );
-    params.loop = false;
+void conditionThread ( ShmFw::HandlerPtr &shmHdl, const std::string &name ) {
+    int offest = 60;
+    COUT_GREEN << std::setw ( offest ) << "Thread started" << std::endl;
+    ShmFw::Vector<int> xy ( name, shmHdl );
+    COUT_GREEN << std::setw ( offest ) << "waiting to get the look using timed_wait()" << std::endl;
+    while ( xy.timed_wait ( 500 ) == false ) {
+        COUT_GREEN << std::setw ( offest ) << "timed_wait(500)" << std::endl;
+        std::cout << std::flush;
+    }
+    COUT_GREEN << std::setw ( offest ) << "timed_wait(500) finished" << std::endl;
+    COUT_GREEN << std::setw ( offest ) << "lock()" << std::endl;
+    xy.lock();
+    COUT_GREEN << std::setw ( offest ) << "lock() finished" << std::endl;
+    COUT_GREEN << std::setw ( offest ) << "push_back ( 100 )" << std::endl;
+    xy->push_back ( 100 );
+    COUT_GREEN << std::setw ( offest ) << "push_back ( 100 ) finished" << std::endl;
+    COUT_GREEN << std::setw ( offest ) << "itHasChanged ( )" << std::endl;
+    xy.itHasChanged();
+    COUT_GREEN << std::setw ( offest ) << "itHasChanged ( ) finished" << std::endl;
+    COUT_GREEN << std::setw ( offest ) << "unlock ( )" << std::endl;
+    xy.unlock();
+    COUT_GREEN << std::setw ( offest ) << "unlock ( ) finished" << std::endl;
 }
+
 int main ( int argc, char *argv[] ) {
-
-
-    using namespace boost::chrono;
-    typedef boost::chrono::thread_clock tclock;
-    thread_clock::time_point thStart, thStop;
-
-    readArgs ( argc, argv, params );
-    signal ( SIGABRT,	terminate );
-    signal ( SIGTERM,	terminate );
-
+    Prarmeters params = readArgs ( argc, argv );
+    if ( params.clear ) {
+        ShmFw::Handler::removeSegment ( params.shm_memory_name );
+        COUT_DEFAULT << "Shared Memory " << params.shm_memory_name << " cleared" << std::endl;
+    }
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
-    srand ( time ( NULL ) );
 
-    ShmFw::DynamicGridMap64FHeap gridHeap1;
-    ShmFw::DynamicGridMap64FHeap gridHeap2;
-    ShmFw::Alloc<ShmFw::DynamicGridMap64FShm> gridShm ( "Grid", shmHdl);
+    std::string varName ( "xy" );
+    ShmFw::Vector<int> xy ( varName, shmHdl );
+    xy.clear();
+    COUT_BLUE << "lock()" << std::endl;
+    xy.lock();
+    COUT_BLUE << "lock() finished" << std::endl;
+    boost::thread t1 ( conditionThread, shmHdl,  varName );
+    COUT_BLUE << "sleep(2)" << std::endl;
+    sleep ( 2 );
+    COUT_BLUE << "sleep(2) finished" << std::endl;
+    COUT_BLUE << "itHasChanged()" << std::endl;
+    xy.itHasChanged();
+    COUT_BLUE << "itHasChanged() finished" << std::endl;
+    COUT_BLUE << "unlock()" << std::endl;
+    xy.unlock();
+    COUT_BLUE << "unlock() finished" << std::endl;
+    COUT_BLUE << "wait()" << std::endl;
+    xy.wait();
+    COUT_BLUE << "wait() finished" << std::endl;
 
-    gridHeap1.setSizeWithResolution ( 0, 50, 0, 40, 1., 1., 0 );
-    std::cout << gridHeap1 << std::endl;
-    int count = 0;
-    do {
-        double d = sin ( count / 100. );
-        double x, y, m = gridHeap1.getSizeX(), n = gridHeap1.getSizeY();
-        for ( int i=0; i<m; i++ ) {
-            for ( int j=0; j<n; j++ ) {
-                x = i/ ( n-1. );
-                y = j/ ( m-1. );
-                double v = d*sin ( 2*M_PI*x ) *sin ( 3*M_PI*y ) + ( 1.0-d ) *cos ( 3*M_PI*x*y );
-                gridHeap1.setCellByIndex ( i, j, v );
-            }
-        }
-        std::cout << std::endl;
-        thStart = tclock::now();
-        gridHeap1.copyTo ( gridHeap2 );
-        thStop = tclock::now();
-        std::cout << "heap->heap: copyTo using_memcpy  : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
-        thStart = tclock::now();
-        gridHeap1.copyTo ( gridHeap2 );
-        thStop = tclock::now();
-        std::cout << "heap->heap: copyTo using_forloop : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
-        thStart = tclock::now();
-        gridHeap1.copyTo ( *gridShm );
-        thStop = tclock::now();
-        std::cout << "heap->shm: copyTo using_memcpy   : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
-        thStart = tclock::now();
-        gridHeap1.copyTo ( *gridShm );
-        thStop = tclock::now();
-        std::cout << "heap->shm: copyTo using_forloop  : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
-        gridShm.itHasChanged();
-        count++;
-        usleep ( 100000 );
-    } while ( params.loop );
-
+    COUT_DEFAULT << "exit" << std::endl;
     exit ( 0 );
 
 }

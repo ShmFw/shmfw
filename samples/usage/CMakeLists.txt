@@ -1,32 +1,24 @@
-add_executable(shmfw-example_usage_header main_usage_header.cpp )
-target_link_libraries(shmfw-example_usage_header )
+add_executable(usage_header usage_header.cpp )
+target_link_libraries(usage_header )
 
-add_executable(shmfw-example_usage_var main_usage_var.cpp )
-target_link_libraries(shmfw-example_usage_var )
+add_executable(usage_var usage_var.cpp )
+target_link_libraries(usage_var )
 
+add_executable(usage_vector usage_vector.cpp )
+target_link_libraries(usage_vector )
 
-add_executable(shmfw-example_usage_vector main_usage_vector.cpp )
-target_link_libraries(shmfw-example_usage_vector )
+add_executable(usage_locking usage_locking.cpp )
+target_link_libraries(usage_locking )
 
-add_executable(shmfw-example_usage_dynamic_grid main_usage_dynamic_grid.cpp )
-target_link_libraries(shmfw-example_usage_dynamic_grid ${PREFIX_LIB}core ${PREFIX_LIB}objects)
+add_executable(usage_allocator usage_allocator.cpp )
+target_link_libraries(usage_allocator )
 
+add_executable(usage_dynamic_grid usage_dynamic_grid.cpp )
+target_link_libraries(usage_dynamic_grid ${PREFIX_LIB}core ${PREFIX_LIB}objects)
 
-add_executable(shmfw-example_usage_and_tests main_usage_and_tests.cpp )
-target_link_libraries(shmfw-example_usage_and_tests )
+IF(EIGEN_FOUND)
 
-add_executable(shmfw-example_usage_raw main_usage_raw.cpp )
-target_link_libraries(shmfw-example_usage_raw )
+add_executable(usage_eigen usage_eigen.cpp )
+target_link_libraries(usage_eigen)
 
-add_executable(shmfw-example_usage_allocator main_usage_allocator.cpp )
-target_link_libraries(shmfw-example_usage_allocator )
-
-add_executable(shmfw-example_usage_container_of_container main_usage_container_of_container.cpp )
-target_link_libraries(shmfw-example_usage_container_of_container )
-
-add_executable(shmfw-example_usage_object_in_heap_or_shm main_usage_object_in_heap_or_shm.cpp )
-target_link_libraries(shmfw-example_usage_object_in_heap_or_shm )
-
-
-add_executable(shmfw-example_usage_copy_between_heap_and_shm main_usage_copy_between_heap_and_shm.cpp )
-target_link_libraries(shmfw-example_usage_copy_between_heap_and_shm )
+ENDIF (EIGEN_FOUND)
