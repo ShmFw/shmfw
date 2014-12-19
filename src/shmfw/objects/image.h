@@ -329,7 +329,7 @@ public:
       pixelStep = channels*depth; 
       size_t size = widthStep*height;
       if(data.size() != size){
-        data.resize ( data.size() );
+        data.resize ( size );
       }
     }
     void create(cv::Size size, int cvtype){
