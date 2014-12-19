@@ -119,7 +119,7 @@ int main ( int argc, char **argv ) {
             }
 
             cv::Mat img;
-            shmImg->toCvMat ( img );
+            shmImg->cvMat ( img );
             cv::namedWindow ( params.variable_name.c_str(), CV_WINDOW_AUTOSIZE );
 
             cv::imshow ( params.variable_name.c_str(), img );

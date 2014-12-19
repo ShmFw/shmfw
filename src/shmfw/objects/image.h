@@ -262,9 +262,13 @@ public:
         };
     };
 
-    cv::Mat &toCvMat ( cv::Mat &img ) {
+    cv::Mat &cvMat ( cv::Mat &img ) {
         img = cv::Mat ( height, width, cvType ( encoding ), &data[0] );
         return img;
+    };
+
+    cv::Mat cvMat () {
+        return cv::Mat ( height, width, cvType ( encoding ), &data[0] );
     };
 
     static void convertYUV422toBGR8 ( int height, int width, uint8_t *src, uint8_t *des ) {
@@ -315,6 +319,37 @@ public:
             R = YCr_TO_RED ( Y, Cr ), G = YCr_TO_GREEN ( Y, Cr, Cb ), B = YCb_TO_BLUE ( Y, Cb );
             *des++ = CLIP_TO_UCHAR ( R ), *des++ = CLIP_TO_UCHAR ( G ), *des++ = CLIP_TO_UCHAR ( B );
         }
+    }
+    
+    void create(int rows, int cols, int cvtype){
+      setEncodingDepthChannels(cvtype);
+      width = cols;
+      height = rows;
+      widthStep = width*channels*depth;
+      pixelStep = channels*depth; 
+      size_t size = widthStep*height;
+      if(data.size() != size){
+        data.resize ( data.size() );
+      }
+    }
+    void create(cv::Size size, int cvtype){
+      create(size.height, size.width, cvtype);
+    }
+private:
+    void setEncodingDepthChannels(int cvtype){
+      encoding = getEncoding(cvtype);   
+      channels = 1 + (cvtype >> CV_CN_SHIFT);    
+      uchar d = cvtype & CV_MAT_DEPTH_MASK;  
+      switch ( d ) {
+        case CV_8U:  depth = 1; break;
+        case CV_8S:  depth = 1; break;
+        case CV_16U: depth = 2; break;
+        case CV_16S: depth = 2; break;
+        case CV_32S: depth = 2; break;
+        case CV_32F: depth = 2; break;
+        case CV_64F: depth = 4; break;
+        default:     depth = 0; break;
+      }
     }
 protected:
     friend class boost::serialization::access;

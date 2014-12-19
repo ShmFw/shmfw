@@ -86,7 +86,7 @@ int main ( int argc, char **argv ) {
 	    ShmFw::Alloc<ShmFw::ImageShm> shm_image( params.variable_name, shmHdl );
 	    shm_image->copyFrom(img);
 	    cv::Mat des;
-	    shm_image->toCvMat(des);
+	    shm_image->cvMat(des);
             cv::imshow ( params.variable_name.c_str(), des );
             cv::waitKey ( -1 );
         }
@@ -102,7 +102,7 @@ int main ( int argc, char **argv ) {
               std::cout << shm_image << std::endl;
             }
             cv::Mat img;
-	    shm_image->toCvMat ( img );
+	    shm_image->cvMat ( img );
             cv::imshow ( params.variable_name.c_str(), img );
             if ( params.reload == 0 ) cv::waitKey ( 10 );
             else if ( cv::waitKey ( params.reload ) >= 0 ) params.reload = -1;

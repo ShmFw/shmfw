@@ -159,7 +159,7 @@ int main ( int argc, char *argv[] ) {
     shmImg.unlock();
     cv::Mat shmMat;
     shmImg->copyFrom(imgSrc);
-    shmImg->toCvMat ( shmMat );
+    shmImg->cvMat ( shmMat );
     std::cout << "You should be able to view the image with:  ";
     std::cout << "shmfw-image_view -v " << params.variable_name << std::endl;
     do {
