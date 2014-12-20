@@ -102,12 +102,14 @@ int main ( int argc, char **argv ) {
             std::cout << "no shared variable with the name: " << params.variable_name << std::endl;
             exit ( 1 );
         }
+        ShmFw::Alloc<ShmFw::ImageShm> shmImg ( params.variable_name, shmHdl );
+        if ( !shmImg.isType<ShmFw::Alloc<ShmFw::ImageShm> >() ) {
+            std::cout << "The shared variable: " << params.variable_name << ", is not a image!" << std::endl;
+            exit ( 1 );
+        }
+        cv::namedWindow ( params.variable_name.c_str(), CV_WINDOW_NORMAL );
         for ( unsigned int i = 0, timeoutCounter = 0; ( params.reload >= 0 ) && loop_program; i++ ) {
             ShmFw::Alloc<ShmFw::ImageShm> shmImg ( params.variable_name, shmHdl );
-            if ( !shmImg.isType<ShmFw::Alloc<ShmFw::ImageShm> >() ) {
-                std::cout << "The shared variable: " << params.variable_name << ", is not a image!" << std::endl;
-                exit(1);
-            }
             if ( i == 0 ) std::cout << shmImg << std::endl;
 
             if ( shmImg.timed_wait ( 1000 ) == false ) {
@@ -120,7 +122,6 @@ int main ( int argc, char **argv ) {
 
             cv::Mat img;
             shmImg->cvMat ( img );
-            cv::namedWindow ( params.variable_name.c_str(), CV_WINDOW_AUTOSIZE );
 
             cv::imshow ( params.variable_name.c_str(), img );
 

@@ -72,6 +72,9 @@ template<class Archive> inline  void serialize ( Archive &ar, cv::RotatedRect &o
     ar & boost::serialization::make_nvp ( "size", o.size );
     ar & boost::serialization::make_nvp ( "angle", o.angle );
 }
+template<class Archive, typename _Tp, int cn, int cm> inline  void serialize ( Archive &ar, cv::Matx<_Tp, cn, cm> &o, const unsigned int version ) {
+    ar & boost::serialization::make_nvp ( "val", o.val );
+}
 
 }; // namespace serialization
 }; // namespace boost

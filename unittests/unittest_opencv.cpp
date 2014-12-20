@@ -149,7 +149,7 @@ TEST_F ( OpenCVTest, shmImage ) {
     a->copyFrom(imgA, ShmFw::IMAGE_ENCODING_BGR8);
     ShmFw::Alloc<ShmFw::ImageShm> b( shm_name, shmHdl );
     cv::Mat imgShm;
-    b->toCvMat(imgShm);
+    b->cvMat(imgShm);
     cv::putText(imgShm, "shmImage", cv::Point(0, imgShm.rows/2), cv::FONT_HERSHEY_COMPLEX,1, cv::Scalar(0xFF,0xFF,0xFF),1);
     cv::namedWindow ( image_filename, CV_WINDOW_AUTOSIZE );
     cv::imshow ( image_filename, imgShm );
@@ -175,7 +175,7 @@ TEST_F ( OpenCVTest, serializeImage ) {
     ShmFw::read (filename, *b);
     EXPECT_EQ ( *a, *b );
     cv::Mat imgShm;
-    b->toCvMat(imgShm);
+    b->cvMat(imgShm);
     cv::putText(imgShm, "serializeImage", cv::Point(0, imgShm.rows/2), cv::FONT_HERSHEY_COMPLEX,1, cv::Scalar(0xFF,0xFF,0xFF),1);
     cv::namedWindow ( filename, CV_WINDOW_AUTOSIZE );
     cv::imshow ( filename, imgShm );

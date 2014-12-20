@@ -10,6 +10,8 @@ SET(FILES_H
   grid_map_header.h
   handler_parameterentry.h
   image.h
+  line2d.h
+  linesegment2d.h
   matrix3x3.h
   message.h
   model_state.h

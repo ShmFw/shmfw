@@ -25,7 +25,9 @@ SET(UNITTEST_OBJECTS_SOURCES
   unittest_objects_plane.cpp
   unittest_objects_twist.cpp
   unittest_objects_quaterion.cpp
-  unittest_objects_marker.cpp)
+  unittest_objects_marker.cpp
+  unittest_objects_line2d.cpp
+  unittest_objects_linesegment2d.cpp)
 
   
 add_executable(unittest_objects ${UNITTEST_OBJECTS_SOURCES})
