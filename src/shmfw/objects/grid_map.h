@@ -127,6 +127,11 @@ public:
     T *data() {
         return m_data.get();
     }
+    /** Returns a reference to a after the last element of the current active layer.
+      */
+    const T *end() const {
+        return m_data.get() + size();
+    }
     /** Returns a reference to a cell, no boundary checks are performed.
       */
     T *data(size_t i) {
@@ -168,6 +173,14 @@ public:
     const T* data_layer(size_t layer) const {
 	if(layer >= getLayers()) throw 0;
         return origin_data(this->size() * layer);
+    }
+    /** Returns a pointer to a layer ending
+     * @param layer
+     * @return pointer to cell after after the layer
+      */
+    T* end_layer(size_t layer){
+        if(layer >= getLayers()) throw 0;
+        return origin_data(size() * (layer+1));
     }
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
       */

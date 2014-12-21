@@ -77,18 +77,27 @@ public:
         double r = sqrt(this->val[0]*this->val[0] + this->val[1]*this->val[1]);
         this->val[0] /= r, this->val[1] /= r, this->val[2] /= r;
     }
+    template <typename T2>
+    T distanceTo(const T2 &x, const T2 &y)  const {
+        return this->val[0]*((T)x) + this->val[1]*((T)y) + this->val[2];
+    }
     /** @pre normalize */
     template <typename T2>
     T distanceTo(const cv::Point_<T2> &p)  const {
-        return this->val[0]*((T)p.x) + this->val[1]*((T)p.y) + this->val[2];
+        return distanceTo(p.x, p.y);
     }
     /** @pre normalize */
     template <typename T2>
-    cv::Point_<T> pointOnLine(const cv::Point_<T2> &p) {
-        T d = distanceTo(p);
-        return cv::Point_<T>(p.x - d * A(), p.y - d * B());
+    cv::Point_<T> pointOnLine(const T2 &x, const T2 &y) const {
+        T d = distanceTo(x,y);
+        return cv::Point_<T>(x - d * A(), y - d * B());
     }
-    cv::Point_<T> intersection(const Line2D<T> &l) const{
+    /** @pre normalize */
+    template <typename T2>
+    cv::Point_<T> pointOnLine(const cv::Point_<T2> &p) const {
+        return distanceTo(p.x,p.y);
+    }
+    cv::Point_<T> intersection(const Line2D<T> &l) const {
         cv::Vec<T,3> h = this->cross(l);
         return cv::Point_<T>(h[0]/h[2],h[1]/h[2]);
     }

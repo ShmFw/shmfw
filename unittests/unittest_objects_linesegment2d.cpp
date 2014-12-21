@@ -15,6 +15,14 @@ TEST_F ( ObjectTest, operationsLineSegment2Line ) {
     EXPECT_NEAR(d2, -0.7, 0.1);
 }
 
+
+TEST_F ( ObjectTest, operationsLineLength ) {
+  
+    cv::Point_<double> p1(0,0), p2(1,1);
+    ShmFw::LineSegment2D<double> s(p1,p2);
+    double d = s.length(); 
+    EXPECT_NEAR(d, 1.4, 0.1);
+}
 TEST_F ( ObjectTest, operationsLineSegment ) {
   
     cv::Point_<double> p1(0,0), p2(1,1);

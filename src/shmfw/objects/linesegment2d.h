@@ -45,20 +45,24 @@ protected:
 public:
     LineSegment2D() {};
     LineSegment2D(const LineSegment2D &l) 
-    : Line2D<T>(l)
-    , p1_(l.p1_)
-    , p2_(l.p2_) {
+    : Line2D<T>(l.line())
+    , p1_(l.p1())
+    , p2_(l.p2()) {
     };
     LineSegment2D(cv::Vec<T,4> &v) 
-    : Line2D<T>(v[0], v[1], v[2], v[3])
+    : Line2D<T>(v[0], v[1], v[2], v[3], true)
     , p1_(v[0], v[1]) 
     , p2_(v[2], v[3]) {
     };
-    template <typename T2>
-    LineSegment2D(const cv::Point_<T2> &pt1, const cv::Point_<T2> &pt2)
-    : Line2D<T>(pt1, pt2)
+    LineSegment2D(const cv::Point_<T> &pt1, const cv::Point_<T> &pt2)
+    : Line2D<T>(pt1, pt2, true)
     , p1_(pt1)
     , p2_(pt2) {
+    };
+    LineSegment2D(const T &x1, const T &y1, const T &x2, const T &y2)
+    : Line2D<T>(x1, y1, x2, y2, true)
+    , p1_(x1, y1)
+    , p2_(x2, y2) {
     };
     const T &x1() const {
         return  p1_.x;
@@ -80,6 +84,9 @@ public:
     }
     const Line2D<T> &line() const {
         return *this;
+    }
+    const T length() const {
+        return cv::norm(cv::Vec<T,2> (p2_.x - p1_.x, p2_.y-p1_.y));
     }    
     /// comparison operator @return true on equal
     bool operator == ( const LineSegment2D<T>& o ) const {
