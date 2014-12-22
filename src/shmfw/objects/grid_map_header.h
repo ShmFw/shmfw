@@ -157,14 +157,20 @@ protected:
     cv::Point cvCellPoint (double x, double y ) const;
     /// Transform a coordinate values into cell index. @param p metric value  @return cell index
     cv::Point cvCellPoint ( const cv::Point &p ) const;
+    /// Transform a coordinate values into cell index. @param src metric value @param des cell indexes   @return cell indexes
+    std::vector<cv::Point> cvCellPoint ( const std::vector<cv::Point> &src, std::vector<cv::Point> &des ) const;
     /// Transform a coordinate values into cell index. @param p metric value  @return cell index
     cv::Point cvCellPoint ( const cv::Point2f &p ) const;
+    /// Transform a coordinate values into cell index. @param src metric value @param des cell indexes   @return cell indexes
+    std::vector<cv::Point> cvCellPoint ( const std::vector<cv::Point2f> &src, std::vector<cv::Point> &des ) const;
     /// Transform a coordinate values into cell index. @param p metric value  @return cell index
     cv::Point cvCellPoint ( const cv::Point2d &p ) const;
+    /// Transform a coordinate values into cell index. @param src metric value @param des cell indexes   @return cell indexes
+    std::vector<cv::Point> cvCellPoint ( const std::vector<cv::Point2d> &src, std::vector<cv::Point> &des ) const;
     /// Transform a cell index into a coordinate value. @param x cell index @param y cell index  @return metric value
-    cv::Point2d cvPosePoint ( int &x, int &y ) const;
+    cv::Point2d cvCoordinatePoint ( int &x, int &y ) const;
     /// Transform a cell index into a coordinate value. @param p cell index  @return metric value
-    cv::Point2d cvPosePoint ( const cv::Point &p ) const;
+    cv::Point2d cvCoordinatePoint ( const cv::Point &p ) const;
     static cv::Scalar cvGreen();
     static cv::Scalar cvBlue();
     static cv::Scalar cvRed();
