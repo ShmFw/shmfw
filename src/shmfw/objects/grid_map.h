@@ -40,8 +40,9 @@
 namespace ShmFw {
 
 /** A 2D grid map usable with the shared memory
+ * @brief This class is based on the mrpt::slam::CDynamicGridMap which was published unter BSD many thanks to the mrpt team
  * @tparam T The type of each cell in the 2D grid.
- * This class is based on the mrpt::slam::CDynamicGridMap which was published unter BSD many thanks to the mrpt team
+ * 
  */
 template <typename T>
 class GridMap : public ShmFw::GridMapHeader {
