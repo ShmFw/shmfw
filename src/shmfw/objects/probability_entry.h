@@ -35,7 +35,7 @@
 
 #include <math.h>
 
-namespace shmfw {
+namespace ShmFw {
 class ProbabilityEntry {
 public:
     typedef int8_t  cellType;

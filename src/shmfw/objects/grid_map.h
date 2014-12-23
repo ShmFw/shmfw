@@ -37,13 +37,11 @@
 #include <shmfw/objects/grid_map_header.h>
 #include <boost/interprocess/offset_ptr.hpp>
 
-#define SHMFW_UNUSED_PARAM(a)		(void)(a)
 namespace ShmFw {
 
-
-/** A 2D grid of dynamic size which stores any kind of data at each cell.
+/** A 2D grid map usable with the shared memory
  * @tparam T The type of each cell in the 2D grid.
- * @note This class is based on the mrpt::slam::CDynamicGridMap which was published unter BSD many thanks to the mrpt team
+ * This class is based on the mrpt::slam::CDynamicGridMap which was published unter BSD many thanks to the mrpt team
  */
 template <typename T>
 class GridMap : public ShmFw::GridMapHeader {
@@ -431,7 +429,6 @@ public:
         }
         return output;
     }
-
 };
 };
 
