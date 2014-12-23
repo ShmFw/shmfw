@@ -139,6 +139,11 @@ public:
     }
     /** Returns a reference to a cell, no boundary checks are performed.
       */
+    const T *data(size_t i) const {
+        return m_data.get() + i;
+    }
+    /** Returns a reference to a cell, no boundary checks are performed.
+      */
     T *origin_data() {
         return m_origin_data.get();
     }
@@ -396,12 +401,25 @@ public:
         memset ( data(), 0, this->size_total() );
     }
 
+    std::ostream& matlab ( std::ostream &output ) const {
+        GridMapHeader::matlab(output);
+        output << std::setw ( 20 ) << "grid.data = [";
+        for ( size_t i = 0; i < size_total(); i++ ) {
+            output << std::endl;
+            output << std::setw ( 20 ) << *this->data(i);
+            if(i < size_total()-1) output << ",";
+        }
+        output << "]\n";
+        return output;
+    }
     
 };
 };
 
 
 #endif //SHARED_MEM_OBJECT_GRID_MAP_H
+
+
 
 
 

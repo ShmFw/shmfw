@@ -27,13 +27,14 @@ SET(UNITTEST_OBJECTS_SOURCES
   unittest_objects_quaterion.cpp
   unittest_objects_marker.cpp
   unittest_objects_line2d.cpp
-  unittest_objects_linesegment2d.cpp)
+  unittest_objects_linesegment2d.cpp
+  unittest_objects_grid_map.cpp)
 
   
 add_executable(unittest_objects ${UNITTEST_OBJECTS_SOURCES})
 
 
-target_link_libraries(unittest_objects gtest shmfw_core)
+target_link_libraries(unittest_objects gtest shmfw_core shmfw_objects)
 
 add_test(
     NAME unittest_objects

@@ -33,6 +33,7 @@
 #ifndef SHARED_MEM_OBJECT_GRID_MAP_HEADER_H
 #define SHARED_MEM_OBJECT_GRID_MAP_HEADER_H
 
+#include <iomanip>
 #include <opencv/cxcore.h>
 #include <typeinfo>  // Needed for typeid()
 
@@ -60,25 +61,25 @@ private:
     size_t m_size_total;   /// number of cells over all layer
     size_t m_bytes;     /// number of bytes per layer
     size_t m_bytes_total;   /// number of bytes over all layer
-    size_t m_type_hash_code; /// type hash code only for C+11;   
-    
+    size_t m_type_hash_code; /// type hash code only for C+11;
+
     /// Sets the Map size
-    void initSize(const size_t size_x, const size_t size_y, const size_t depth, const size_t layers);
+    void initSize ( const size_t size_x, const size_t size_y, const size_t depth, const size_t layers );
 protected:
     /// Sets the bounderies and rounds the values to integers and to multipliers of the given resolution
-    void initHeader ( const double x_min, const double x_max, const double y_min, const double y_max, const double x_resolution, const double y_resolution, const size_t depth, const size_t layers, const size_t type_hash_code  );
+    void initHeader ( const double x_min, const double x_max, const double y_min, const double y_max, const double x_resolution, const double y_resolution, const size_t depth, const size_t layers, const size_t type_hash_code );
     /// Sets the bounderies and rounds the values to integers and to multipliers of the given resolution
-    void initHeader ( const double x_min, const double x_max, const double y_min, const double y_max, const double x_resolution, const double y_resolution, const size_t depth, const size_t layers);
+    void initHeader ( const double x_min, const double x_max, const double y_min, const double y_max, const double x_resolution, const double y_resolution, const size_t depth, const size_t layers );
     /// Sets the bounderies and rounds the values to integers and to multipliers of the given resolution
-    void initHeader ( const double x_min, const double x_max, const double y_min, const double y_max, const size_t size_x, const size_t size_y, const size_t depth, const size_t layers, const size_t type_hash_code);
+    void initHeader ( const double x_min, const double x_max, const double y_min, const double y_max, const size_t size_x, const size_t size_y, const size_t depth, const size_t layers, const size_t type_hash_code );
     /// Sets the bounderies and rounds the values to integers and to multipliers of the given resolution
-    void initHeader ( const double x_min, const double x_max, const double y_min, const double y_max, const size_t size_x, const size_t size_y, const size_t depth, const size_t layers);
-    void setTypeHasCode(const size_t type_hash_code);
-    template <typename T>  void setTypeHasCode(){
+    void initHeader ( const double x_min, const double x_max, const double y_min, const double y_max, const size_t size_x, const size_t size_y, const size_t depth, const size_t layers );
+    void setTypeHasCode ( const size_t type_hash_code );
+    template <typename T>  void setTypeHasCode() {
         size_t type_hash_code = typeid ( T ).hash_code();
-	setTypeHasCode(type_hash_code);
+        setTypeHasCode ( type_hash_code );
     }
- public:
+public:
 
     GridMapHeader ()
         : m_x_min ( 0 )
@@ -90,13 +91,13 @@ protected:
         , m_size_x ( 0 )
         , m_size_y ( 0 )
         , m_depth ( 0 )
-        , m_layers(0) 
+        , m_layers ( 0 )
         , m_size ( 0 )
         , m_size_total ( 0 )
         , m_bytes ( 0 )
         , m_bytes_total ( 0 )
         , m_type_hash_code ( 0 ) {
-    }    
+    }
     /// Returns the horizontal size of grid map in cells count. @return m_size_x
     const size_t& getSizeX() const;
     /// Returns the horizontal size of grid map in cells count. @return m_size_x
@@ -109,7 +110,7 @@ protected:
     const size_t& getDepth() const;
     /// Returns the number of layers. @return m_layers
     const size_t& getLayers() const;
-    /// Returns the type hash code. @return m_depth 
+    /// Returns the type hash code. @return m_depth
     const size_t& getTypeHashCode() const;
     /// Returns the number of cells on one layer. @return m_size
     const size_t& size() const;
@@ -119,20 +120,20 @@ protected:
     const size_t& bytes() const;
     /// Returns the number of cells on one layer. @return m_bytes_total
     const size_t& bytes_total() const;
-    /// Returns the "x" coordinate of left side of grid map.  @return m_x_min 
+    /// Returns the "x" coordinate of left side of grid map.  @return m_x_min
     const double& getXMin() const;
-    /// Returns the "x" coordinate of right side of grid map.  @return m_x_max 
+    /// Returns the "x" coordinate of right side of grid map.  @return m_x_max
     const double& getXMax() const ;
     /// Returns the "y" coordinate of top side of grid map.  @return m_y_min
     const double& getYMin() const;
-    /// Returns the "y" coordinate of bottom side of grid map.  @return m_y_max 
+    /// Returns the "y" coordinate of bottom side of grid map.  @return m_y_max
     const double& getYMax() const;
-    /// Returns the resolution of the grid map.  @return m_x_resolution 
+    /// Returns the resolution of the grid map.  @return m_x_resolution
     const double& getResolutionX() const ;
-    /// Returns the resolution of the grid map.  @return m_y_resolution 
-    const double& getResolutionY() const;      
-    /// Returns the resolution of the grid map. it thows an exception if m_x_resolution != m_y_resolution  @return resolution 
-    const double& getResolution() const;      
+    /// Returns the resolution of the grid map.  @return m_y_resolution
+    const double& getResolutionY() const;
+    /// Returns the resolution of the grid map. it thows an exception if m_x_resolution != m_y_resolution  @return resolution
+    const double& getResolution() const;
     /// Transform a coordinate x values into cell index. @return cell index x
     int x2idx ( double x ) const;
     /// Transform a coordinate y values into cell index. @return cell index y
@@ -151,10 +152,10 @@ protected:
     bool xyInRangeMap ( double x, double y ) const;
 
     /// tries to identify the cvtype. @return cvtype or -1
-    int cvtype() const;  
-    
+    int cvtype() const;
+
     /// Transform a coordinate values into cell index. @param x metric value, @param y metric value  @return cell index
-    cv::Point cvCellPoint (double x, double y ) const;
+    cv::Point cvCellPoint ( double x, double y ) const;
     /// Transform a coordinate values into cell index. @param p metric value  @return cell index
     cv::Point cvCellPoint ( const cv::Point &p ) const;
     /// Transform a coordinate values into cell index. @param src metric value @param des cell indexes   @return cell indexes
@@ -174,31 +175,50 @@ protected:
     static cv::Scalar cvGreen();
     static cv::Scalar cvBlue();
     static cv::Scalar cvRed();
-    
+
     /** Compared the entry type
      * @return true if the type T1 is equal to T
      */
     template <typename T1>
     bool isType() const {
-      size_t type_hash_code =( typeid ( T1 ).hash_code() );
-      return (m_type_hash_code == type_hash_code);
+        size_t type_hash_code = ( typeid ( T1 ).hash_code() );
+        return ( m_type_hash_code == type_hash_code );
     }
-    
-  friend std::ostream& operator<< ( std::ostream &output, const GridMapHeader &o ) {
-    char msg[0xFF];
-    sprintf ( msg, "[%zu, %zu] @ [%4.3f, %4.3f]m/px of %zu bytes, range x:  %4.3f -> %4.3f, y: %4.3f -> %4.3f, layer %zu, type_hash_code: %zu",
-	o.getSizeX(), o.getSizeY(), o.getResolutionX(), o.getResolutionY(),
-	o.getDepth (),
-	o.getXMin(), o.getXMax(),
-	o.getYMin(), o.getYMax(),
-	o.getLayers(),
-	o.getTypeHashCode() );
-    output << msg;
-    return output;
-  }
-  friend std::istream& operator>> ( std::istream &input, GridMapHeader &o ) {
-    return input;
-  }
+
+    friend std::ostream& operator<< ( std::ostream &output, const GridMapHeader &o ) {
+        char msg[0xFF];
+        sprintf ( msg, "[%zu, %zu] @ [%4.3f, %4.3f]m/px of %zu bytes, range x:  %4.3f -> %4.3f, y: %4.3f -> %4.3f, layer %zu, type_hash_code: %zu",
+                  o.getSizeX(), o.getSizeY(), o.getResolutionX(), o.getResolutionY(),
+                  o.getDepth (),
+                  o.getXMin(), o.getXMax(),
+                  o.getYMin(), o.getYMax(),
+                  o.getLayers(),
+                  o.getTypeHashCode() );
+        output << msg;
+        return output;
+    }
+    friend std::istream& operator>> ( std::istream &input, GridMapHeader &o ) {
+        return input;
+    }
+
+    std::ostream& matlab ( std::ostream &output ) const {
+        output << std::setw ( 20 ) << "grid.x_min =" << std::setw ( 20 ) <<  m_x_min << ",\n";
+        output << std::setw ( 20 ) << "grid.x_max =" << std::setw ( 20 ) <<  m_x_max << ",\n";
+        output << std::setw ( 20 ) << "grid.y_min =" << std::setw ( 20 ) <<  m_y_min << ",\n";
+        output << std::setw ( 20 ) << "grid.y_max =" << std::setw ( 20 ) <<  m_y_max << ",\n";
+        output << std::setw ( 20 ) << "grid.x_resolution =" << std::setw ( 20 ) <<  m_x_resolution << ",\n";
+        output << std::setw ( 20 ) << "grid.y_resolution =" << std::setw ( 20 ) <<  m_y_resolution << ",\n";
+        output << std::setw ( 20 ) << "grid.size_x =" << std::setw ( 20 ) <<  m_size_x << ",\n";
+        output << std::setw ( 20 ) << "grid.size_y =" << std::setw ( 20 ) <<  m_size_y << ",\n";
+        output << std::setw ( 20 ) << "grid.depth =" << std::setw ( 20 ) <<  m_depth << ",\n";
+        output << std::setw ( 20 ) << "grid.layers =" << std::setw ( 20 ) <<  m_layers << ",\n";
+        output << std::setw ( 20 ) << "grid.size =" << std::setw ( 20 ) <<  m_size << ",\n";
+        output << std::setw ( 20 ) << "grid.size_total =" << std::setw ( 20 ) <<  m_size_total << ",\n";
+        output << std::setw ( 20 ) << "grid.bytes =" << std::setw ( 20 ) <<  m_bytes << ",\n";
+        output << std::setw ( 20 ) << "grid.bytes_total =" << std::setw ( 20 ) <<  m_bytes_total << ",\n";
+        output << std::setw ( 20 ) << "grid.type_hash_code =" << std::setw ( 20 ) <<  m_type_hash_code << ",\n";
+        return output;
+    }
 };
 };
 

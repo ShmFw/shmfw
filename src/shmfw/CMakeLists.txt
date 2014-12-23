@@ -32,3 +32,5 @@ add_subdirectory(objects)
 add_subdirectory(gerneralization)
 add_subdirectory(serialization)
 add_subdirectory(modules)
+
+add_subdirectory(utils)
