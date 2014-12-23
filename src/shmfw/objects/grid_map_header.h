@@ -201,22 +201,30 @@ public:
         return input;
     }
 
-    std::ostream& matlab ( std::ostream &output ) const {
-        output << std::setw ( 20 ) << "grid.x_min =" << std::setw ( 20 ) <<  m_x_min << ",\n";
-        output << std::setw ( 20 ) << "grid.x_max =" << std::setw ( 20 ) <<  m_x_max << ",\n";
-        output << std::setw ( 20 ) << "grid.y_min =" << std::setw ( 20 ) <<  m_y_min << ",\n";
-        output << std::setw ( 20 ) << "grid.y_max =" << std::setw ( 20 ) <<  m_y_max << ",\n";
-        output << std::setw ( 20 ) << "grid.x_resolution =" << std::setw ( 20 ) <<  m_x_resolution << ",\n";
-        output << std::setw ( 20 ) << "grid.y_resolution =" << std::setw ( 20 ) <<  m_y_resolution << ",\n";
-        output << std::setw ( 20 ) << "grid.size_x =" << std::setw ( 20 ) <<  m_size_x << ",\n";
-        output << std::setw ( 20 ) << "grid.size_y =" << std::setw ( 20 ) <<  m_size_y << ",\n";
-        output << std::setw ( 20 ) << "grid.depth =" << std::setw ( 20 ) <<  m_depth << ",\n";
-        output << std::setw ( 20 ) << "grid.layers =" << std::setw ( 20 ) <<  m_layers << ",\n";
-        output << std::setw ( 20 ) << "grid.size =" << std::setw ( 20 ) <<  m_size << ",\n";
-        output << std::setw ( 20 ) << "grid.size_total =" << std::setw ( 20 ) <<  m_size_total << ",\n";
-        output << std::setw ( 20 ) << "grid.bytes =" << std::setw ( 20 ) <<  m_bytes << ",\n";
-        output << std::setw ( 20 ) << "grid.bytes_total =" << std::setw ( 20 ) <<  m_bytes_total << ",\n";
-        output << std::setw ( 20 ) << "grid.type_hash_code =" << std::setw ( 20 ) <<  m_type_hash_code << ",\n";
+    std::ostream& matlab ( std::ostream &output, const std::string &variable ) const {
+        output << variable << ".x              = [ ";
+        for(size_t cx = 0; cx < m_size_x; cx++) {
+          output << idx2x(cx) << (cx < m_size_x-1?", ":"]\n");
+        }
+        output << variable << ".y              = [ ";
+        for(size_t cy = 0; cy < m_size_y; cy++) {
+          output << idx2y(cy) << (cy < m_size_y-1?", ":"]\n");
+        }
+        output << variable << ".x_min          =" <<  m_x_min << ",\n";
+        output << variable << ".x_max          =" <<  m_x_max << ",\n";
+        output << variable << ".y_min          =" <<  m_y_min << ",\n";
+        output << variable << ".y_max          =" <<  m_y_max << ",\n";
+        output << variable << ".x_resolution   =" <<  m_x_resolution << ",\n";
+        output << variable << ".y_resolution   =" <<  m_y_resolution << ",\n";
+        output << variable << ".size_x         =" <<  m_size_x << ",\n";
+        output << variable << ".size_y         =" <<  m_size_y << ",\n";
+        output << variable << ".depth          =" <<  m_depth << ",\n";
+        output << variable << ".layers         =" <<  m_layers << ",\n";
+        output << variable << ".size           =" <<  m_size << ",\n";
+        output << variable << ".size_total     =" <<  m_size_total << ",\n";
+        output << variable << ".bytes          =" <<  m_bytes << ",\n";
+        output << variable << ".bytes_total    =" <<  m_bytes_total << ",\n";
+        output << variable << ".type_hash_code =" <<  m_type_hash_code << ",\n";
         return output;
     }
 };

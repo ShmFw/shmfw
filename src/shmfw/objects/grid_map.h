@@ -401,19 +401,34 @@ public:
         memset ( data(), 0, this->size_total() );
     }
 
-    std::ostream& matlab ( std::ostream &output ) const {
-        GridMapHeader::matlab ( output );
-        const T *p = this->data();
-        output << std::setw ( 20 ) << "grid.data = [";
-        for ( size_t y = 0; y < this->getSizeY(); y++ ) {
-            output << std::endl;
-            for ( size_t x = 0; x < this->getSizeX(); x++ ) {
-                output << std::setw ( 20 ) << *p++;
-                if ( x < this->getSizeX()-1 ) output << ",";
+    /**
+     * creates a matlab struct
+     * @param output output stream
+     * @param varaible name of the matlab struct
+     * @code
+     * % c++ 
+     * std::ofstream outfile("/tmp/gridmap.m", std::ofstream::out);
+     * grid.matlab(outfile, "grid");
+     * outfile.close();   
+     * % matlab
+     * run('/tmp/gridmap.m')
+     * surf(grid.x,grid.y,reshape(grid.data(1,:,:), grid.size_x, grid.size_y))
+     */
+    std::ostream& matlab ( std::ostream &output, const std::string &variable ) const {
+        GridMapHeader::matlab ( output, variable );
+        for ( size_t l = 0; l < this->getLayers(); l++ ) {
+            const T *p = this->data_layer(l);
+            output << variable << ".data(" << l+1 << ",:,:) = [";
+            for ( size_t y = 0; y < this->getSizeY(); y++ ) {
+                output << std::endl;
+                for ( size_t x = 0; x < this->getSizeX(); x++ ) {
+                    output << std::setw ( 20 ) << *p++;
+                    if ( x < this->getSizeX()-1 ) output << ",";
+                }
+                if ( y < this->getSizeY()-1 ) output << ";";
             }
-            if ( y < this->getSizeY()-1 ) output << ";";
+            output << "]\n";
         }
-        output << "]\n";
         return output;
     }
 
