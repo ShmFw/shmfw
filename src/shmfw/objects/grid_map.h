@@ -52,22 +52,22 @@ protected:
     boost::interprocess::offset_ptr<T>  m_data;        /// cells
 public:
     GridMap ()
-        : GridMapHeader (  )
+        : GridMapHeader ( )
         , m_data () {
     }
     GridMap ( const double x_min, const double x_max, const double y_min, const double y_max, const double x_resolution, const double y_resolution, const size_t layers, T *data, const T * fill_value = NULL ) {
-      size_t type_hash_code;
+        size_t type_hash_code;
 #if __cplusplus > 199711L
         type_hash_code = typeid ( T ).hash_code();
 #else
         type_hash_code = 0;
 #endif
-      initHeader ( x_min, x_max, y_min, y_max, x_resolution, y_resolution, sizeof ( T ), layers, type_hash_code);
-      initData(data, fill_value);
+        initHeader ( x_min, x_max, y_min, y_max, x_resolution, y_resolution, sizeof ( T ), layers, type_hash_code );
+        initData ( data, fill_value );
     }
     /** Initilialies a given data array
       */
-    void initData (T *data, const T * fill_value = NULL ) {
+    void initData ( T *data, const T * fill_value = NULL ) {
         m_data = data;
         if ( fill_value ) fill ( fill_value );
     }
@@ -134,12 +134,12 @@ public:
     }
     /** Returns a reference to a cell, no boundary checks are performed.
       */
-    T *data(size_t i) {
+    T *data ( size_t i ) {
         return m_data.get() + i;
     }
     /** Returns a reference to a cell, no boundary checks are performed.
       */
-    const T *data(size_t i) const {
+    const T *data ( size_t i ) const {
         return m_data.get() + i;
     }
     /** Returns a reference to a cell, no boundary checks are performed.
@@ -154,12 +154,12 @@ public:
     }
     /** Returns a reference to a cell, no boundary checks are performed.
       */
-    T *origin_data(size_t i) {
+    T *origin_data ( size_t i ) {
         return m_origin_data.get() + i;
     }
     /** Returns a reference to a cell, no boundary checks are performed.
       */
-    const T *origin_data(size_t i) const {
+    const T *origin_data ( size_t i ) const {
         return m_origin_data.get() + i;
     }
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
@@ -169,23 +169,23 @@ public:
     };
     /** Returns a pointer to a layer @return pointer ot layer data
       */
-    T* data_layer(size_t layer){
-	if(layer >= getLayers()) throw 0;
-        return origin_data(size() * layer);
+    T* data_layer ( size_t layer ) {
+        if ( layer >= getLayers() ) throw 0;
+        return origin_data ( size() * layer );
     }
     /** Returns a pointer to a layer @return pointer ot layer data
       */
-    const T* data_layer(size_t layer) const {
-	if(layer >= getLayers()) throw 0;
-        return origin_data(this->size() * layer);
+    const T* data_layer ( size_t layer ) const {
+        if ( layer >= getLayers() ) throw 0;
+        return origin_data ( this->size() * layer );
     }
     /** Returns a pointer to a layer ending
      * @param layer
      * @return pointer to cell after after the layer
       */
-    T* end_layer(size_t layer){
-        if(layer >= getLayers()) throw 0;
-        return origin_data(size() * (layer+1));
+    T* end_layer ( size_t layer ) {
+        if ( layer >= getLayers() ) throw 0;
+        return origin_data ( size() * ( layer+1 ) );
     }
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
       */
@@ -196,13 +196,13 @@ public:
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
       */
     inline T& cellByIndex_nocheck ( int cx, int cy ) {
-        return m_data[ cxcy2idx(cx,cy) ];
+        return m_data[ cxcy2idx ( cx,cy ) ];
     };
 
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
       */
     inline const T& cellByIndex_nocheck ( int cx, int cy ) const {
-        return m_data[ cxcy2idx(cx,cy) ];
+        return m_data[ cxcy2idx ( cx,cy ) ];
     };
 
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
@@ -306,13 +306,13 @@ public:
     }
     /** Returns the data as opencv matrix
       */
-    cv::Mat_<T> cvMatLayer(size_t layer) {
-        return cv::Mat_<T> ( getSizeY(), getSizeX(), data_layer(layer) );
+    cv::Mat_<T> cvMatLayer ( size_t layer ) {
+        return cv::Mat_<T> ( getSizeY(), getSizeX(), data_layer ( layer ) );
     }
     /** Returns the data as opencv matrix
       */
-    const cv::Mat_<T> cvMatLayer(size_t layer) const {
-        return cv::Mat_<T> ( getSizeY(), getSizeX(), (T*) data_layer(layer) );
+    const cv::Mat_<T> cvMatLayer ( size_t layer ) const {
+        return cv::Mat_<T> ( getSizeY(), getSizeX(), ( T* ) data_layer ( layer ) );
     }
     /** Returns the data as opencv matrix
       */
@@ -338,7 +338,7 @@ public:
     /** Returns the data as opencv matrix
       */
     cv::Mat_<T> cvMatTotal() const {
-        return cv::Mat_<T> ( getSizeY()*getLayers(), getSizeX(), (T*) m_origin_data.get() );
+        return cv::Mat_<T> ( getSizeY() *getLayers(), getSizeX(), ( T* ) m_origin_data.get() );
     }
     /** creates a opencv line iterator based on a metric start and endpoint
       */
@@ -350,12 +350,12 @@ public:
     /** Returns transformation matrix
       */
     cv::Mat_<double> getTf ( ) const {
-        cv::Mat_<double> m = cv::Mat_<double>::eye(3,3);
-	double sx = 1./m_x_resolution;
-	double sy = 1./m_x_resolution;
-	m(0,0) = sx, m(0,2) = -m_x_min*sx; 
-	m(1,1) = sx, m(1,2) = -m_y_min*sy; 
-	return m;
+        cv::Mat_<double> m = cv::Mat_<double>::eye ( 3,3 );
+        double sx = 1./m_x_resolution;
+        double sy = 1./m_x_resolution;
+        m ( 0,0 ) = sx, m ( 0,2 ) = -m_x_min*sx;
+        m ( 1,1 ) = sx, m ( 1,2 ) = -m_y_min*sy;
+        return m;
     }
     /** draws a line based on metrc coordinate
       */
@@ -367,52 +367,56 @@ public:
     }
     /// parses over all entries and looks for the min an max entry
     template <typename T1>
-    void getMinMax(T1 &min, T1 &max) const{
-      max = min = cellByIndex_nocheck(0);
-      T* p = &m_data[0];
-      T* end = &m_data[size()];
-      while(p != end){
-	if(*p < min) min = *p;
-	if(*p > max) max = *p;
-	p++;
-      }
+    void getMinMax ( T1 &min, T1 &max ) const {
+        max = min = cellByIndex_nocheck ( 0 );
+        T* p = &m_data[0];
+        T* end = &m_data[size()];
+        while ( p != end ) {
+            if ( *p < min ) min = *p;
+            if ( *p > max ) max = *p;
+            p++;
+        }
     }
-    
+
     /** returns the current active layer
      * @returns current layer
       */
     int activeLayer() const {
-      unsigned long memory_address_orgion_data = (unsigned long) m_origin_data.get();
-      unsigned long memory_address_current_data = (unsigned long) m_data.get();
-      unsigned long memory_address_difference = memory_address_current_data - memory_address_orgion_data;
-      unsigned long memory_size_layer =  size() * getDepth();
-      return memory_address_difference / memory_size_layer;
+        unsigned long memory_address_orgion_data = ( unsigned long ) m_origin_data.get();
+        unsigned long memory_address_current_data = ( unsigned long ) m_data.get();
+        unsigned long memory_address_difference = memory_address_current_data - memory_address_orgion_data;
+        unsigned long memory_size_layer =  size() * getDepth();
+        return memory_address_difference / memory_size_layer;
     }
     /** changes the active layer
      * @returns the new active layer
       */
-    int activateLayer(size_t i) {
-	m_data = (m_origin_data + size() * i);
+    int activateLayer ( size_t i ) {
+        m_data = ( m_origin_data + size() * i );
         return activeLayer();
     }
-    
+
     /** Erase the contents of all the cells. */
     void  clear() {
         memset ( data(), 0, this->size_total() );
     }
 
     std::ostream& matlab ( std::ostream &output ) const {
-        GridMapHeader::matlab(output);
+        GridMapHeader::matlab ( output );
+        const T *p = this->data();
         output << std::setw ( 20 ) << "grid.data = [";
-        for ( size_t i = 0; i < size_total(); i++ ) {
+        for ( size_t y = 0; y < this->getSizeY(); y++ ) {
             output << std::endl;
-            output << std::setw ( 20 ) << *this->data(i);
-            if(i < size_total()-1) output << ",";
+            for ( size_t x = 0; x < this->getSizeX(); x++ ) {
+                output << std::setw ( 20 ) << *p++;
+                if ( x < this->getSizeX()-1 ) output << ",";
+            }
+            if ( y < this->getSizeY()-1 ) output << ";";
         }
         output << "]\n";
         return output;
     }
-    
+
 };
 };
 
