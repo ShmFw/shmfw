@@ -51,6 +51,11 @@ public:
     /** Constructor **/
     Vector3 ( const Vector3<T> &r ) : x ( r.x ), y ( r.y ), z ( r.z ) {}
 
+    /** sets all vectore entries **/
+    Vector3<T>& set(const T &x, const T &y, const T &z) {
+        this->x = x, this->y = y, this->z = z;
+        return *this;
+    }
     /** @return reference the first two elements **/
     const Vector2<T>& v3() const {
         return * ( ( Vector2<T>* ) this );

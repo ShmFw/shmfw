@@ -5,7 +5,6 @@ SET(FILES_H
   base_object.h
   dynamic_grid_map.h
   eigen.h
-  grid_layer_map.h
   grid_map.h
   grid_map_header.h
   handler_parameterentry.h

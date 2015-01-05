@@ -50,6 +50,19 @@ public:
         sprintf ( buf, "[ [%lf, %lf, %lf], [ %lf, %lf, %lf] ]", linear.x, linear.y, linear.z, angular.x, angular.y, angular.z );
         return std::string ( buf );
     }
+    Twist& set(const double &vx, const double &vy, const double &vz, const double &wx, const double &wy, const double &wz){
+      linear.set(vx, vy, vz); 
+      angular.set(wx, wy, wz); 
+      return *this;
+    }
+    Twist& setLinear(const double &vx, const double &vy, const double &vz){
+      linear.set(vx, vy, vz); 
+      return *this;
+    }
+    Twist& setAngular(const double &wx, const double &wy, const double &wz){
+      angular.set(wx, wy, wz); 
+      return *this;
+    }
     bool setFromString ( const std::string &str ) {
         int start = str.find ( "[" );
         int end = str.find_last_of ( "]" );
@@ -115,6 +128,10 @@ public:
     }
     double &w(){
       return angular.z;
+    }
+    Twist2D& set(double v, double w){
+      Twist::set(v, 0, 0, 0, 0, w);
+      return *this;
     }
 };
 

@@ -161,11 +161,6 @@ public:
     const T *origin_data ( size_t i ) const {
         return m_origin_data.get() + i;
     }
-    /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
-      */
-    inline T& cellByIndex_nocheck ( int idx )  {
-        return m_data[idx];
-    };
     /** Returns a pointer to a layer @return pointer ot layer data
       */
     T* data_layer ( size_t layer ) {
@@ -188,20 +183,23 @@ public:
     }
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
       */
+    inline T& cellByIndex_nocheck ( int idx ) {
+        return m_data[idx];
+    };
+    /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
+      */
     inline const T& cellByIndex_nocheck ( int idx ) const {
         return m_data[idx];
     };
-
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
       */
     inline T& cellByIndex_nocheck ( int cx, int cy ) {
-        return m_data[ cxcy2idx ( cx,cy ) ];
+        return cellByIndex_nocheck( cxcy2idx ( cx,cy ) );
     };
-
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
       */
     inline const T& cellByIndex_nocheck ( int cx, int cy ) const {
-        return m_data[ cxcy2idx ( cx,cy ) ];
+        return cellByIndex_nocheck( cxcy2idx ( cx,cy ) );
     };
 
     /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
@@ -215,6 +213,36 @@ public:
     inline const T& cellByIndex_nocheck ( const cv::Point &p ) const {
         return cellByIndex_nocheck ( p.x, p.y );
     };
+    /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
+      */
+    inline T& layerCellByIndex_nocheck ( int idx, int layer ) {
+        return m_origin_data[idx + this->size() * layer];
+    };
+    /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
+      */
+    inline const T& layerCellByIndex_nocheck ( int idx, int layer ) const {
+        return m_origin_data[idx + this->size() * layer];
+    };
+    /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
+      */
+    inline T& layerCellByIndex_nocheck ( int cx, int cy, int layer  ) {
+        return layerCellByIndex_nocheck( this->cxcy2idx ( cx,cy ), layer );
+    };
+    /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
+      */
+    inline const T& layerCellByIndex_nocheck ( int cx, int cy, int layer ) const {
+        return layerCellByIndex_nocheck( this->cxcy2idx ( cx,cy ), layer );
+    };
+    /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
+      */
+    inline T& layerCellByIndex_nocheck ( const cv::Point &p, int layer  ) {
+        return layerCellByIndex_nocheck ( p.x, p.y, layer  );
+    };
+    /** Returns a pointer to the contents of a cell given by its cell indexes, no checks are performed.
+      */
+    inline const T& layerCellByIndex_nocheck ( const cv::Point &p, int layer  ) const {
+        return layerCellByIndex_nocheck ( p.x, p.y, layer );
+    };
 
     /** Returns a pointer to the contents of a cell given by its coordinates, or NULL if it is out of the map extensions.
       */
@@ -222,10 +250,22 @@ public:
         int cx = x2idx ( x );
         int cy = y2idx ( y );
 
-        if ( cx<0 || cx>=static_cast<int> ( getSizeX() ) ) return NULL;
-        if ( cy<0 || cy>=static_cast<int> ( getSizeY() ) ) return NULL;
+        if ( cx<0 || cx>=static_cast<int> ( getSizeX() ) ) throw 0;
+        if ( cy<0 || cy>=static_cast<int> ( getSizeY() ) ) throw 0;
 
         return cellByIndex_nocheck ( cx, cy );
+    }
+    /** Returns a pointer to the contents of a cell given by its coordinates, or NULL if it is out of the map extensions.
+      */
+    inline T& layerCellByPos ( double x, double y, int layer ) {
+        int cx = x2idx ( x );
+        int cy = y2idx ( y );
+
+        if ( cx<0 || cx>=static_cast<int> ( getSizeX() ) ) throw 0;
+        if ( cy<0 || cy>=static_cast<int> ( getSizeY() ) ) throw 0;
+        if ( layer<0 || layer>=static_cast<int> ( getLayers() ) ) throw 0;
+
+        return layerCellByIndex_nocheck ( cx, cy, layer );
     }
 
     /** Returns a pointer to the contents of a cell given by its coordinates, or NULL if it is out of the map extensions.
@@ -234,10 +274,22 @@ public:
         int cx = x2idx ( x );
         int cy = y2idx ( y );
 
-        if ( cx<0 || cx>=static_cast<int> ( getSizeX() ) ) return NULL;
-        if ( cy<0 || cy>=static_cast<int> ( getSizeY() ) ) return NULL;
+        if ( cx<0 || cx>=static_cast<int> ( getSizeX() ) ) throw 0;
+        if ( cy<0 || cy>=static_cast<int> ( getSizeY() ) ) throw 0;
 
         return cellByIndex_nocheck ( cx, cy );
+    }
+    /** Returns a pointer to the contents of a cell given by its coordinates, or NULL if it is out of the map extensions.
+      */
+    inline const T& layerCellByPos ( double x, double y, int layer ) const {
+        int cx = x2idx ( x );
+        int cy = y2idx ( y );
+
+        if ( cx<0 || cx>=static_cast<int> ( getSizeX() ) ) throw 0;
+        if ( cy<0 || cy>=static_cast<int> ( getSizeY() ) ) throw 0;
+        if ( layer<0 || layer>=static_cast<int> ( getLayers() ) ) throw 0;
+
+        return layerCellByIndex_nocheck ( cx, cy, layer );
     }
     /** set the contents of a cell given by its coordinates if the coordinates are with the range.
       */
@@ -250,6 +302,18 @@ public:
 
         cellByIndex_nocheck ( cx, cy ) = src;
     }
+    /** set the contents of a cell given by its coordinates if the coordinates are with the range.
+      */
+    inline void setLayerCellByPos ( double x, double y, int layer, const T &src ) {
+        int cx = x2idx ( x );
+        int cy = y2idx ( y );
+
+        if ( cx<0 || cx>=static_cast<int> ( getSizeX() ) ) return;
+        if ( cy<0 || cy>=static_cast<int> ( getSizeY() ) ) return;
+        if ( layer<0 || layer>=static_cast<int> ( getLayers() ) ) return;
+
+        layerCellByIndex_nocheck ( cx, cy, layer ) = src;
+    }
     /** Gets the contents of a cell given by its coordinates if the coordinates are with the range.
       */
     inline void getCellByPos ( double x, double y, T &des ) const {
@@ -261,13 +325,32 @@ public:
 
         des = cellByIndex_nocheck ( cx, cy );
     }
+    /** Gets the contents of a cell given by its coordinates if the coordinates are with the range.
+      */
+    inline void getLayerCellByPos ( double x, double y, int layer, T &des ) const {
+        int cx = x2idx ( x );
+        int cy = y2idx ( y );
+
+        if ( cx<0 || cx>=static_cast<int> ( getSizeX() ) ) return;
+        if ( cy<0 || cy>=static_cast<int> ( getSizeY() ) ) return;
+        if ( layer<0 || layer>=static_cast<int> ( getLayers() ) ) return;
+
+        des = layerCellByIndex_nocheck ( cx, cy, layer );
+    }
 
     /** Returns a pointer to the contents of a cell given by its cell indexes, or NULL if it is out of the map extensions.
       */
-    inline  T*	cellByIndex ( unsigned int cx, unsigned int cy ) {
+    inline  T* cellByIndex ( unsigned int cx, unsigned int cy ) {
         if ( cx>=getSizeX() || cy>=getSizeY() )
             return NULL;
-        else	return &cellByIndex_nocheck ( cx, cy );
+        else    return &cellByIndex_nocheck ( cx, cy );
+    }
+    /** Returns a pointer to the contents of a cell given by its cell indexes, or NULL if it is out of the map extensions.
+      */
+    inline  T* layerCellByIndex ( unsigned int cx, unsigned int cy, unsigned int layer ) {
+        if ( cx>=getSizeX() || cy>=getSizeY() || layer>=getLayers() )
+            return NULL;
+        else    return &layerCellByIndex_nocheck ( cx, cy, layer );
     }
 
     /** Returns a pointer to the contents of a cell given by its cell indexes, or NULL if it is out of the map extensions.
@@ -275,7 +358,14 @@ public:
     inline const T* cellByIndex ( unsigned int cx, unsigned int cy ) const {
         if ( cx>=getSizeX() || cy>=getSizeY() )
             return NULL;
-        else	return &cellByIndex_nocheck ( cx, cy );
+        else    return &cellByIndex_nocheck ( cx, cy );
+    }
+    /** Returns a pointer to the contents of a cell given by its cell indexes, or NULL if it is out of the map extensions.
+      */
+    inline const T* layerCellByIndex ( unsigned int cx, unsigned int cy, unsigned int layer  ) const {
+        if ( cx>=getSizeX() || cy>=getSizeY() || layer>=getLayers() )
+            return NULL;
+        else    return &layerCellByIndex_nocheck ( cx, cy, layer );
     }
     /** set the contents of a cell given by its cell indexes if the indexes are with the range.
       */
@@ -287,11 +377,27 @@ public:
     }
     /** set the contents of a cell given by its cell indexes if the indexes are with the range.
       */
+    inline void setLayerCellByIndex ( unsigned int cx, unsigned int cy, unsigned int layer , const T &src ) {
+        if ( cx>=getSizeX() || cy>=getSizeY() || layer>=getLayers() )
+            return;
+        else
+            layerCellByIndex_nocheck ( cx, cy, layer ) = src;
+    }
+    /** set the contents of a cell given by its cell indexes if the indexes are with the range.
+      */
     inline void getCellByIndex ( unsigned int cx, unsigned int cy, T &des ) const {
         if ( cx>=getSizeX() || cy>=getSizeY() )
             return;
         else
             des = cellByIndex_nocheck ( cx, cy );
+    }
+    /** set the contents of a cell given by its cell indexes if the indexes are with the range.
+      */
+    inline void getLayerCellByIndex ( unsigned int cx, unsigned int cy, unsigned int layer, T &des ) const {
+        if ( cx>=getSizeX() || cy>=getSizeY() || layer>=getLayers() )
+            return;
+        else
+            des = layerCellByIndex_nocheck ( cx, cy, layer );
     }
     /** Returns a reference to a cell, no boundary checks are performed.
       */
