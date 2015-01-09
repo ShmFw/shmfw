@@ -42,8 +42,10 @@ namespace ShmFw {
 
 /** A 2D grid with data pointers able to handle shared memory objects
  * @note This class is based on the mrpt::slam::CDynamicGridMap which was published unter BSD many thanks to the mrpt team
+ * @tparam T grid cell type
+ * @tparam TPointer pointer type a boost::interprocess::offset_ptr<T> is neede for to use the grid in shm otherwise T* is sufficient 
  **/
-template <typename T, class TPointer = boost::interprocess::offset_ptr<T> >
+template <typename T, class TPointer = T* >
 class GridMap : public ShmFw::GridMapHeader {
 protected:
     TPointer m_origin_data; /// cells
@@ -119,7 +121,7 @@ public:
      * @param value element to fill the current layer
      **/
     inline void fill ( const T& value ) {
-        T *p =  data();
+        T *p = data();
         T *end = p+size();
         while ( p != end ) {
             *p++ = value;
@@ -129,7 +131,7 @@ public:
      * @return cell elment of the active layer
      **/
     const T &operator[] ( int idx ) const {
-        return m_data[idx];
+        return m_data[idx]; 
     }
     /** Returns a reference to a cell, no boundary checks are performed.
      * @return cell elment of the active layer
@@ -141,55 +143,55 @@ public:
      * @return pointer to the element after the current active layer
      **/
     const T *end() const {
-        return &m_data[size()];
+        return &m_data[size()]; 
     }
     /** Returns a reference to a cell, no boundary checks are performed.
      * @return pointer to the current active layer (data) 
      **/
     const T *data() const {
-        return &m_data[0];
+        return &m_data[0]; ///@note the acces with the brackets is needed to be compatible with the boost offset_ptr
     }
     /** Returns a reference to a cell, no boundary checks are performed.
      * @return pointer to the current active layer (data) 
      **/
     T *data() {
-        return &m_data[0];
+        return &m_data[0]; ///@note the acces with the brackets is needed to be compatible with the boost offset_ptr
     }
     /** Returns a reference to a cell, no boundary checks are performed.
      * @return pointer to the current active layer (data) with offset i
      **/
     T *data ( size_t i ) {
-        return &m_data[i];
+        return &m_data[i]; ///@note the acces with the brackets is needed to be compatible with the boost offset_ptr
     }
     /** Returns a reference to a cell, no boundary checks are performed.
      * @return pointer to the current active layer (data) with offset i
      **/
     const T *data ( size_t i ) const {
-        return &m_data[i];
+        return &m_data[i]; ///@note the acces with the brackets is needed to be compatible with the boost offset_ptr
     }
     /** Returns a reference to a cell, no boundary checks are performed.
      * @return pointer to the orgin of all layers (data)
      **/
     T *origin_data() {
-        return &m_origin_data[0];
+        return &m_origin_data[0]; ///@note the acces with the brackets is needed to be compatible with the boost offset_ptr
     }
     /** Returns a reference to a cell, no boundary checks are performed.
      * @return pointer to the orgin of all layers (data)
      **/
     const T *origin_data() const {
-        return &m_origin_data[0];
+        return &m_origin_data[0]; ///@note the acces with the brackets is needed to be compatible with the boost offset_ptr
     }
     /** Returns a reference to a cell, no boundary checks are performed.
      * @return pointer to the orgin of all layers (data) with offset i
      **/
     T *origin_data ( size_t i ) {
-        return &m_origin_data[i];
+        return &m_origin_data[i]; ///@note the acces with the brackets is needed to be compatible with the boost offset_ptr
     }
     /** Returns a reference to a cell, no boundary checks are performed.
      * @return pointer to the orgin of all layers (data) with offset i
      **/
     const T *origin_data ( size_t i ) const {
-        return &m_origin_data[i];
+        return &m_origin_data[i]; ///@note the acces with the brackets is needed to be compatible with the boost offset_ptr
     }
     /** Returns a pointer to a layer 
      * @return pointer ot layer data
