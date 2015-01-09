@@ -43,13 +43,13 @@ namespace ShmFw {
 /** A 2D grid with data pointers able to handle shared memory objects
  * @note This class is based on the mrpt::slam::CDynamicGridMap which was published unter BSD many thanks to the mrpt team
  * @tparam T grid cell type
- * @tparam TPointer pointer type a boost::interprocess::offset_ptr<T> is neede for to use the grid in shm otherwise T* is sufficient 
+ * @tparam TPtr pointer type a boost::interprocess::offset_ptr<T> is neede for to use the grid in shm otherwise T* is sufficient 
  **/
-template <typename T, class TPointer = T* >
+template <typename T, class TPtr = T* >
 class GridMap : public ShmFw::GridMapHeader {
 protected:
-    TPointer m_origin_data; /// cells
-    TPointer m_data;        /// cells
+    TPtr m_origin_data; /// cells
+    TPtr m_data;        /// cells
 public:
     /// constructor
     GridMap ()
@@ -83,8 +83,8 @@ public:
      * @param src source
      * @param layer layer
      **/
-    template<class TPointerDes>
-    void copyDataToLayer ( GridMap<T, TPointerDes> & des, int destination_layer, int source_layer ) {
+    template<class TPtrDes>
+    void copyDataToLayer ( GridMap<T, TPtrDes> & des, int destination_layer, int source_layer ) {
         memcpy ( des.data_layer(destination_layer), data_layer(source_layer), bytes() );
     }
     /** copies all layers layer to des
@@ -521,6 +521,12 @@ public:
         return output;
     }
 };
+
+/** placing a shared grid into the shared memory requiers a boost::interprocess::offset_ptr<T>
+ *  this using is a short cut for ShmFw::Var<ShmFw::GridMap<T, boost::interprocess::offset_ptr<T> > 
+ **/
+template <typename T> using GridMapInterprocess = GridMap<T,  boost::interprocess::offset_ptr<T> >;
+
 };
 
 #endif ///SHARED_MEM_OBJECT_GRID_MAP_H

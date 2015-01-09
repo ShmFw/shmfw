@@ -45,15 +45,23 @@
 #define SHMFW_UNUSED_PARAM(a)		(void)(a)
 namespace ShmFw {
 
-template <typename T, template<typename...> class Allocator = std::allocator, class TPointer = boost::interprocess::offset_ptr<T> >
-class DynamicGridMap : public GridMap<T, TPointer> {
+
+/** A 2D grid with a boost vector for data allocation
+ * @note This class is based on the mrpt::slam::CDynamicGridMap which was published unter BSD many thanks to the mrpt team
+ * @tparam T grid cell type
+ * @tparam Allocator using the boost::interprocess::allocator< T, bi::managed_shared_memory::segment_manager > == ShmFw::Allocator allows placements into
+ * shm otherwise the std::allocator is  sufficient
+ * @tparam TPtr pointer type a boost::interprocess::offset_ptr<T> is neede for to use the grid in shm otherwise T* is sufficient 
+ **/
+template <typename T, template<typename...> class Allocator = std::allocator, class TPtr = boost::interprocess::offset_ptr<T> >
+class DynamicGridMap : public GridMap<T, TPtr> {
     typedef boost::interprocess::vector<T,    Allocator<T>    > VectorT;
 protected:
     VectorT m_map; /// cells
 public:
 
     DynamicGridMap ( const Allocator<void>& void_alloc = {} )
-        : GridMap<T, TPointer> ()
+        : GridMap<T, TPtr> ()
         , m_map ( void_alloc ) {
     }
 
@@ -160,8 +168,8 @@ public:
      *  the active layer will be same as on the map parameter
      * @param map source size
      **/
-    template <typename T1, class TPointer1>
-    void  setSize ( const GridMap<T1, TPointer1> &map) {
+    template <typename T1, class TPtr1>
+    void  setSize ( const GridMap<T1, TPtr1> &map) {
 
         // Sets the bounderies and rounds the values to integers if needed
         this->initHeader ( map.getXMin(), map.getXMax(), map.getYMin(), map.getYMax(), map.getSizeX(),  map.getSizeY(),
@@ -176,8 +184,8 @@ public:
     /** Deep copy and size adaptation
      * @param des destination
      **/
-    template<template<typename...> class AllocatorDes, class TPointerDes>
-    void copyTo ( DynamicGridMap<T, AllocatorDes, TPointerDes>& des ) const {
+    template<template<typename...> class AllocatorDes, class TPtrDes>
+    void copyTo ( DynamicGridMap<T, AllocatorDes, TPtrDes>& des ) const {
         des.setSize(*this);
         this->copyDataTo ( des );
     }
@@ -185,8 +193,8 @@ public:
     /** Deep copy and size adaptation
      * @param src source
      **/
-    template<template<typename...> class AllocatorDes, class TPointerDes>
-    DynamicGridMap& copyFrom ( const DynamicGridMap<T, AllocatorDes, TPointerDes>& src ) {
+    template<template<typename...> class AllocatorDes, class TPtrDes>
+    DynamicGridMap& copyFrom ( const DynamicGridMap<T, AllocatorDes, TPtrDes>& src ) {
         setSize(src);
         return this->copyDataFrom ( src );
     }

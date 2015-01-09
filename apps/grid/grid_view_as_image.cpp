@@ -92,7 +92,7 @@ void terminate ( int param ) {
 }
 
 void view_image ( const Prarmeters &params, ShmFw::HandlerPtr &shmHdl ) {
-    ShmFw::Var<ShmFw::GridMap<uchar> > grid ( params.variable_name, shmHdl );
+    ShmFw::Var<ShmFw::GridMapInterprocess<uchar > > grid ( params.variable_name, shmHdl );
     std::cout << *grid << " --> ";
     cv::Mat img;
     if ( grid->isType<double> () ) {
