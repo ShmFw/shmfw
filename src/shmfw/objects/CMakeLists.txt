@@ -42,7 +42,7 @@ SET(FILES_CPP
 )
 
 add_library(shmfw_objects SHARED ${FILES_H} ${FILES_CPP})
-target_link_libraries(shmfw_objects ${MRPT_LIBS})
+target_link_libraries(shmfw_objects ${MRPT_LIBS} ${OpenCV_LIBRARIES})
 
 
 _install_library(shmfw_objects "${FILES_H}" "/shmfw/objects")

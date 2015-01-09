@@ -68,6 +68,12 @@ const double& GridMapHeader::getYMin() const  {
 const double& GridMapHeader::getYMax() const  {
     return m_y_max;
 }
+const double& GridMapHeader::getRotation() const  {
+    return m_rotation;
+}
+const double& GridMapHeader::setRotation(double phi){
+    m_rotation = phi;
+}
 const double& GridMapHeader::getResolution() const  {
     if ( m_x_resolution == m_y_resolution ) return m_x_resolution;
     else throw 0;
@@ -97,25 +103,25 @@ cv::Point GridMapHeader::cvCellPoint ( const cv::Point &p ) const {
     return cv::Point ( x2idx ( p.x ), y2idx ( p.y ) );
 }
 std::vector<cv::Point> GridMapHeader::cvCellPoint ( const std::vector<cv::Point> &src, std::vector<cv::Point> &des ) const {
-  des.resize(src.size());
-  for(size_t i = 0; i < src.size(); i++) des[i] = cvCellPoint(src[i]);
-  return des;
+    des.resize ( src.size() );
+    for ( size_t i = 0; i < src.size(); i++ ) des[i] = cvCellPoint ( src[i] );
+    return des;
 }
 cv::Point GridMapHeader::cvCellPoint ( const cv::Point2f &p ) const {
     return cv::Point ( x2idx ( p.x ), y2idx ( p.y ) );
 }
 std::vector<cv::Point> GridMapHeader::cvCellPoint ( const std::vector<cv::Point2f> &src, std::vector<cv::Point> &des ) const {
-  des.resize(src.size());
-  for(size_t i = 0; i < src.size(); i++) des[i] = cvCellPoint(src[i]);
-  return des;
+    des.resize ( src.size() );
+    for ( size_t i = 0; i < src.size(); i++ ) des[i] = cvCellPoint ( src[i] );
+    return des;
 }
 cv::Point GridMapHeader::cvCellPoint ( const cv::Point2d &p ) const {
     return cv::Point ( x2idx ( p.x ), y2idx ( p.y ) );
 }
 std::vector<cv::Point> GridMapHeader::cvCellPoint ( const std::vector<cv::Point2d> &src, std::vector<cv::Point> &des ) const {
-  des.resize(src.size());
-  for(size_t i = 0; i < src.size(); i++) des[i] = cvCellPoint(src[i]);
-  return des;
+    des.resize ( src.size() );
+    for ( size_t i = 0; i < src.size(); i++ ) des[i] = cvCellPoint ( src[i] );
+    return des;
 }
 cv::Point2d GridMapHeader::cvCoordinatePoint ( int &x, int &y ) const {
     return cv::Point2d ( idx2x ( x ), idx2y ( y ) );
@@ -138,6 +144,18 @@ cv::Scalar GridMapHeader::cvBlue() {
 }
 cv::Scalar GridMapHeader::cvRed() {
     return cv::Scalar ( 0,0,255 );
+}
+cv::Mat_<double> GridMapHeader::getTransformation ( ) const {
+    cv::Mat_<double> m ( 3,3 );
+    double sx = 1./m_x_resolution;
+    double sy = 1./m_x_resolution;
+    m ( 0,0 ) = sx, m ( 0,1 ) =  0, m ( 0,2 ) = -m_x_min*sx;
+    m ( 1,0 ) =  0, m ( 1,1 ) = sx, m ( 1,2 ) = -m_y_min*sy;
+    m ( 2,0 ) =  0, m ( 2,1 ) =  0, m ( 2,2 ) = 1;
+    /// ToDo add Rotation
+    // double ca = cos(m_rotation);
+    // double sa = sin(m_rotation);
+    return m;
 }
 void GridMapHeader::setTypeHasCode ( const size_t type_hash_code ) {
     m_type_hash_code = type_hash_code;
@@ -206,4 +224,13 @@ bool GridMapHeader::idxInRangeMap ( int cx, int cy ) const {
 }
 bool GridMapHeader::xyInRangeMap ( double x, double y ) const {
     return ( x >= m_x_min ) && ( y >= m_y_min ) && ( x <= m_x_max ) && ( y <= m_y_max );
+}
+bool GridMapHeader::compareResolution ( const GridMapHeader& o ) const {
+    return getResolutionX() == o.getResolutionX() && getResolutionY() == o.getResolutionY();
+}
+bool GridMapHeader::compareGridSize ( const GridMapHeader& o ) const {
+    return getSizeX() == o.getSizeX() && getSizeY() == o.getSizeY();
+}
+bool GridMapHeader::compareMetricRepresentation ( const GridMapHeader& o ) const {
+    return getXMin() == o.getXMin() && getXMax() == o.getXMax() && getYMin() == o.getYMin() && getYMax() == o.getYMax() && getRotation() == o.getRotation();
 }

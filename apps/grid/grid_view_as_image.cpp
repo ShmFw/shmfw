@@ -78,8 +78,8 @@ Prarmeters readArgs ( int argc, char **argv ) {
         std::cout << desc << std::endl;
         exit ( 1 );
     }
-    params.on_change = (vm.count ( "on_change" ) > 0); 
-    params.normalize = (vm.count ( "normalize" ) > 0); 
+    params.on_change = ( vm.count ( "on_change" ) > 0 );
+    params.normalize = ( vm.count ( "normalize" ) > 0 );
 
     return params;
 }
@@ -95,47 +95,52 @@ void view_image ( const Prarmeters &params, ShmFw::HandlerPtr &shmHdl ) {
     ShmFw::Var<ShmFw::GridMap<uchar> > grid ( params.variable_name, shmHdl );
     std::cout << *grid << " --> ";
     cv::Mat img;
-    if(grid->isType<double> ()){
-	std::cout << " CV_64F";
-	img = grid->cvMat ( CV_64F );
-    } else if(grid->isType<float> ()){
-	std::cout << " CV_32F";
-	img = grid->cvMat ( CV_32F );
-    } else if(grid->isType<int8_t> ()){
-	std::cout << " CV_8S";
-	img = grid->cvMat ( CV_8S );
-    } else if(grid->isType<uint8_t> ()){
-	std::cout << " CV_8U";
-	img = grid->cvMat ( CV_8U );
+    if ( grid->isType<double> () ) {
+        std::cout << " CV_64F";
+        img = grid->cvMat ( CV_64F );
+    } else if ( grid->isType<float> () ) {
+        std::cout << " CV_32F";
+        img = grid->cvMat ( CV_32F );
+    } else if ( grid->isType<int8_t> () ) {
+        std::cout << " CV_8S";
+        img = grid->cvMat ( CV_8S );
+    } else if ( grid->isType<uint8_t> () ) {
+        std::cout << " CV_8U";
+        img = grid->cvMat ( CV_8U );
     } else {
-	std::cout << "no matching type!" << std::endl;
-	return;
+        if ( grid->cvtype() != -1 ) {
+            std::cout << " CV by depth";
+            img = grid->cvMat ( grid->cvtype() );
+        } else {
+            std::cout << "no matching type!" << std::endl;
+            return;
+        }
     }
     std::cout << std::endl;
-    
-    
-    
+
+
+
     cv::namedWindow ( params.variable_name.c_str() );
     int key;
-	double min, max;
+    double min, max;
     do {
-      cv::Mat tmp = img;
-      if(params.normalize){
-	tmp = img.clone();
-	cv::minMaxLoc(img, &min, &max);
-	tmp = img / max;
-	std::cout << "[" << min << ", " << max << " ]" << std::endl;
-      }
+        cv::Mat tmp = img;
+        if ( params.normalize ) {
+            tmp = img.clone();
+            cv::minMaxLoc ( img, &min, &max );
+            tmp = img / max;
+            std::cout << "[" << min << ", " << max << " ]" << std::endl;
+        }
         cv::imshow ( params.variable_name.c_str(), tmp );
-	if(params.on_change){
-	  key = cv::waitKey ( params.reload );
-	  while(grid.timed_wait(10000) == false){
-	    boost::posix_time::time_duration d = ShmFw::now() - grid.timestampShm();
-	    std::cout << "Last change " << d.total_milliseconds() << " ms ago!" << std::endl;
-	  }
-	} else {
-	  key = cv::waitKey ( params.reload );
-	}
+        if ( params.on_change ) {
+            key = cv::waitKey ( params.reload );
+            while ( grid.timed_wait ( 10000 ) == false ) {
+                boost::posix_time::time_duration d = ShmFw::now() - grid.timestampShm();
+                std::cout << "Last change " << d.total_milliseconds() << " ms ago!" << std::endl;
+            }
+        } else {
+            key = cv::waitKey ( params.reload );
+        }
     } while ( loop_program && ( key < 0 ) );
     cv::destroyWindow ( params.variable_name.c_str() );
 }

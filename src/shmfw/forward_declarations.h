@@ -63,7 +63,7 @@ namespace ShmFw {
   class ModelState;
   class Handler;
   class AgentState;
-  //template <typename T> class GridMap;
+  template <typename T, class TPointer> class GridMap;
   template <typename T, template<typename...> class Allocator> class DynamicGridMap;
   namespace ros{
     class LaserScan;

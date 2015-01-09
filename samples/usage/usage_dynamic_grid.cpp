@@ -112,23 +112,28 @@ int main ( int argc, char *argv[] ) {
                 gridHeap1.setCellByIndex ( i, j, v );
             }
         }
+        const double *src;
+        double *des;
+        
         std::cout << std::endl;
         thStart = tclock::now();
         gridHeap1.copyTo ( gridHeap2 );
         thStop = tclock::now();
-        std::cout << "heap->heap: copyTo using_memcpy  : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
+        std::cout << "heap1->heap2: copyTo using_memcpy  : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
         thStart = tclock::now();
-        gridHeap1.copyTo ( gridHeap2 );
+        src = gridHeap2.data();
+        des = gridHeap1.data();
+        for(size_t i = 0; i < gridHeap2.size(); i++) *des++ = *src++;
         thStop = tclock::now();
-        std::cout << "heap->heap: copyTo using_forloop : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
-        thStart = tclock::now();
-        gridHeap1.copyTo ( *gridShm );
-        thStop = tclock::now();
-        std::cout << "heap->shm: copyTo using_memcpy   : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
+        std::cout << "heap2->heap1: copyTo using_forloop : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
         thStart = tclock::now();
         gridHeap1.copyTo ( *gridShm );
         thStop = tclock::now();
-        std::cout << "heap->shm: copyTo using_forloop  : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
+        std::cout << "heap1->shm: copyTo using_memcpy    : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
+        thStart = tclock::now();
+        gridHeap1.copyTo ( *gridShm );
+        thStop = tclock::now();
+        std::cout << "heap->shm: copyTo using_forloop    : " << duration_cast<nanoseconds> ( thStop - thStart ).count() << " nanoseconds\n";
         gridShm.itHasChanged();
         count++;
         usleep ( 100000 );

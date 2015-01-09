@@ -44,151 +44,190 @@
 
 #define SHMFW_UNUSED_PARAM(a)		(void)(a)
 namespace ShmFw {
-  
-template <typename T, template<typename...> class Allocator>
-class DynamicGridMap : public GridMap<T> {
+
+template <typename T, template<typename...> class Allocator = std::allocator, class TPointer = boost::interprocess::offset_ptr<T> >
+class DynamicGridMap : public GridMap<T, TPointer> {
     typedef boost::interprocess::vector<T,    Allocator<T>    > VectorT;
 protected:
     VectorT m_map; /// cells
 public:
 
     DynamicGridMap ( const Allocator<void>& void_alloc = {} )
-        : GridMap<T> ()
+        : GridMap<T, TPointer> ()
         , m_map ( void_alloc ) {
     }
 
-    template<typename T1>
-    void copyTo ( T1& des ) const {
-        des.setSizeWithResolution ( this->getXMin(), this->getXMax(), this->getYMin(), this->getYMax(), this->getResolutionX(), this->getResolutionY(), 1 );
-        this->copyDataTo ( des );
-    }
-
-
-    template<typename T1>
-    DynamicGridMap& copyFrom ( const T1& src ) {
-        setSizeWithResolution ( src.getXMin(), src.getXMax(), src.getYMin(), src.getYMax(), src.getResolutionX(), src.getResolutionY(),1  );
-        return this->copyDataFrom ( src );
-    }
-
     /** Changes the size of the grid, ERASING all previous contents.
-      */
+     * the size of the grid will be computed based on the resolution and min max values
+     * @param x_min
+     * @param x_max
+     * @param y_min
+     * @param y_max
+     * @param x_resolution
+     * @param y_resolution
+     * @param layers
+     * @param fill_value
+     **/
     void  setSizeWithResolution (
         const double x_min, const double x_max,
         const double y_min, const double y_max,
         const double x_resolution, const double y_resolution,
-	const size_t layers) {
+        const size_t layers ) {
 
         // Sets the bounderies and rounds the values to integers if needed
-        this->initHeader ( x_min, x_max, y_min, y_max, x_resolution, y_resolution, sizeof(T), layers );
-
-        // Cells memory:
-        m_map.resize ( this->size_total());
-        this->m_origin_data = &m_map[0];
-	this->activateLayer(0);
-    }
-    /** Changes the size of the grid, ERASING all previous contents.
-      */
-    void  setSizeWithResolution (
-        const double x_min, const double x_max,
-        const double y_min, const double y_max,
-        const double x_resolution, const double y_resolution,
-	const size_t layers, const T &fill_value ) {
-
-        // Sets the bounderies and rounds the values to integers if needed
-        this->initHeader ( x_min, x_max, y_min, y_max, x_resolution, y_resolution, sizeof(T), layers);
-
-        m_map.assign ( this->size_total(), fill_value );
-        this->m_origin_data = &m_map[0];
-	this->activateLayer(0);
-    }
-    /** Changes the size of the grid, ERASING all previous contents.
-      */
-    void  setSizeWithNrOfCells (
-        const double x_min, const double x_max,
-        const double y_min, const double y_max,
-        const size_t size_x, const size_t size_y,
-	const size_t layers ) {
-
-        // Sets the bounderies and rounds the values to integers if needed
-        this->initHeader ( x_min, x_max, y_min, y_max, size_x,  size_y, sizeof(T), layers);
+        this->initHeader ( x_min, x_max, y_min, y_max, x_resolution, y_resolution, sizeof ( T ), layers );
 
         // Cells memory:
         m_map.resize ( this->size_total() );
         this->m_origin_data = &m_map[0];
-	this->activateLayer(0);
+        this->activateLayer ( 0 );
     }
     /** Changes the size of the grid, ERASING all previous contents.
-      */
+     * the size of the grid will be computed based on the resolution and min max values
+     * @param x_min
+     * @param x_max
+     * @param y_min
+     * @param y_max
+     * @param x_resolution
+     * @param y_resolution
+     * @param layers
+     * @param fill_value
+     **/
+    void  setSizeWithResolution (
+        const double x_min, const double x_max,
+        const double y_min, const double y_max,
+        const double x_resolution, const double y_resolution,
+        const size_t layers, const T &fill_value ) {
+
+        // Sets the bounderies and rounds the values to integers if needed
+        this->initHeader ( x_min, x_max, y_min, y_max, x_resolution, y_resolution, sizeof ( T ), layers );
+
+        m_map.assign ( this->size_total(), fill_value );
+        this->m_origin_data = &m_map[0];
+        this->activateLayer ( 0 );
+    }
+    /** Changes the size of the grid, ERASING all previous contents
+     * the resolution will be computed based on the size and min max values
+     * @param x_min
+     * @param x_max
+     * @param y_min
+     * @param y_max
+     * @param size_x
+     * @param size_y
+     * @param layers
+     * @param fill_value 
+     **/
     void  setSizeWithNrOfCells (
         const double x_min, const double x_max,
         const double y_min, const double y_max,
         const size_t size_x, const size_t size_y,
-	const size_t layers, const T &fill_value  ) {
+        const size_t layers ) {
 
         // Sets the bounderies and rounds the values to integers if needed
-        this->initHeader ( x_min, x_max, y_min, y_max, size_x,  size_y, sizeof(T), layers);
+        this->initHeader ( x_min, x_max, y_min, y_max, size_x,  size_y, sizeof ( T ), layers );
 
         // Cells memory:
-        m_map.assign (  this->size_total(), fill_value );
+        m_map.resize ( this->size_total() );
         this->m_origin_data = &m_map[0];
-	this->activateLayer(0);
+        this->activateLayer ( 0 );
+    }
+    /** Changes the size of the grid, ERASING all previous contents and assign the fill_value
+     * the resolution will be computed based on the size and min max values
+     * @param x_min
+     * @param x_max
+     * @param y_min
+     * @param y_max
+     * @param size_x
+     * @param size_y
+     * @param layers
+     * @param fill_value
+     **/
+    void  setSizeWithNrOfCells (
+        const double x_min, const double x_max,
+        const double y_min, const double y_max,
+        const size_t size_x, const size_t size_y,
+        const size_t layers, const T &fill_value ) {
+
+        // Sets the bounderies and rounds the values to integers if needed
+        this->initHeader ( x_min, x_max, y_min, y_max, size_x,  size_y, sizeof ( T ), layers );
+
+        // Cells memory:
+        m_map.assign ( this->size_total(), fill_value );
+        this->m_origin_data = &m_map[0];
+        this->activateLayer ( 0 );
     }
     /** Changes the size of the grid, ERASING all previous contents.
-      */
-    template <typename T1>
-    void  setSize (const GridMap<T1> &map, bool copy = false){
+     *  the active layer will be same as on the map parameter
+     * @param map source size
+     **/
+    template <typename T1, class TPointer1>
+    void  setSize ( const GridMap<T1, TPointer1> &map) {
 
         // Sets the bounderies and rounds the values to integers if needed
-        this->initHeader ( map.getXMin(), map.getXMax(), map.getYMin(), map.getYMax(), map.getSizeX(),  map.getSizeY(), 
-			      map.getDepth(), map.getLayers());
+        this->initHeader ( map.getXMin(), map.getXMax(), map.getYMin(), map.getYMax(), map.getSizeX(),  map.getSizeY(),
+                           map.getDepth(), map.getLayers() );
 
+        this->setRotation(map.getRotation());
         // Cells memory:
-        m_map.resize (this->size_total());
+        m_map.resize ( this->size_total() );
         this->m_origin_data = &m_map[0];
-	this->activateLayer(0);
-	if(copy){
-	  this->copyDataFrom(map);
-	}
+        this->activateLayer ( map.activeLayer () );
+    }
+    /** Deep copy and size adaptation
+     * @param des destination
+     **/
+    template<template<typename...> class AllocatorDes, class TPointerDes>
+    void copyTo ( DynamicGridMap<T, AllocatorDes, TPointerDes>& des ) const {
+        des.setSize(*this);
+        this->copyDataTo ( des );
     }
 
+    /** Deep copy and size adaptation
+     * @param src source
+     **/
+    template<template<typename...> class AllocatorDes, class TPointerDes>
+    DynamicGridMap& copyFrom ( const DynamicGridMap<T, AllocatorDes, TPointerDes>& src ) {
+        setSize(src);
+        return this->copyDataFrom ( src );
+    }
 };
 
 // Variant to use on the heap:
-using DynamicGridMapS8Heap  = DynamicGridMap<int8_t, std::allocator>;
+using DynamicGridMapS8Heap  = DynamicGridMap<int8_t, std::allocator, int8_t*>;
 // Variant to use in shared memory:
 using DynamicGridMapS8Shm = DynamicGridMap<int8_t, Allocator>;
 // Variant to use on the heap:
-using DynamicGridMapS16Heap  = DynamicGridMap<int16_t, std::allocator>;
+using DynamicGridMapS16Heap  = DynamicGridMap<int16_t, std::allocator, int16_t*>;
 // Variant to use in shared memory:
 using DynamicGridMapS16Shm = DynamicGridMap<int16_t, Allocator>;
 // Variant to use on the heap:
-using DynamicGridMapS32Heap  = DynamicGridMap<int32_t, std::allocator>;
+using DynamicGridMapS32Heap  = DynamicGridMap<int32_t, std::allocator, int32_t*>;
 // Variant to use in shared memory:
 using DynamicGridMapS32Shm = DynamicGridMap<int32_t, Allocator>;
 
 // Variant to use on the heap:
-using DynamicGridMapU8Heap  = DynamicGridMap<uint8_t, std::allocator>;
+using DynamicGridMapU8Heap  = DynamicGridMap<uint8_t, std::allocator, uint8_t*>;
 // Variant to use in shared memory:
 using DynamicGridMapU8Shm = DynamicGridMap<uint8_t, Allocator>;
 // Variant to use on the heap:
-using DynamicGridMapU16Heap  = DynamicGridMap<uint16_t, std::allocator>;
+using DynamicGridMapU16Heap  = DynamicGridMap<uint16_t, std::allocator, uint16_t*>;
 // Variant to use in shared memory:
 using DynamicGridMapU16Shm = DynamicGridMap<uint16_t, Allocator>;
 // Variant to use on the heap:
-using DynamicGridMapU32Heap  = DynamicGridMap<uint32_t, std::allocator>;
+using DynamicGridMapU32Heap  = DynamicGridMap<uint32_t, std::allocator, uint32_t*>;
 // Variant to use in shared memory:
 using DynamicGridMapU32Shm = DynamicGridMap<uint32_t, Allocator>;
 
 // Variant to use on the heap:
-using DynamicGridMap64FHeap  = DynamicGridMap<double, std::allocator>;
+using DynamicGridMap64FHeap  = DynamicGridMap<double, std::allocator, double*>;
 // Variant to use in shared memory:
 using DynamicGridMap64FShm = DynamicGridMap<double, Allocator>;
 // Variant to use on the heap:
-using DynamicGridMap32FHeap  = DynamicGridMap<float, std::allocator>;
+using DynamicGridMap32FHeap  = DynamicGridMap<float, std::allocator, float*>;
 // Variant to use in shared memory:
 using DynamicGridMap32FShm = DynamicGridMap<float, Allocator>;
 // Variant to use on the heap:
-using DynamicGridMap8UHeap  = DynamicGridMap<uchar, std::allocator>;
+using DynamicGridMap8UHeap  = DynamicGridMap<uchar, std::allocator, uchar*>;
 // Variant to use in shared memory:
 using DynamicGridMap8UShm = DynamicGridMap<uchar, Allocator>;
 

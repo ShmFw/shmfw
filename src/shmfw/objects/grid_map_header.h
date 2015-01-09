@@ -41,8 +41,7 @@
 namespace ShmFw {
 
 
-/** A 2D grid of dynamic size which stores any kind of data at each cell.
- * @tparam T The type of each cell in the 2D grid.
+/** A general 2D grid header without data pointer
  * @note This class is based on the mrpt::slam::CDynamicGridMap which was published unter BSD many thanks to the mrpt team
  */
 class GridMapHeader  {
@@ -51,6 +50,7 @@ private:
     double m_x_max; /// max x in metric units
     double m_y_min; /// min y in metric units
     double m_y_max; /// max y in metric units
+    double m_rotation; /// rotation of the map
     double m_x_resolution;  /// resolution: metric unit = cell * resolution
     double m_y_resolution;  /// resolution: metric unit = cell * resolution
     size_t m_size_x; /// size x in cells
@@ -86,6 +86,7 @@ public:
         , m_x_max ( 0 )
         , m_y_min ( 0 )
         , m_y_max ( 0 )
+        , m_rotation ( 0 )
         , m_x_resolution ( 0 )
         , m_y_resolution ( 0 )
         , m_size_x ( 0 )
@@ -128,6 +129,10 @@ public:
     const double& getYMin() const;
     /// Returns the "y" coordinate of bottom side of grid map.  @return m_y_max
     const double& getYMax() const;
+    /// Returns the rotation of grid map.  @return m_rotation
+    const double& getRotation() const;
+    /// sets the rotation @param phi
+    const double& setRotation(double phi);
     /// Returns the resolution of the grid map.  @return m_x_resolution
     const double& getResolutionX() const ;
     /// Returns the resolution of the grid map.  @return m_y_resolution
@@ -176,7 +181,10 @@ public:
     static cv::Scalar cvBlue();
     static cv::Scalar cvRed();
 
-    /** Compared the entry type
+    /** Returns transformation matrix
+      */
+    cv::Mat_<double> getTransformation ( ) const;
+    /** Compares the entry type
      * @return true if the type T1 is equal to T
      */
     template <typename T1>
@@ -184,14 +192,31 @@ public:
         size_t type_hash_code = ( typeid ( T1 ).hash_code() );
         return ( m_type_hash_code == type_hash_code );
     }
+    /** 
+     * Compares resolution
+     * @return true on same resolution
+     */
+    bool compareResolution ( const GridMapHeader& o ) const ;
+    /** 
+     * Compares grid size
+     * @return true on same resolution
+     */
+    bool compareGridSize ( const GridMapHeader& o ) const ;
+    /** 
+     * Compares representation x_min, x_max, y_min and y_max;
+     * @return true on same resolution
+     */
+    bool compareMetricRepresentation ( const GridMapHeader& o ) const ;
 
+    /// pipes the header information
     friend std::ostream& operator<< ( std::ostream &output, const GridMapHeader &o ) {
         char msg[0xFF];
-        sprintf ( msg, "[%zu, %zu] @ [%4.3f, %4.3f]m/px of %zu bytes, range x:  %4.3f -> %4.3f, y: %4.3f -> %4.3f, layer %zu, type_hash_code: %zu",
+        sprintf ( msg, "[%zu, %zu] @ [%4.3f, %4.3f]m/px of %zu bytes, range x:  %4.3f -> %4.3f, y: %4.3f -> %4.3f, phi: %4.3frad, layer %zu, hash_code: %zu",
                   o.getSizeX(), o.getSizeY(), o.getResolutionX(), o.getResolutionY(),
                   o.getDepth (),
                   o.getXMin(), o.getXMax(),
                   o.getYMin(), o.getYMax(),
+                  o.getRotation(),
                   o.getLayers(),
                   o.getTypeHashCode() );
         output << msg;
@@ -201,14 +226,15 @@ public:
         return input;
     }
 
+    /// stream the header in a matlab format
     std::ostream& matlab ( std::ostream &output, const std::string &variable ) const {
         output << variable << ".x              = [ ";
-        for(size_t cx = 0; cx < m_size_x; cx++) {
-          output << idx2x(cx) << (cx < m_size_x-1?", ":"]\n");
+        for ( size_t cx = 0; cx < m_size_x; cx++ ) {
+            output << idx2x ( cx ) << ( cx < m_size_x-1?", ":"]\n" );
         }
         output << variable << ".y              = [ ";
-        for(size_t cy = 0; cy < m_size_y; cy++) {
-          output << idx2y(cy) << (cy < m_size_y-1?", ":"]\n");
+        for ( size_t cy = 0; cy < m_size_y; cy++ ) {
+            output << idx2y ( cy ) << ( cy < m_size_y-1?", ":"]\n" );
         }
         output << variable << ".x_min          =" <<  m_x_min << ",\n";
         output << variable << ".x_max          =" <<  m_x_max << ",\n";
@@ -216,6 +242,7 @@ public:
         output << variable << ".y_max          =" <<  m_y_max << ",\n";
         output << variable << ".x_resolution   =" <<  m_x_resolution << ",\n";
         output << variable << ".y_resolution   =" <<  m_y_resolution << ",\n";
+        output << variable << ".rotation       =" <<  m_rotation << ",\n";
         output << variable << ".size_x         =" <<  m_size_x << ",\n";
         output << variable << ".size_y         =" <<  m_size_y << ",\n";
         output << variable << ".depth          =" <<  m_depth << ",\n";

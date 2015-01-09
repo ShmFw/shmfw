@@ -7,7 +7,6 @@ namespace ShmFwTest {
 
 TEST_F ( ObjectTest, gridMapToMatlab ) {
 
-
     ShmFw::DynamicGridMap64FHeap grid;
     grid.setSizeWithResolution ( -10, 10, -10, 10, 1., 1., 1 );
     EXPECT_EQ(grid.getLayers(), 1); 
