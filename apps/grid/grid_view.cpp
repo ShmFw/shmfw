@@ -106,8 +106,8 @@ void prepare_grid ( mglData* data ) {
 }
 
 
-template <typename T>
-void updateData(const ShmFw::GridMap<T> &src, mglData &des){    
+template <typename T, class TPtr>
+void updateData(const ShmFw::GridMap<T, TPtr> &src, mglData &des){    
     std::cout << src << std::endl;
     size_t col, row, columns = src.getSizeX(), rows = src.getSizeY();
     T min = 1., max = 1.;
