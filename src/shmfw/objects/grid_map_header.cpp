@@ -71,7 +71,7 @@ const double& GridMapHeader::getYMax() const  {
 const double& GridMapHeader::getRotation() const  {
     return m_rotation;
 }
-const double& GridMapHeader::setRotation(double phi){
+void GridMapHeader::setRotation(double phi){
     m_rotation = phi;
 }
 const double& GridMapHeader::getResolution() const  {

@@ -132,7 +132,7 @@ public:
     /// Returns the rotation of grid map.  @return m_rotation
     const double& getRotation() const;
     /// sets the rotation @param phi
-    const double& setRotation(double phi);
+    void setRotation(double phi);
     /// Returns the resolution of the grid map.  @return m_x_resolution
     const double& getResolutionX() const ;
     /// Returns the resolution of the grid map.  @return m_y_resolution

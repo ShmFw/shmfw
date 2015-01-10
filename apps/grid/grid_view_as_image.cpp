@@ -46,6 +46,7 @@ struct Prarmeters {
     int reload;
     bool on_change;
     bool normalize;
+    bool flip;
     std::string shm_memory_name;
     unsigned int shm_memory_size;
     std::string variable_name;

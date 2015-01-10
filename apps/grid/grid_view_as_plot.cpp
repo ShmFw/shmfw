@@ -94,7 +94,7 @@ void terminate ( int param ) {
     loop_program = false;
 }
 
-void draw_grid ( const Prarmeters &params,  const ShmFw::Var<ShmFw::GridMap<uchar> > &grid,  cv::Mat &des ) {
+void draw_grid ( const Prarmeters &params,  const ShmFw::Var<ShmFw::GridMapInterprocess<uchar> > &grid,  cv::Mat &des ) {
     cv::Scalar colorOrigin ( 0,0,0 );
     cv::Scalar colorGrid ( 200,200,200 );
     cv::Scalar colorText ( 0,0,0 );
@@ -141,7 +141,7 @@ void draw_grid ( const Prarmeters &params,  const ShmFw::Var<ShmFw::GridMap<ucha
 
 }
 void view_image ( const Prarmeters &params, ShmFw::HandlerPtr &shmHdl ) {
-    ShmFw::Var<ShmFw::GridMap<uchar> > grid ( params.variable_name, shmHdl );
+    ShmFw::Var<ShmFw::GridMapInterprocess<uchar> > grid ( params.variable_name, shmHdl );
     std::cout << *grid << std::endl;
     int cvtype = -1;
     if ( params.cvtype.empty() ) {

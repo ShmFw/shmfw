@@ -428,7 +428,7 @@ public:
         return cv::Mat_<T> ( getSizeY(), getSizeX(), data() );
     }
     /// Returns the data as opencv matrix
-    cv::Mat cvMat ( int cvtype ) {
+    const cv::Mat cvMat ( int cvtype ) {
         return cv::Mat ( getSizeY(), getSizeX(), cvtype, data() );
     }
     /// Returns the data as opencv matrix
