@@ -80,8 +80,8 @@ public:
             return "Line";
             break;
         case TYPE_ARC:
-            if(orientation == ORIENTATION_CLOCKWISE) return "ArcRight";
-            if(orientation == ORIENTATION_COUNTER_CLOCKWISE) return "ArcLeft";
+            if(orientation == ORIENTATION_CLOCKWISE) return "ArcLeft";
+            if(orientation == ORIENTATION_COUNTER_CLOCKWISE) return "ArcRight";
             else  return "Arc";
             break;
         case TYPE_SPIROS:
