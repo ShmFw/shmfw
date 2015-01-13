@@ -78,6 +78,13 @@ public:
     bool operator == ( const Point2D& o ) const {
         return x == o.x && y == o.y;
     }
+    /** distance to Point
+     * @return 
+     **/
+    double distanceTo (const Point2D& o) {
+      double dx = o.x - this->x, dy = o.y - this->y;
+      return sqrt(dx*dx + dy*dy);
+    }
     /** casts to vector2
      * @return vector2<double> cast
      **/

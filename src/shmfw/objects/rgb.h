@@ -138,11 +138,20 @@ public:
     static RGB AQUA() {
       return RGB(0x00,0xFF,0xFF);
     }
+    /**
+     * Returns a random colour;
+     * @return color based on 14 colours + back and white
+     **/
     static RGB RAND() {
       srand (time(NULL));
       unsigned int i = rand() & 0xF;
       return COLOR(i);
     }
+    /**
+     * Returns a color based on the index;
+     * @param i index
+     * @return color based on 14 colours + back and white
+     **/
     static RGB COLOR(unsigned int i) {
       i = i & 0xF;
       switch(i){
@@ -165,6 +174,11 @@ public:
       }
       return BLACK();
     }
+    /**
+     * Returns a color based on the index no black and white
+     * @param i index
+     * @return color based on 14 colours no black and white
+     **/
     static RGB COLOR_NO_WB(unsigned int i) {
       i = i & 0xE;
       switch(i){
