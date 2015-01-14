@@ -432,13 +432,12 @@ public:
         return cv::Mat ( getSizeY(), getSizeX(), cvtype, data() );
     }
     /// Returns the data as opencv matrix
-    cv::Mat_<T> &cvMatTotal ( cv::Mat_<T> &m ) {
-        m = cvMatTotal();
-        return m;
+    cv::Mat_<T> cvMatTotal() {
+        return cv::Mat_<T> ( getSizeY() *getLayers(), getSizeX(), origin_data() );
     }
     /// Returns the data as opencv matrix
-    cv::Mat_<T> cvMatTotal() const {
-        return cv::Mat_<T> ( getSizeY() *getLayers(), getSizeX(), ( T* ) origin_data() );
+    cv::Mat cvMatTotal(int cvtype ) {
+        return cv::Mat ( getSizeY() *getLayers(), getSizeX(), cvtype, origin_data() );
     }
     /// creates a opencv line iterator based on a metric start and endpoint
     cv::LineIterator cvLineIteratorByPose ( double x0, double y0, double x1, double y1, int connectivity=8, bool leftToRight=false ) const {
