@@ -111,11 +111,8 @@ public:
      * @param value element to fill the current layer
      **/
     inline void set ( unsigned char value ) {
-        size_t size = this->size() * this->getDepth();
-        memset(data(), value, size);
-    }
-    
-    
+        memset(data(), value, this->bytes());
+    }    
     /** Fills all the cells with the same value
      * @note if one liles ot set the value to zero one shouel use memset
      * @param value element to fill the current layer
@@ -483,9 +480,18 @@ public:
         return activeLayer();
     }
 
-    /// Erase the contents of all the cells. 
-    void  clear() {
-        memset ( data(), 0, this->size_total() );
+    /** Erases the contents of all the cells using memset
+     * @param value value to set --> default 0
+     **/
+    void clear(const char &value = 0) {
+        memset ( data(), value, this->bytes_total() );
+    }
+    /** Erase the contents of layer. 
+     * @param value value to set --> default 0 using 0xFF causes all nan values on floating points
+     * @param layer
+     **/
+    void clearLayer(size_t layer, const char &value = 0) {
+        memset ( data_layer(layer), value, this->bytes() );
     }
 
     /**

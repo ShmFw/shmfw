@@ -115,11 +115,11 @@ public:
     const size_t& getTypeHashCode() const;
     /// Returns the number of cells on one layer. @return m_size
     const size_t& size() const;
-    /// Returns the number of cells on one layer. @return m_size_total
+    /// Returns the number of cells over all layers. @return m_size_total
     const size_t& size_total() const;
-    /// Returns the number of cells on one layer. @return m_bytes
+    /// Returns the number of bytes on one layer. @return m_bytes
     const size_t& bytes() const;
-    /// Returns the number of cells on one layer. @return m_bytes_total
+    /// Returns the number of bytes over all layers. @return m_bytes_total
     const size_t& bytes_total() const;
     /// Returns the "x" coordinate of left side of grid map.  @return m_x_min
     const double& getXMin() const;
