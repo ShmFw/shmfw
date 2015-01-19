@@ -76,6 +76,11 @@ public:
     const T &y2() const {
         return p2_.y;
     }
+    double angle() const {
+      T dx = p2_.x - p1_.x;
+      T dy = p2_.y - p1_.y;
+      return atan2(dy,dx);
+    }
     const cv::Point_<T> &p1() const {
         return p1_;
     }
@@ -107,19 +112,26 @@ public:
      * @see http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
      * @return distance to line between the segment endpoints or the distance to the nearest endpoints **/
     template <typename T2>
-    T distanceTo(const cv::Point_<T2> &pt) const {
+    T distanceTo(const T2 &x, const T2 y) const {
         T px = x2()-x1();
         T py = y2()-y1();
         T l2 = px*px + py*py;
-        T u =  ((pt.x - x1()) * px + (pt.y - y1()) * py) / l2;
+        T u =  ((x - x1()) * px + (y - y1()) * py) / l2;
         if (u > 1) u = 1;
         else if (u < 0) u = 0;
-        T x = x1() + u * px;
-        T y = y1() + u * py;
-        T dx = x - pt.x;
-        T dy = y - pt.y;
+        T x0 = x1() + u * px;
+        T y0 = y1() + u * py;
+        T dx = x0 - x;
+        T dy = y0 - y;
         T dist = sqrt(dx*dx + dy*dy);
         return dist;
+    }
+    /** computes distance to line segment 
+     * @see http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+     * @return distance to line between the segment endpoints or the distance to the nearest endpoints **/
+    template <typename T2>
+    T distanceTo(const cv::Point_<T2> &pt) const {
+        return distanceTo(pt.x, pt.y);
     }
     friend std::ostream &operator << ( std::ostream &os, const ShmFw::LineSegment2D<T> &o ) {
         os << "[[" << o.x1() <<  ", " << o.y1() << "], [" << o.x2() << ", " << o.y2() << "] ]";
