@@ -70,8 +70,14 @@ public:
      * Construtor creates a shm
      * @param name
      * @param size
+     * @param ns namespace
      **/
-    Handler ( const std::string &name, unsigned int size = DEFAULT_SEGMENT_SIZE() );
+    Handler ( const std::string &name, unsigned int size = DEFAULT_SEGMENT_SIZE(), const std::string &ns = "");
+    /**
+     * Construtor creates a shm
+     * @param p shared memory parameter
+     **/
+    Handler ( ParameterPtr &p );
     /**
      * rerates a new handler
      * @post Handler::createSegment
@@ -82,7 +88,12 @@ public:
      * @param name
      * @param size
      **/
-    static HandlerPtr create ( const std::string &name, unsigned int size = DEFAULT_SEGMENT_SIZE() );
+    static HandlerPtr create ( const std::string &name, unsigned int size = DEFAULT_SEGMENT_SIZE(), const std::string &ns = "" );
+     /**
+     * rerates a new handler
+     * @param p shared memory parameter
+     **/
+    static HandlerPtr create ( ParameterPtr &p );
     /**
     * @return managed memory
     **/
@@ -90,11 +101,18 @@ public:
     /** creates a named shared memory segment with the current name and size
     **/
     void createSegment();
+    
     /** creates a named shared memory segment
     * @param name name of segment to remove
     * @param size size in bytes of the segment
     **/
-    void createSegment ( const std::string &name, unsigned int size = DEFAULT_SEGMENT_SIZE() );
+    void createSegment ( const std::string &name, unsigned int size = DEFAULT_SEGMENT_SIZE(), const std::string &ns = "" );
+    
+    /** creates a named shared memory segment
+     * @param p shared memory parameter
+    **/
+    void createSegment ( ParameterPtr &p );
+    
     /**
      * @return shm name
      **/
@@ -146,9 +164,7 @@ public:
 private:
     Handler ( const Handler & ) {};
     bool valid_;
-    std::string namespace_;
-    std::string name_;
-    unsigned int size_;
+    ParameterPtr param_;
     ShmPtr pShm_;
 };
 

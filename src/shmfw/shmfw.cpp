@@ -32,8 +32,44 @@
 
 #include "shmfw.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/algorithm/string.hpp>
 
 using namespace ShmFw;
+
+ParameterPtr Parameter::create() {
+    return ParameterPtr ( new Parameter );
+}
+ParameterPtr Parameter::create ( const std::string& name, unsigned int size, const std::string& ns ) {
+    return ParameterPtr ( new Parameter ( name, size, ns ) );
+}
+Parameter::Parameter()
+    : segment_name ( "ShmFw" )
+    , segment_size ( 16*1024*1024 ) //16MB;
+    , ns ( "/" ) {
+};
+Parameter::Parameter ( const std::string& name, unsigned int size, const std::string& ns )
+    : segment_name ( name )
+    , segment_size ( size )
+    , ns ( "" ) {
+    setNamespace ( ns );
+};
+
+void Parameter::setNamespace ( const std::string& ns ) {
+    this->ns = ns;
+    boost::trim ( this->ns );
+    boost::trim_left_if ( this->ns, boost::is_any_of ( "/" ) );
+    boost::trim_right_if ( this->ns, boost::is_any_of ( "/" ) );
+    if ( this->ns.empty() ) this->ns = "/";
+    else this->ns = "/" + this->ns + "/";
+}
+
+std::string Parameter::resolve_namespace ( const std::string &_name ) {
+    if ( this->ns.empty() ) return _name;
+    std::string n = _name;
+    boost::trim_left_if ( n, boost::is_any_of ( "/" ) );
+    boost::trim_right_if ( n, boost::is_any_of ( "/" ) );
+    return this->ns + n;
+}
 
 boost::posix_time::ptime ShmFw::now() {
     return boost::posix_time::microsec_clock::local_time();

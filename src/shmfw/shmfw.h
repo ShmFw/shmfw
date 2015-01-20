@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Software License Agreement (BSD License)                              *  
+ *   Software License Agreement (BSD License)                              *
  *   Copyright (C) 2012 by Markus Bader <markus.bader@tuwien.ac.at>        *
  *                                                                         *
  *   Redistribution and use in source and binary forms, with or without    *
@@ -37,6 +37,32 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 
 namespace ShmFw {
+
+class Parameter;
+typedef std::shared_ptr<ShmFw::Parameter> ParameterPtr;
+/// class to handle shared memory parameters
+class Parameter {
+public:
+    Parameter();
+    Parameter ( const std::string& name, unsigned int size, const std::string& ns = "" );
+    std::string segment_name;
+    unsigned int segment_size;
+    std::string ns;  /// Namespace
+    friend std::ostream &operator << ( std::ostream &os, const Parameter &o ) {
+        os << "segment_name =  " << o.segment_name << std::endl;
+        os << "segment_size =  " << o.segment_size << std::endl;
+        os << "ns =  " << o.ns << std::endl;
+        return os;
+    }
+    void setNamespace ( const std::string& ns );
+    std::string resolve_namespace ( const std::string &_name );
+  
+    static ParameterPtr create();
+    static ParameterPtr create ( const std::string& name, unsigned int size, const std::string& ns = "" );
+
+ 
+};
+
 
 enum SerializeFormat {
     FORMAT_NA  = 0,
