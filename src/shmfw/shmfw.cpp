@@ -71,34 +71,17 @@ std::string Parameter::resolve_namespace ( const std::string &_name ) {
     return this->segment_ns + n;
 }
 
-void Parameter::parse ( int argc, char **argv, const std::string &group, std::string &filename ){
-    namespace po = boost::program_options;
-    po::options_description desc ( "Allowed Arguments" );
+boost::program_options::options_description Parameter::options (const std::string &group) {
+    using namespace boost::program_options;
+    using namespace std;
+    options_description desc ( "ShmFw" );
+    std::string prefix = group;
+    if(!prefix.empty()) prefix = prefix + std::string(".");
     desc.add_options()
-    ( "shm.memory_name,m", po::value<std::string> ( &this->segment_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
-    ( "shm.memory_size,s", po::value<size_t> ( &this->segment_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" )
-    ( "shm.namespace", po::value<std::string> ( &this->segment_name )->default_value ( "r1" ), "shm namespace (robot name) " );
-
-    // Load setting file.
-    po::variables_map vm;
-    try {
-        po::store ( po::parse_command_line ( argc, argv, desc ), vm );
-        po::notify ( vm );
-        if ( !filename.empty() )  {
-            std::ifstream ifs ( filename , std::ifstream::in );
-            if ( !ifs ) {
-                std::cout << "can not open config file: " << filename << std::endl;
-                return;
-            }
-            po::store ( po::parse_config_file ( ifs , desc ), vm );
-            po::notify ( vm );
-            ifs.close();
-        }
-    } catch ( const std::exception &ex ) {
-        std::cout << desc << std::endl;;
-        return;
-    }
-    
+    ( string ( prefix + string ( "memory_name" ) ).c_str(), value<std::string> ( &segment_name )->default_value ( ShmFw::DEFAULT_SEGMENT_NAME() ), "shared memory segment name" )
+    ( string ( prefix + string ( "memory_size" ) ).c_str(), value<size_t> ( &segment_size )->default_value ( ShmFw::DEFAULT_SEGMENT_SIZE() ), "shared memory segment size" )
+    ( string ( prefix + string ( "namespace" ) ).c_str(), value<std::string> ( &segment_ns )->default_value ( "r1" ), "shm namespace (robot name) " );
+    return desc;
 }
 
 boost::posix_time::ptime ShmFw::now() {

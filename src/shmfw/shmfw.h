@@ -34,6 +34,7 @@
 #define SHARED_MEM_FW_H
 
 #include <string>
+#include <boost/program_options/options_description.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
 
 namespace ShmFw {
@@ -80,7 +81,13 @@ public:
      * @param  ns namespace used to create variables
      **/
     static ParameterPtr create ( const std::string& name, unsigned int size, const std::string& ns = "" );
-    void parse ( int argc, char **argv, const std::string &group, std::string &filename );
+    /**
+     * returns a boost program option description
+     * @param group option group
+     * @return program option description
+     * @post you should execute fix_namespace_syntax() to fix the namespace format
+     **/
+    boost::program_options::options_description options (const std::string &group);
 };
 
 
