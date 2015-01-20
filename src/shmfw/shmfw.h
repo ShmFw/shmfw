@@ -42,7 +42,6 @@ class Parameter;
 typedef std::shared_ptr<ShmFw::Parameter> ParameterPtr;
 /// class to handle shared memory parameters
 class Parameter {
-    void fix_namespace_syntax(); /// fixes the namespace syntax
 public:
     std::string segment_name;
     size_t segment_size;
@@ -70,7 +69,9 @@ public:
      * @return resolved name
      **/
     std::string resolve_namespace ( const std::string &_name );
-  
+    
+    /// fixes the namespace syntax
+    void fix_namespace_syntax(); 
     /// creates a smart pointer to the class
     static ParameterPtr create();
     /** creates a smart pointer to the class
