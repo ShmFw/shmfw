@@ -91,8 +91,7 @@ int main ( int argc, char *argv[] ) {
         ShmFw::Handler::removeSegment ( params.shm_memory_name );
         std::cout << "Shared Memory " << params.shm_memory_name << " cleared" << std::endl;
     }
-    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size );
-    shmHdl->setNamespace(params.ns);
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( params.shm_memory_name, params.shm_memory_size, params.ns );
     srand ( time ( NULL ) );
 
     ShmFw::Alloc<ShmFw::ros::Header> h ( "header", shmHdl );

@@ -45,7 +45,7 @@ Handler::Handler ( ParameterPtr& p )
     createSegment();
 }
 
-Handler::Handler ( const std::string &name, unsigned int size, const std::string &ns )
+Handler::Handler ( const std::string &name, size_t size, const std::string &ns )
     : valid_ ( false ), param_ ( Parameter::create ( name , size, ns ) ) {
     createSegment();
 }
@@ -54,7 +54,7 @@ HandlerPtr Handler::create() {
     return HandlerPtr ( new Handler );
 }
 
-HandlerPtr Handler::create ( const std::string &name, unsigned int size, const std::string &ns ) {
+HandlerPtr Handler::create ( const std::string &name, size_t size, const std::string &ns ) {
     return HandlerPtr ( new Handler ( name, size, ns ) );
 }
 HandlerPtr Handler::create ( ParameterPtr& p ) {
@@ -88,12 +88,6 @@ void Handler::createSegment() {
         }
     }
     valid_ = true;
-}
-
-void Handler::createSegment ( const std::string &name, unsigned int size, const std::string &ns ) {
-    param_->segment_name = name;
-    param_->segment_size = size;
-    createSegment();
 }
 
 const std::string &Handler::getName() const {
@@ -165,22 +159,9 @@ bool Handler::removeSegment() {
 }
 
 const std::string &Handler::getNamespace() const {
-    return param_->ns;
-}
-
-void Handler::setNamespace ( const std::string& ns ) {
-    param_->ns = ns;
-    boost::trim ( param_->ns );
-    boost::trim_left_if ( param_->ns, boost::is_any_of ( "/" ) );
-    boost::trim_right_if ( param_->ns, boost::is_any_of ( "/" ) );
-    if ( param_->ns.empty() ) param_->ns = "/";
-    else param_->ns = "/" + param_->ns + "/";
+    return param_->segment_ns;
 }
 
 std::string Handler::resolve_namespace ( const std::string &_name ) {
-    if ( param_->ns.empty() ) return _name;
-    std::string n = _name;
-    boost::trim_left_if ( n, boost::is_any_of ( "/" ) );
-    boost::trim_right_if ( n, boost::is_any_of ( "/" ) );
-    return param_->ns + n;
+    return param_->resolve_namespace(_name);
 }

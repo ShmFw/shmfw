@@ -116,11 +116,8 @@ int main ( int argc, char *argv[] ) {
     Prarmeters params = readArgs ( argc, argv );
     params.close = false;
 
-    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create( params.shm_memory_name, params.shm_memory_size );
+    ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create( params.shm_memory_name, params.shm_memory_size, params.ns );
 
-    if(params.ns.size() > 0){
-      shmHdl->setNamespace(params.ns);
-    }
     /*
             ShmFw::HandlerParameterBasePtr parameter = ShmFw::parameterEntryHdl("param_double", shmHdl);
             std::cout << parameter->getString() << std::endl;

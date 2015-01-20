@@ -72,7 +72,7 @@ public:
      * @param size
      * @param ns namespace
      **/
-    Handler ( const std::string &name, unsigned int size = DEFAULT_SEGMENT_SIZE(), const std::string &ns = "");
+    Handler ( const std::string &name, size_t size = DEFAULT_SEGMENT_SIZE(), const std::string &ns = "");
     /**
      * Construtor creates a shm
      * @param p shared memory parameter
@@ -88,7 +88,7 @@ public:
      * @param name
      * @param size
      **/
-    static HandlerPtr create ( const std::string &name, unsigned int size = DEFAULT_SEGMENT_SIZE(), const std::string &ns = "" );
+    static HandlerPtr create ( const std::string &name, size_t size = DEFAULT_SEGMENT_SIZE(), const std::string &ns = "" );
      /**
      * rerates a new handler
      * @param p shared memory parameter
@@ -101,18 +101,6 @@ public:
     /** creates a named shared memory segment with the current name and size
     **/
     void createSegment();
-    
-    /** creates a named shared memory segment
-    * @param name name of segment to remove
-    * @param size size in bytes of the segment
-    **/
-    void createSegment ( const std::string &name, unsigned int size = DEFAULT_SEGMENT_SIZE(), const std::string &ns = "" );
-    
-    /** creates a named shared memory segment
-     * @param p shared memory parameter
-    **/
-    void createSegment ( ParameterPtr &p );
-    
     /**
      * @return shm name
      **/
@@ -151,11 +139,6 @@ public:
     * @return namespace
     **/
     const std::string &getNamespace() const;
-    /** Defines a namespace for shared memory varaibles constructed with this handler
-    * a "/" will allways present after calling this fnc
-    * @param namespace name prefix
-    **/
-    void setNamespace ( const std::string& ns );
     /** adds the prefix to a name
     * @param name
     * @return prefix + name

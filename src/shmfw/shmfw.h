@@ -42,25 +42,44 @@ class Parameter;
 typedef std::shared_ptr<ShmFw::Parameter> ParameterPtr;
 /// class to handle shared memory parameters
 class Parameter {
+    void fix_namespace_syntax(); /// fixes the namespace syntax
 public:
-    Parameter();
-    Parameter ( const std::string& name, unsigned int size, const std::string& ns = "" );
     std::string segment_name;
-    unsigned int segment_size;
-    std::string ns;  /// Namespace
+    size_t segment_size;
+    std::string segment_ns;  
+    /**
+     * constructor
+     **/
+    Parameter();
+    /**
+     * constructor
+     * @param name name of the shared segment
+     * @param  size  size of the shared segment
+     * @param  ns namespace used to create variables
+     **/
+    Parameter ( const std::string& name, unsigned int size, const std::string& ns = "" );
     friend std::ostream &operator << ( std::ostream &os, const Parameter &o ) {
         os << "segment_name =  " << o.segment_name << std::endl;
         os << "segment_size =  " << o.segment_size << std::endl;
-        os << "ns =  " << o.ns << std::endl;
+        os << "segment_ns =  " << o.segment_ns << std::endl;
         return os;
     }
-    void setNamespace ( const std::string& ns );
+    /**
+     * resolves a name and addes the namespace
+     * @param name name of the shared segment
+     * @return resolved name
+     **/
     std::string resolve_namespace ( const std::string &_name );
   
+    /// creates a smart pointer to the class
     static ParameterPtr create();
+    /** creates a smart pointer to the class
+     * @param name name of the shared segment
+     * @param  size  size of the shared segment
+     * @param  ns namespace used to create variables
+     **/
     static ParameterPtr create ( const std::string& name, unsigned int size, const std::string& ns = "" );
-
- 
+    void parse ( int argc, char **argv, const std::string &group, std::string &filename );
 };
 
 
@@ -73,7 +92,7 @@ enum SerializeFormat {
 
 boost::posix_time::ptime now();
 std::string DEFAULT_SEGMENT_NAME();
-unsigned int DEFAULT_SEGMENT_SIZE();
+size_t DEFAULT_SEGMENT_SIZE();
 
 };
 #endif //SHARED_MEM_FW_H
