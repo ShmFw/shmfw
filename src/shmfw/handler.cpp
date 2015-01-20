@@ -65,6 +65,7 @@ ShmPtr Handler::getShm() {
     return pShm_;
 }
 void Handler::createSegment() {
+    param_->fix_namespace_syntax();
     try {
         /// look if it allready exists
         pShm_ = ShmPtr ( new bi::managed_shared_memory ( bi::open_only, param_->segment_name.c_str() ) );
