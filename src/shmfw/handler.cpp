@@ -40,7 +40,7 @@ Handler::Handler()
     : valid_ ( false ), param_ ( Parameter::create() ) {
 }
 
-Handler::Handler ( ParameterPtr& p )
+Handler::Handler (const ParameterPtr& p )
     : valid_ ( false ), param_ ( p ) {
     createSegment();
 }
@@ -57,7 +57,7 @@ HandlerPtr Handler::create() {
 HandlerPtr Handler::create ( const std::string &name, size_t size, const std::string &ns ) {
     return HandlerPtr ( new Handler ( name, size, ns ) );
 }
-HandlerPtr Handler::create ( ParameterPtr& p ) {
+HandlerPtr Handler::create (const ParameterPtr& p ) {
     return HandlerPtr ( new Handler ( p ) );
 }
 

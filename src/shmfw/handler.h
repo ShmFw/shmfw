@@ -77,7 +77,7 @@ public:
      * Construtor creates a shm
      * @param p shared memory parameter
      **/
-    Handler ( ParameterPtr &p );
+    Handler (const ParameterPtr &p );
     /**
      * rerates a new handler
      * @post Handler::createSegment
@@ -93,7 +93,7 @@ public:
      * rerates a new handler
      * @param p shared memory parameter
      **/
-    static HandlerPtr create ( ParameterPtr &p );
+    static HandlerPtr create (const  ParameterPtr &p );
     /**
     * @return managed memory
     **/
