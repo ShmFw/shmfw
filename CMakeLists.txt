@@ -8,7 +8,8 @@ _output_prefix()
 _set_output_paths()
 _installation_destinations() # must be befor add_subdirectory
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+add_compile_options(-std=c++11) ## for c++ 2011
+
 include(PCHSupport.cmake)
 
 MESSAGE( STATUS "CMAKE_BUILD_TYPE:              " ${CMAKE_BUILD_TYPE} )
