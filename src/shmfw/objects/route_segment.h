@@ -34,46 +34,59 @@
 
 
 #include <vector>
+#include <boost/graph/graph_concepts.hpp>
 #include <shmfw/objects/pose.h>
 
 namespace ShmFw {
 
 class RouteSegment : public ShmFw::BaseObject {
 public:
+    static const size_t MAX_MAP_SIZE = 0x1FF;
+    
     static const uint32_t ID_NA       = -1;
     static const uint8_t TYPE_NA      = 0;
     static const uint8_t TYPE_LINE    = 1;
     static const uint8_t TYPE_ARC     = 2;
     static const uint8_t TYPE_SPIROS  = 3;
     static const uint8_t TYPE_SPLINE  = 4;
+    
     static const uint8_t ORIENTATION_CLOCKWISE  = 0;
     static const uint8_t ORIENTATION_COUNTER_CLOCKWISE  = 1;
+    
+    static const uint8_t MOTION_TYPE_NA = 0;
+    static const uint8_t MOTION_TYPE_FLAT = 1;
+    static const uint8_t MOTION_TYPE_DWA_SLOW = 2;
+    static const uint8_t MOTION_TYPE_DWA_FAST = 3;
+    static const uint8_t MOTION_TYPE_MPC_SLOW = 4;
+    static const uint8_t MOTION_TYPE_MPC_FAST = 5;
+    static const uint8_t MOTION_TYPE_PI_SLOW = 6;
+    static const uint8_t MOTION_TYPE_PI_FAST = 7;
+    
     uint32_t id;
     uint8_t type;
     uint8_t orientation;
+    char map[MAX_MAP_SIZE];
+    uint8_t motion_type;
     Pose start;
     Pose end;
     Pose center;    
     int8_t level;
 
     RouteSegment()
-        : id ( ID_NA ), type ( TYPE_NA ), orientation(ORIENTATION_CLOCKWISE), start(), end(), center(), level ( 0 ) {};
+        : id ( ID_NA ), type ( TYPE_NA ), orientation(ORIENTATION_CLOCKWISE), motion_type(MOTION_TYPE_NA), start(), end(), center(), level ( 0 ) {
+          map[0] = '\0';
+        };
     RouteSegment ( const RouteSegment &p )
         : id ( p.id )
         , type ( p.type )
         , orientation ( p.orientation )
+        , motion_type ( p.motion_type )
         , start ( p.start )
         , end ( p.end )
         , center ( p.center )
-        , level ( p.level ) {};
-    RouteSegment ( uint32_t _id,  uint8_t _type, uint8_t _orientation, const Pose2D &_start, const Pose2D &_end, const Pose2D &_center = Pose2D(), int8_t _level = 0 )
-        : id ( _id )
-        , type ( _type )
-        , orientation ( _orientation )
-        , start ( _start )
-        , end ( _end )
-        , center ( _center )
-        , level ( _level ) {};
+        , level ( p.level ) {
+          strncpy(map, p.map, MAX_MAP_SIZE);
+        };
     const char* getToStringType ( ) const {
         switch ( type ) {
         case TYPE_LINE:
@@ -132,6 +145,8 @@ protected:
         ar & make_nvp ( "id", id );
         ar & make_nvp ( "type", type );
         ar & make_nvp ( "orientation", orientation );
+        ar & make_nvp ( "map", map );
+        ar & make_nvp ( "motion_type", motion_type );
         ar & make_nvp ( "start", start );
         ar & make_nvp ( "end", end );
         ar & make_nvp ( "center", center );

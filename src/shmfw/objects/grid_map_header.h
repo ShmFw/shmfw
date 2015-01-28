@@ -53,6 +53,8 @@ private:
     double m_rotation; /// rotation of the map
     double m_x_resolution;  /// resolution: metric unit = cell * resolution
     double m_y_resolution;  /// resolution: metric unit = cell * resolution
+    double m_M[2][3]; /// Transform p[pixel memory] = Mint * Mext * p[m world] 
+    double m_Minv[2][3]; /// Transform p[m world] = Mint * Mext * p[pixel memory]
     size_t m_size_x; /// size x in cells
     size_t m_size_y; /// size y in cells
     size_t m_depth;  /// number of bytes per cell (sizeof(T))
@@ -158,7 +160,23 @@ public:
 
     /// tries to identify the cvtype. @return cvtype or -1
     int cvtype() const;
-
+    
+    /**
+     * Transform a world coordinate into cell a index. 
+     * @param wx source value x in world coordinates 
+     * @param wy source value x in world coordinates  
+     * @param cx des value x in pixel cell coordinates 
+     * @param cx des value x in pixel cell coordinates 
+     **/
+    void world2Cell (const double wx, const double wy, int &cx, int &cy ) const;
+    /**
+     * Transform a cell a index into a world coordinate 
+     * @param cx src value x in pixel cell coordinates 
+     * @param cx src value x in pixel cell coordinates 
+     * @param wx des value x in world coordinates 
+     * @param wy des value x in world coordinates  
+     **/
+    void cell2World (const int cx, const int cy, double &wx, double &wy ) const;
     /// Transform a coordinate values into cell index. @param x metric value, @param y metric value  @return cell index
     cv::Point cvCellPoint ( double x, double y ) const;
     /// Transform a coordinate values into cell index. @param p metric value  @return cell index

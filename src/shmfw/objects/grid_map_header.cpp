@@ -96,6 +96,14 @@ const size_t& GridMapHeader::bytes() const {
 const size_t& GridMapHeader::bytes_total() const {
     return m_bytes_total;
 }
+void GridMapHeader::world2Cell (const double wx, const double wy, int &cx, int &cy ) const {
+  cx = m_M[0][0] * wx + m_M[0][1] * wy + m_M[0][2];
+  cy = m_M[1][0] * wx + m_M[1][1] * wy + m_M[1][2];
+}
+void GridMapHeader::cell2World (const int cx, const int cy, double &wx, double &wy ) const {
+  wx = m_Minv[0][0] * cx + m_Minv[0][1] * cy + m_Minv[0][2];
+  wy = m_Minv[1][0] * cx + m_Minv[1][1] * cy + m_Minv[1][2];
+}
 cv::Point GridMapHeader::cvCellPoint ( double x, double y ) const {
     return cv::Point ( x2idx ( x ), y2idx ( y ) );
 }
