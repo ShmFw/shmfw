@@ -36,6 +36,7 @@
 #include <vector>
 #include <boost/graph/graph_concepts.hpp>
 #include <shmfw/objects/pose.h>
+#include <shmfw/header.h>
 
 namespace ShmFw {
 
@@ -74,7 +75,7 @@ public:
 
     RouteSegment()
         : id ( ID_NA ), type ( TYPE_NA ), orientation(ORIENTATION_CLOCKWISE), motion_type(MOTION_TYPE_NA), start(), end(), center(), level ( 0 ) {
-          map[0] = '\0';
+
         };
     RouteSegment ( const RouteSegment &p )
         : id ( p.id )
@@ -84,7 +85,8 @@ public:
         , start ( p.start )
         , end ( p.end )
         , center ( p.center )
-        , level ( p.level ) {
+        , level ( p.level )
+        {
           strncpy(map, p.map, MAX_MAP_SIZE);
         };
     const char* getToStringType ( ) const {
@@ -141,14 +143,20 @@ protected:
     friend class boost::serialization::access;
     /** Boost serialization function **/
     template<class archive>  void serialize ( archive &ar, const unsigned int version ) {
-        using boost::serialization::make_nvp;
+      using boost::serialization::make_nvp;
+      std::string str;
         ar & make_nvp ( "id", id );
         ar & make_nvp ( "type", type );
         ar & make_nvp ( "orientation", orientation );
-        ar & make_nvp ( "motion_type", motion_type );
-        std::string xmlmap;
-        ar & make_nvp ( "map", xmlmap );
-        strncpy(map, xmlmap.c_str(), MAX_MAP_SIZE);
+        ar & make_nvp ( "motion_type", motion_type );    
+        if ( archive::is_saving::value ) {
+          str = std::string(map);
+          ar & boost::serialization::make_nvp ( "map", map );
+        }
+        if ( archive::is_loading::value ) {
+          ar & boost::serialization::make_nvp ( "map", str );
+          strncpy(map, str.c_str(), MAX_MAP_SIZE);
+        }
         ar & make_nvp ( "start", start );
         ar & make_nvp ( "end", end );
         ar & make_nvp ( "center", center );
