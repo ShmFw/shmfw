@@ -145,8 +145,10 @@ protected:
         ar & make_nvp ( "id", id );
         ar & make_nvp ( "type", type );
         ar & make_nvp ( "orientation", orientation );
-        ar & make_nvp ( "map", map );
         ar & make_nvp ( "motion_type", motion_type );
+        std::string xmlmap;
+        ar & make_nvp ( "map", xmlmap );
+        strncpy(map, xmlmap.c_str(), MAX_MAP_SIZE);
         ar & make_nvp ( "start", start );
         ar & make_nvp ( "end", end );
         ar & make_nvp ( "center", center );
