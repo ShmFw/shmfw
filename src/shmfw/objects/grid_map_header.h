@@ -53,7 +53,7 @@ private:
     double m_rotation; /// rotation of the map
     double m_x_resolution;  /// resolution: metric unit = cell * resolution
     double m_y_resolution;  /// resolution: metric unit = cell * resolution
-    double m_M[2][3]; /// Transform p[pixel memory] = Mint * Mext * p[m world] 
+    double m_M[2][3];    /// Transform p[pixel memory] = Mint * Mext * p[m world] 
     double m_Minv[2][3]; /// Transform p[m world] = Mint * Mext * p[pixel memory]
     size_t m_size_x; /// size x in cells
     size_t m_size_y; /// size y in cells
@@ -160,6 +160,16 @@ public:
 
     /// tries to identify the cvtype. @return cvtype or -1
     int cvtype() const;
+    
+    void setExt(const double &a00, const double &a01, const double &a02, const double &a10, const double &a11, const double &a12 ){
+      m_M[0][0] = a00, m_M[0][1] = a01, m_M[0][2] = a02;
+      m_M[1][0] = a10, m_M[1][1] = a11, m_M[1][2] = a12;
+    }
+    
+    void setExtInv(const double &a00, const double &a01, const double &a02, const double &a10, const double &a11, const double &a12 ){
+      m_Minv[0][0] = a00, m_Minv[0][1] = a01, m_Minv[0][2] = a02;
+      m_Minv[1][0] = a10, m_Minv[1][1] = a11, m_Minv[1][2] = a12;
+    }
     
     /**
      * Transform a world coordinate into cell a index. 
