@@ -75,7 +75,7 @@ public:
 
     RouteSegment()
         : id ( ID_NA ), type ( TYPE_NA ), orientation(ORIENTATION_CLOCKWISE), motion_type(MOTION_TYPE_NA), start(), end(), center(), level ( 0 ) {
-
+          strncpy(map, "", MAX_MAP_SIZE);
         };
     RouteSegment ( const RouteSegment &p )
         : id ( p.id )
@@ -151,7 +151,7 @@ protected:
         ar & make_nvp ( "motion_type", motion_type );    
         if ( archive::is_saving::value ) {
           str = std::string(map);
-          ar & boost::serialization::make_nvp ( "map", map );
+          ar & boost::serialization::make_nvp ( "map", str );
         }
         if ( archive::is_loading::value ) {
           ar & boost::serialization::make_nvp ( "map", str );
