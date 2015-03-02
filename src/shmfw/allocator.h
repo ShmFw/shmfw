@@ -168,6 +168,28 @@ public:
         return ( *get() != o );
     }
 
+    /** SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
+     * copies data to the shared variable and updated the timestamps and locks the variable while accessing
+     * @param source
+     **/
+    template<typename T1>
+    void set ( const T1 &source ) {
+        lock();
+        *get() = source;
+        unlock();
+        itHasChanged();
+    }
+    /** SAVE ACCESS :-) (the function will to the lock and the timstamp stuff)
+     *  copies data form the shared variable into a local varaiable and sets local timestamps and locks the variable while accessing
+     * @param destination
+     **/
+    template<typename T1>
+    void get ( T1 &destination ) {
+        lock();
+        destination = *get();
+        unlock();
+        dataProcessed();
+    }
     /**
      * overloads the << and calls the varalible overloades operator
      **/

@@ -40,6 +40,8 @@
 #include <boost/container/scoped_allocator.hpp>
 #include <boost/interprocess/sync/interprocess_condition.hpp>
 #include <boost/interprocess/containers/string.hpp>
+#include <boost/container/scoped_allocator.hpp>
+#include <boost/interprocess/managed_mapped_file.hpp>
 /**
  * Foward declaration for serialization fiend access
  */
@@ -57,10 +59,12 @@ namespace ShmFw {
 
 namespace bi = boost::interprocess;
 namespace bp = boost::posix_time;
+namespace bc = boost::container;
 
 typedef bi::scoped_lock<bi::interprocess_mutex> ScopedLock;
 
 template <typename T> using Allocator = bi::allocator<T, bi::managed_shared_memory::segment_manager>;
+typedef bc::scoped_allocator_adaptor<bi::allocator<void, bi::managed_mapped_file::segment_manager> >  void_allocator;
 typedef Allocator<void> VoidAllocator;
 typedef Allocator<char> CharAllocator;
 typedef bi::basic_string<char, std::char_traits<char> , CharAllocator > CharString;
