@@ -99,6 +99,7 @@ public:
         set ( NA, NA, _msg );
     }
     void set ( int _type, int _source, const std::string &_msg ) {
+        updateHeader ( _type, _source );
         updateMsg ( _msg );
     }
     void set ( const std::string &_msg ) {
