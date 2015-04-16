@@ -51,7 +51,6 @@
 #include "shmfw/objects/quaternion.h"
 #include "shmfw/objects/pose.h"
 #include "shmfw/objects/pose2d.h"
-#include "shmfw/objects/pose2d_agv.h"
 #include "shmfw/objects/route_segment.h"
 #include "shmfw/objects/parameterentry.h"
 #include "shmfw/objects/rgb.h"
@@ -110,7 +109,6 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_VAR ( Quaternion );
     RETURN_IF_TYPE_VAR ( Pose );
     RETURN_IF_TYPE_VAR ( Pose2D );
-    RETURN_IF_TYPE_VAR ( Pose2DAGV );
     RETURN_IF_TYPE_VAR ( RouteSegment );
     RETURN_IF_TYPE_VAR ( Twist );
     RETURN_IF_TYPE_VAR ( Twist2D );
@@ -165,7 +163,6 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_VECTOR ( Quaternion );
     RETURN_IF_TYPE_VECTOR ( Pose );
     RETURN_IF_TYPE_VECTOR ( Pose2D );
-    RETURN_IF_TYPE_VECTOR ( Pose2DAGV );
     RETURN_IF_TYPE_VECTOR ( RouteSegment );
     RETURN_IF_TYPE_VECTOR ( Twist );
     RETURN_IF_TYPE_VECTOR ( ModelState );
@@ -219,7 +216,6 @@ HandlerObjectPtr HandlerObject::open ( const std::string &name, HandlerPtr &shmH
     RETURN_IF_TYPE_DEQUE ( Quaternion );
     RETURN_IF_TYPE_DEQUE ( Pose );
     RETURN_IF_TYPE_DEQUE ( Pose2D );
-    RETURN_IF_TYPE_DEQUE ( Pose2DAGV );
     RETURN_IF_TYPE_DEQUE ( RouteSegment );
     RETURN_IF_TYPE_DEQUE ( Twist );
     RETURN_IF_TYPE_DEQUE ( Twist2D );
@@ -294,7 +290,6 @@ HandlerObjectPtr HandlerObject::create ( const std::string &name, HandlerPtr &sh
     CREATE_TYPE_VAR ( Quaternion );
     CREATE_TYPE_VAR ( Pose );
     CREATE_TYPE_VAR ( Pose2D );
-    CREATE_TYPE_VAR ( Pose2DAGV );
     CREATE_TYPE_VAR ( Twist );
     CREATE_TYPE_VAR ( Twist2D );
     CREATE_TYPE_VAR ( ModelState );

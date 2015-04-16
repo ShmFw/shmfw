@@ -23,7 +23,6 @@ SET(FILES_H
   points.h
   pose.h
   pose2d.h
-  pose2d_agv.h
   probability_entry.h
   quaternion.h
   rgb.h
@@ -38,7 +37,6 @@ SET(FILES_H
 SET(FILES_CPP
   mrpt.cpp
   grid_map_header.cpp
-  pose2d_agv.cpp 
 )
 
 add_library(shmfw_objects SHARED ${FILES_H} ${FILES_CPP})
