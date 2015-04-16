@@ -166,6 +166,14 @@ public:
         }
     }
     
+    /** computes the vector dot products
+     * @param b 
+     * @return dot product
+     **/
+    double dot(const Quaternion &b) const {
+      return x*b.x + y*b.y + z*b.z + w*b.w;
+    }
+    
 protected:
     friend class boost::serialization::access;
     /** Boost serialization function **/

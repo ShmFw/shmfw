@@ -124,6 +124,15 @@ public:
 	des.orientation = orientation.getYaw();
 	return des;
     }
+    /** Projects the 3D pose on the xy plane
+     * @param des 2D pose
+     **/
+    ShmFw::Pose2D getPose2D () const {
+        ShmFw::Pose2D des;
+        des.position.copyFrom(position);
+	des.orientation = orientation.getYaw();
+	return des;
+    }
     /** Copies data from an array
      * @param src data source
      **/

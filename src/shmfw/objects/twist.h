@@ -50,6 +50,14 @@ public:
         sprintf ( buf, "[ [%lf, %lf, %lf], [ %lf, %lf, %lf] ]", linear.x, linear.y, linear.z, angular.x, angular.y, angular.z );
         return std::string ( buf );
     }
+    bool setFromString ( const std::string &str ) {
+        int start = str.find ( "[" );
+        int end = str.find_last_of ( "]" );
+        std::string data = str.substr ( start+1, end-1 );
+        boost::erase_all ( data, " " );
+        if ( sscanf ( data.c_str(), "[%lf,%lf,%lf],[%lf,%lf,%lf]", &linear.x, &linear.y, &linear.z, &angular.x, &angular.y, &angular.z ) == EOF ) return false;
+        return true;
+    }
     Twist& set(const double &vx, const double &vy, const double &vz, const double &wx, const double &wy, const double &wz){
       linear.set(vx, vy, vz); 
       angular.set(wx, wy, wz); 
@@ -62,14 +70,6 @@ public:
     Twist& setAngular(const double &wx, const double &wy, const double &wz){
       angular.set(wx, wy, wz); 
       return *this;
-    }
-    bool setFromString ( const std::string &str ) {
-        int start = str.find ( "[" );
-        int end = str.find_last_of ( "]" );
-        std::string data = str.substr ( start+1, end-1 );
-        boost::erase_all ( data, " " );
-        if ( sscanf ( data.c_str(), "[%lf,%lf,%lf],[%lf,%lf,%lf]", &linear.x, &linear.y, &linear.z, &angular.x, &angular.y, &angular.z ) == EOF ) return false;
-        return true;
     }
     friend std::ostream& operator<< ( std::ostream &output, const Twist &o ) {
         output << o.getToString();
@@ -117,6 +117,20 @@ public:
     Twist2D() : Twist() {};
     Twist2D ( const Twist &p ) : Twist ( p ) {};
     Twist2D ( double v, double w ) : Twist ( v, 0, 0, 0, 0, w ) {};
+    std::string getToString() const {
+        char buf[0xFF];
+        sprintf ( buf, "[ [%lf], [%lf] ]", linear.x, angular.z );
+        return std::string ( buf );
+    }
+    bool setFromString ( const std::string &str ) {
+        int start = str.find ( "[" );
+        int end = str.find_last_of ( "]" );
+        std::string data = str.substr ( start+1, end-1 );
+        boost::erase_all ( data, " " );
+        if ( sscanf ( data.c_str(), "[%lf],[%lf]", &linear.x, &angular.z ) == EOF ) return false;
+        return true;
+    }
+    
     const double &v() const{
       return linear.x;
     }
