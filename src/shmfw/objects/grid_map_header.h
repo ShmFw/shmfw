@@ -101,6 +101,8 @@ public:
         , m_bytes_total ( 0 )
         , m_type_hash_code ( 0 ) {
     }
+    /// Changes the resolution and thus boundaries of tthe maps while keeping their size constant
+    void updateResolution (const double x_resolution, const double y_resolution);
     /// Returns the horizontal size of grid map in cells count. @return m_size_x
     const size_t& getSizeX() const;
     /// Returns the horizontal size of grid map in cells count. @return m_size_x
