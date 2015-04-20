@@ -181,7 +181,7 @@ inline mrpt::poses::CPose2D& operator<< ( mrpt::poses::CPose2D &des, const ShmFw
 }
 
 inline mrpt::poses::CPose2D& operator<< ( mrpt::poses::CPose2D &des, const ShmFw::Pose& src ) {
-    des.m_coords[0] = src.position.x,  des.m_coords[1] = src.position.y,  des.phi() = src.orientation.getYaw();
+    des.m_coords[0] = src.position.x,  des.m_coords[1] = src.position.y,  des.phi() = src.orientation.getAngleYaw();
     return des;
 }
 

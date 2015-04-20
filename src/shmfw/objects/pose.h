@@ -119,9 +119,9 @@ public:
     /** Projects the 3D pose on the xy plane
      * @param des 2D pose
      **/
-    ShmFw::Pose2D &getPose2D (ShmFw::Pose2D &des) {
+    ShmFw::Pose2D &getPose2D (ShmFw::Pose2D &des) const {
         des.position.copyFrom(position);
-	des.orientation = orientation.getYaw();
+	des.orientation = orientation.getAngleYaw();
 	return des;
     }
     /** Projects the 3D pose on the xy plane
@@ -130,7 +130,7 @@ public:
     ShmFw::Pose2D getPose2D () const {
         ShmFw::Pose2D des;
         des.position.copyFrom(position);
-	des.orientation = orientation.getYaw();
+	des.orientation = orientation.getAngleYaw();
 	return des;
     }
     /** Copies data from an array

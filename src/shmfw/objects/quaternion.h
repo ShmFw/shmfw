@@ -152,6 +152,70 @@ public:
 	 return d < tolerance;
     }
     
+    
+    /** computes the Euler angles
+     * @param xAngle rotation around x
+     * @param yAngle rotation around y
+     * @param zAngle rotation around z (importand for 2D)
+     * @see http://www.tinkerforge.com/en/doc/Software/Bricks/IMU_Brick_CSharp.html
+     **/
+    void getAnglesEuler(double &xAngle, double &yAngle, double &zAngle) const{
+      xAngle = getAngleEulerX(),  yAngle = getAngleEulerY(), zAngle = getAngleEulerZ();
+    }
+    /** quaternions to Euler angles around X
+     * @see http://www.tinkerforge.com/en/doc/Software/Bricks/IMU_Brick_CSharp.html
+     * @return angle around X
+     **/
+    double getAngleEulerX() const{
+      return atan2(2.*y*w - 2.*x*z, 1. - 2.*y*y - 2.*z*z);
+    }
+    /** quaternions to Euler angles around Y
+     * @see http://www.tinkerforge.com/en/doc/Software/Bricks/IMU_Brick_CSharp.html
+     * @return angle around Y
+     **/
+    double getAngleEulerY() const{
+      return atan2(2.*x*w - 2.*y*z, 1. - 2.*x*x - 2.*z*z);
+    }
+    /** quaternions to Euler angles around Z (importand for 2D on the X,Y Plane)
+     * @see http://www.tinkerforge.com/en/doc/Software/Bricks/IMU_Brick_CSharp.html
+     * @return angle around Z
+     **/
+    double getAngleEulerZ() const{
+      return asin(2.*x*y + 2.*z*w);
+    }
+    
+    
+    /** computes independent angles. yaw, pitch and roll in a right-handed vehicle coordinate system according to DIN70000
+     * @param yaw rotation around z (importand for 2D)
+     * @param pitch rotation around y
+     * @param roll rotation around x 
+     * @see http://www.tinkerforge.com/en/doc/Software/Bricks/IMU_Brick_CSharp.html
+     **/
+    void getAnglesYawPitchRoll(double &yaw, double &pitch, double &roll) const{
+      yaw = getAngleYaw(),  pitch = getAnglePitch(), roll = getAngleRoll();
+    }
+    /** computes independent angle yaw in a right-handed vehicle coordinate system according to DIN70000
+     * @see http://www.tinkerforge.com/en/doc/Software/Bricks/IMU_Brick_CSharp.html
+     * @return yaw  (importand for 2D on the X,Y Plane)
+     **/
+    double getAngleYaw() const{
+      return  atan2(2.0*x*y + 2*w*z, w*w + x*x - y*y - z*z);
+    }
+    /** computes independent angle pitch in a right-handed vehicle coordinate system according to DIN70000
+     * @see http://www.tinkerforge.com/en/doc/Software/Bricks/IMU_Brick_CSharp.html
+     * @return pitch 
+     **/
+    double getAnglePitch() const{
+      return  -asin(2.*w*y - 2.*x*z);
+    }
+    /** computes independent angle roll in a right-handed vehicle coordinate system according to DIN70000
+     * @see http://www.tinkerforge.com/en/doc/Software/Bricks/IMU_Brick_CSharp.html
+     * @return roll 
+     **/
+    double getAngleRoll() const{
+      return -atan2(2.*y*z + 2.*w*x, -w*w + x*x + y*y - z*z);
+    }
+    /*
     double getYaw() const {
         double opposite = 2 * z * w;
         double adjacent = 1 - 2 * z * z;
@@ -165,6 +229,7 @@ public:
             return ( 2 * M_PI + asin ( opposite ) );
         }
     }
+    */
     
     /** computes the vector dot products
      * @param b 
