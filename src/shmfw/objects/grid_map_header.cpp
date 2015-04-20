@@ -185,6 +185,15 @@ void GridMapHeader::initHeader ( const double x_min, const double x_max, const d
     size_t size_y = round ( ( m_y_max-m_y_min ) /m_y_resolution );
     initSize ( size_x, size_y, depth, layers );
 }
+void GridMapHeader::updateResolution (const double x_resolution, const double y_resolution) {
+    m_x_min = x_resolution*round ( m_x_min/m_x_resolution );
+    m_y_min = y_resolution*round ( m_y_min/m_y_resolution );
+    m_x_max = x_resolution*round ( m_x_max/m_x_resolution );
+    m_y_max = y_resolution*round ( m_y_max/m_y_resolution );
+    // Res:
+    m_x_resolution = x_resolution;
+    m_y_resolution = y_resolution;
+}
 void GridMapHeader::initHeader ( const double x_min, const double x_max, const double y_min, const double y_max, const size_t size_x, const size_t size_y, const size_t depth, const size_t layers, const size_t type_hash_code ) {
     initHeader ( x_min, x_max, y_min, y_max, size_x, size_y, depth, layers );
     setTypeHasCode ( type_hash_code );
