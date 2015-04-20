@@ -3,7 +3,7 @@
 
 namespace ShmFwTest {
 
-TEST_F ( ObjectTest, serializeTransform2dXML ) {
+TEST_F ( ObjectTest, Transform2DSerializeXML ) {
     std::string filename ( "Transform2D.xml" );
     ShmFw::Transform2D a ( randf(), randf(), randf() );
     ShmFw::Transform2D b;
@@ -11,7 +11,7 @@ TEST_F ( ObjectTest, serializeTransform2dXML ) {
     ShmFw::read ( filename, b );
     EXPECT_EQ ( a, b );
 }
-TEST_F ( ObjectTest, serializeTransform2dTXT ) {
+TEST_F ( ObjectTest, Transform2DSerializeTXT ) {
     std::string filename ( "Transform2D.txt" );
     ShmFw::Transform2D a ( randf(), randf(), randf() );
     ShmFw::Transform2D b;
@@ -20,7 +20,7 @@ TEST_F ( ObjectTest, serializeTransform2dTXT ) {
     EXPECT_EQ ( a, b );
 }
 
-TEST_F ( ObjectTest, serializeOperatorTransform2d ) {
+TEST_F ( ObjectTest, Transform2DSerializeOperator ) {
     ShmFw::Transform2D a ( randf(), randf(), randf() );
     ShmFw::Transform2D b;
     std::stringstream ss;
@@ -56,13 +56,23 @@ TEST_F ( ObjectTest, Transform2DOrientation ) {
     a1 = tf.orientation();
     EXPECT_NEAR ( a0, a1, 0.0001 );
 }
-TEST_F ( ObjectTest, Transform2DOperationsPose2D ) {
-    double a0, a1;
-    ShmFw::Transform2D tf;
-    ShmFw::Pose2D p0, p1;
-    tf.setTf ( 0, 0, M_PI );
-    p0.setPose ( 1, 0, 0 );
-    p1 = tf*p0;
-    EXPECT_EQ ( true, p1.equal ( ShmFw::Pose2D ( -1, 0, M_PI ) ) ) << "Should be equal";
+TEST_F ( ObjectTest, Transform2DOperationsPose2DtoTf ) {
+    ShmFw::Point2D p_r(1.05,1.8);
+    //std::cout << p_r << std::endl; 
+    ShmFw::Pose2D P_r(3.5,-4.5,-M_PI/4.);
+    //std::cout << P_r << std::endl; 
+    ShmFw::Transform2D tf_rw(P_r); 
+    //std::cout << tf_rw << std::endl; 
+    ShmFw::Point2D p_w = tf_rw * p_r;
+    //std::cout << p_w << std::endl; 
+    EXPECT_EQ ( true, p_w.equal ( ShmFw::Point2D ( 5.5, -4 ), 0.3) ) << "Should be equal";
+    p_r = tf_rw / p_w;
+    //std::cout << p_r << std::endl; 
+    EXPECT_EQ ( true, p_r.equal ( ShmFw::Point2D ( 1.05,1.8 ), 0.1) ) << "Should be equal";
+    ShmFw::Transform2D tf_wr = tf_rw.invert();
+    p_r = tf_wr * p_w;
+    //std::cout << p_r << std::endl; 
+    EXPECT_EQ ( true, p_r.equal ( ShmFw::Point2D ( 1.05,1.8 ), 0.1) ) << "Should be equal";
+    
 }
 }  // namespace

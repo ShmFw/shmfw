@@ -58,9 +58,15 @@ public:
 
     /**
      * construtor
-     * @param o  Pose2D
+     * @param o Pose2D
      **/
     Transform2D ( const Pose2D &o );
+    /**
+     * construtor crates a transformation from a to b
+     * @param a  Pose2D
+     * @param b  Pose2D
+     **/
+    Transform2D ( const Pose2D &a, const Pose2D &b );
     
     /// construtor
     Transform2D ( const Matrix3x3<double> &o );
@@ -98,12 +104,23 @@ public:
     /** @return true on equal
      **/
     bool operator == ( const Transform2D& o ) const;
+    
+    /** @return invert transforamtion
+     **/
+    Transform2D invert (); 
+
     /**
      * Transform
      * @param o to transform
      * @return point transformed
      **/
     Point2D operator * ( const Point2D& o ) const;
+    /**
+     * Invert transform
+     * @param o to transform
+     * @return point transformed
+     **/
+    Point2D operator / ( const Point2D& o ) const;
 
     /**
      * combine Transforms
@@ -160,16 +177,25 @@ public:
   
     /** Computes a pose element
      * @param src data source
+     * @return reference to this
      **/
-    void setTf ( const ShmFw::Pose2D &src );
+    ShmFw::Transform2D &setTf ( const ShmFw::Pose2D &src );
 
     /** sets the transformation components
      * @param dx translation x
      * @param dy translation y
      * @param da rotation
+     * @return reference to this
      **/
-    void setTf ( const double &dx, const double &dy, const double &da );
+    ShmFw::Transform2D &setTf ( const double &dx, const double &dy, const double &da );
 
+    /** Computes a transformation from a to b
+     * @param a  Pose2D
+     * @param b  Pose2D
+     * @return reference to this
+     **/
+    ShmFw::Transform2D &setTf ( const ShmFw::Pose2D &a,  const ShmFw::Pose2D &b );
+    
     /** sets the identity -> no transformation
      **/
     void identity ();
