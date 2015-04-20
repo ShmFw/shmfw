@@ -90,6 +90,13 @@ ShmFw::Transform2D ShmFw::Transform2D::operator * ( const ShmFw::Transform2D& o 
     return tf*=o;
 }
 
+ShmFw::Pose2D ShmFw::Transform2D::operator * ( const ShmFw::Pose2D& o ) const {
+    ShmFw::Transform2D src ( o );
+    ShmFw::Transform2D des = (*this)*src;
+    ShmFw::Pose2D p = des.getPose();
+    return p;
+}
+
 bool ShmFw::Transform2D::equal ( const Transform2D& o, double tolerance ) const {
     double distance = fabs ( o.x() - x() ) + fabs ( o.y() - y() );
     double angle = o.orientation() - orientation();
@@ -108,10 +115,15 @@ double ShmFw::Transform2D::orientation () const {
     return atan2 ( M.m10, M.m00 );
 }
 
-void ShmFw::Transform2D::getPose ( ShmFw::Pose2D &des ) const {
+ShmFw::Pose2D &ShmFw::Transform2D::getPose ( ShmFw::Pose2D &des ) const {
     des.setPose ( M.m02, M.m12, orientation () );
+    return des;
 }
 
+ShmFw::Pose2D ShmFw::Transform2D::getPose () const {
+    ShmFw::Pose2D pose;
+    return getPose(pose);
+}
 void ShmFw::Transform2D::setTf ( const ShmFw::Pose2D &src ) {
     setTf ( src.x(), src.y(), src.phi() );
 }

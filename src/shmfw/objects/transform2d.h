@@ -118,6 +118,13 @@ public:
      * @return new transform 
      **/
     Transform2D operator * ( const Transform2D& o ) const;
+    
+    /**
+     * Transform
+     * @param o to transform
+     * @return Pose2D transformed
+     **/
+    Pose2D operator * ( const Pose2D& o ) const;
 
     /** compares with within a tolerance
      * @param o
@@ -141,10 +148,16 @@ public:
     double orientation () const;
 
     /** Computes a pose element
-     * @param src data source
+     * @param des data source
+     * @return pose reference to the argument
      **/
-    void getPose ( ShmFw::Pose2D &des ) const;
+    ShmFw::Pose2D &getPose ( ShmFw::Pose2D &des ) const;
 
+    /** Computes a pose element
+     * @return pose
+     **/
+    Pose2D getPose () const;
+  
     /** Computes a pose element
      * @param src data source
      **/
