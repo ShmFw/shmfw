@@ -24,6 +24,7 @@ SET(UNITTEST_OBJECTS_SOURCES
   unittest_objects_matrix3x3.cpp
   unittest_objects_plane.cpp
   unittest_objects_twist.cpp
+  unittest_objects_transform2d.cpp
   unittest_objects_quaterion.cpp
   unittest_objects_marker.cpp
   unittest_objects_line2d.cpp

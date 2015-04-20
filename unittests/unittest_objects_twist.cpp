@@ -20,7 +20,7 @@ TEST_F ( ObjectTest, serializeTwistTXT ) {
     EXPECT_EQ ( a, b );
 }
 
-TEST_F ( ObjectTest, serializeOperator ) {
+TEST_F ( ObjectTest, serializeOperatorTwist ) {
     ShmFw::Twist a(randf(), randf(), randf(), randf(), randf(), randf());
     ShmFw::Twist b;
     std::stringstream ss;

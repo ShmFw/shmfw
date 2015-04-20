@@ -36,6 +36,7 @@ SET(FILES_H
 )
 SET(FILES_CPP
   mrpt.cpp
+  transform2d.cpp
   grid_map_header.cpp
 )
 

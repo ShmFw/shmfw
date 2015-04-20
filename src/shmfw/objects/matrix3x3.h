@@ -56,6 +56,9 @@ public:
         m10 = 0, m11 = 0, m12 = 0;
         m20 = 0, m21 = 0, m22 = 0;
     }
+    static const Matrix3x3 EYE() {
+      return Matrix3x3<double>(1, 0, 0, 0, 1, 0, 0, 0, 1);
+    }
     void eye() {
         m00 = 1, m01 = 0, m02 = 0;
         m10 = 0, m11 = 1, m12 = 0;

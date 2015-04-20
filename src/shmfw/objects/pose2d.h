@@ -91,6 +91,14 @@ public:
         position = location;
         orientation = atan2 ( dy, dx );
     }
+    /** set the pose
+     * @param x 
+     * @param y 
+     * @param phi (orientation) 
+     **/
+    void setPose ( const double &x, const double &y, const double &phi ) {
+        position.x = x, position.y = y, orientation = phi;
+    }
     /** Copies data from an array
      * @param src data source
      **/
@@ -107,6 +115,42 @@ public:
     void copyTo( T2 &des ) const {
         position.copyTo(des.position);
         des.orientation = orientation;
+    }
+    /** translational x component
+     * @return x component
+     **/
+    const double &x () const {
+        return position.x;
+    }
+    /** translational y component
+     * @return y component
+     **/
+    const double &y () const {
+        return position.y;
+    }
+    /** roational component
+     * @return rotation
+     **/
+    const double &phi () const {
+        return orientation;
+    }
+    /** translational x component
+     * @return x component
+     **/
+    double &x () {
+        return position.x;
+    }
+    /** translational y component
+     * @return y component
+     **/
+    double &y () {
+        return position.y;
+    }
+    /** roational component
+     * @return rotation
+     **/
+    double &phi () {
+        return orientation;
     }
 protected:
     friend class boost::serialization::access;
