@@ -1,5 +1,6 @@
 
 #include "unittest_objects.h"
+#include <shmfw/header.h>
 
 namespace ShmFwTest {
 
@@ -59,7 +60,7 @@ TEST_F ( ObjectTest, Transform2DOrientation ) {
 TEST_F ( ObjectTest, Transform2DOperationsPose2DtoTf ) {
     ShmFw::Point2D p_r(1.05,1.8);
     //std::cout << p_r << std::endl; 
-    ShmFw::Pose2D P_r(3.5,-4.5,-M_PI/4.);
+    ShmFw::Pose2D P_r(3.5,-4.5,ShmFw::DEG2RAD(-45));
     //std::cout << P_r << std::endl; 
     ShmFw::Transform2D tf_rw(P_r); 
     //std::cout << tf_rw << std::endl; 
@@ -72,7 +73,19 @@ TEST_F ( ObjectTest, Transform2DOperationsPose2DtoTf ) {
     ShmFw::Transform2D tf_wr = tf_rw.invert();
     p_r = tf_wr * p_w;
     //std::cout << p_r << std::endl; 
-    EXPECT_EQ ( true, p_r.equal ( ShmFw::Point2D ( 1.05,1.8 ), 0.1) ) << "Should be equal";
-    
+    EXPECT_EQ ( true, p_r.equal ( ShmFw::Point2D ( 1.05,1.8 ), 0.1) ) << "Should be equal";  
+}
+TEST_F ( ObjectTest, Transform2DOperationsPose2DtoTf2 ) {
+    ShmFw::Point2D p_r1(1.05,1.8);
+    std::cout << p_r1 << std::endl; 
+    ShmFw::Pose2D P_r1(3.5,-4.5,ShmFw::DEG2RAD(-45));
+    std::cout << P_r1 << std::endl; 
+    ShmFw::Pose2D P_r2(3,-2, ShmFw::DEG2RAD(10));
+    std::cout << P_r2 << std::endl; 
+    ShmFw::Transform2D tf_r1_2_r2(P_r1, P_r2);
+    std::cout << tf_r1_2_r2 << std::endl; 
+    ShmFw::Point2D p_r2 = tf_r1_2_r2 * p_r1;
+    std::cout << p_r2 << std::endl; 
+    EXPECT_EQ ( true, p_r2.equal ( ShmFw::Point2D ( 2.1, -2.4 ), 0.3) ) << "Should be equal";
 }
 }  // namespace

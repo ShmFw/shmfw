@@ -56,17 +56,18 @@ public:
      **/
     Transform2D ( const double &dx, const double &dy, const double &da );
 
-    /**
-     * construtor
+    /** Computes a transformation from the source frame into the origin
+     * @note one can also use -frane_source to get the inverse
+     * @param frame_source source frame
      * @param o Pose2D
      **/
-    Transform2D ( const Pose2D &o );
-    /**
-     * construtor crates a transformation from a to b
-     * @param a  Pose2D
-     * @param b  Pose2D
+    Transform2D ( const Pose2D &frame_source );
+    
+    /** Computes a transformation from the source frame into the target frame
+     * @param frame_source  source frame
+     * @param frame_target  target frame
      **/
-    Transform2D ( const Pose2D &a, const Pose2D &b );
+    Transform2D ( const Pose2D &frame_source, const Pose2D &frame_target );
     
     /// construtor
     Transform2D ( const Matrix3x3<double> &o );
@@ -175,11 +176,11 @@ public:
      **/
     Pose2D getPose () const;
   
-    /** Computes a pose element
-     * @param src data source
+    /** Computes a transformation from the source frame into the origin
+     * @param frame_source source frame
      * @return reference to this
      **/
-    ShmFw::Transform2D &setTf ( const ShmFw::Pose2D &src );
+    ShmFw::Transform2D &setTf ( const ShmFw::Pose2D &frame_source);
 
     /** sets the transformation components
      * @param dx translation x
@@ -189,12 +190,12 @@ public:
      **/
     ShmFw::Transform2D &setTf ( const double &dx, const double &dy, const double &da );
 
-    /** Computes a transformation from a to b
-     * @param a  Pose2D
-     * @param b  Pose2D
+    /** Computes a transformation from the source frame into the target frame
+     * @param frame_source  source frame
+     * @param frame_target  target frame
      * @return reference to this
      **/
-    ShmFw::Transform2D &setTf ( const ShmFw::Pose2D &a,  const ShmFw::Pose2D &b );
+    ShmFw::Transform2D &setTf ( const ShmFw::Pose2D &frame_source,  const ShmFw::Pose2D &frame_target );
     
     /** sets the identity -> no transformation
      **/

@@ -42,11 +42,11 @@ ShmFw::Transform2D::Transform2D ( const double &dx, const double &dy, const doub
     setTf ( dx, dy, da );
 };
 
-ShmFw::Transform2D::Transform2D ( const ShmFw::Pose2D &o ) {
-    setTf ( o );
+ShmFw::Transform2D::Transform2D ( const ShmFw::Pose2D &frame_source) {
+    setTf ( frame_source );
 };
-ShmFw::Transform2D::Transform2D ( const Pose2D &a, const Pose2D &b ) {
-    setTf ( a,b );
+ShmFw::Transform2D::Transform2D ( const Pose2D &frame_source, const Pose2D &frame_target ) {
+    setTf ( frame_source,frame_target );
 };
 
 ShmFw::Transform2D::Transform2D ( const Matrix3x3<double> &o ) : M ( o ) {
@@ -89,11 +89,13 @@ ShmFw::Transform2D ShmFw::Transform2D::invert () {
 ShmFw::Point2D ShmFw::Transform2D::operator * ( const ShmFw::Point2D& o ) const {
     return ShmFw::Point2D ( o.x * M.m00 + o.y * M.m01 + M.m02, o.x * M.m10 + o.y * M.m11 + M.m12 );
 }
+
 ShmFw::Point2D ShmFw::Transform2D::operator / ( const ShmFw::Point2D& o ) const {
     double dx =  (M.m00 * -M.m02) + (M.m10 * -M.m12);
     double dy =  (M.m01 * -M.m02) + (M.m11 * -M.m12);
     return ShmFw::Point2D ( o.x * M.m00 + o.y * M.m10 + dx, o.x * M.m01 + o.y * M.m11 + dy );
 }
+
 const ShmFw::Transform2D &ShmFw::Transform2D::operator *= ( const ShmFw::Transform2D& o ) {
     M*=o.M;
     return *this;
@@ -144,18 +146,15 @@ ShmFw::Transform2D &ShmFw::Transform2D::setTf ( const double &dx, const double &
     return *this;
 }
 
-ShmFw::Transform2D &ShmFw::Transform2D::setTf ( const ShmFw::Pose2D &src ) {
-    return setTf ( src.x(), src.y(), src.phi() );
+ShmFw::Transform2D &ShmFw::Transform2D::setTf ( const ShmFw::Pose2D &frame_source ) {
+    return setTf ( frame_source.x(), frame_source.y(), frame_source.phi() );
 }
 
-ShmFw::Transform2D &ShmFw::Transform2D::setTf ( const ShmFw::Pose2D &a,  const ShmFw::Pose2D &b ) {;
-    // ToDo
-    double da = a.phi() - b.phi();
-    double sa = sin(da);
-    double ca = cos(da);
-    double dx = a.x() - ca * b.x() + sa * b.y();
-    double dy = a.y() - sa * b.x() - ca * b.y();
-    return setTf(dx, dy, da);
+ShmFw::Transform2D &ShmFw::Transform2D::setTf ( const ShmFw::Pose2D &frame_source,  const ShmFw::Pose2D &frame_target ) {
+    ShmFw::Transform2D tw0(frame_source);
+    ShmFw::Transform2D tw1(-frame_target);
+    *this = tw1 * tw0;
+    return *this;
 }
 
 void ShmFw::Transform2D::identity () {

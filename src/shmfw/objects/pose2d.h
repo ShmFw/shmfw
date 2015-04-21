@@ -46,8 +46,8 @@ public:
     Pose2D ( const Point2D &p, double o ) : position ( p ), orientation ( o ) {};
     Pose2D ( const Pose2D &p ) : position ( p.position ), orientation ( p.orientation ) {};
     Pose2D ( double _x, double _y, double _orientation ) : position ( _x,_y ), orientation ( _orientation ) {};
-    Pose2D ( const ShmFw::Point2D &location, const ShmFw::Point2D &target ){
-      setPose(location, target);
+    Pose2D ( const ShmFw::Point2D &location, const ShmFw::Point2D &target ) {
+        setPose ( location, target );
     };
     std::string getToStringFormat ( const std::string &format ) const {
         char buf[0xFF];
@@ -78,12 +78,23 @@ public:
     bool operator == ( const Pose2D& o ) const {
         return position == o.position && orientation == o.orientation;
     }
-    /** compares with within a tolerance
-     * @param o 
-     * @param tolerance 
+    /** inverts the pose
+     * @param o
+     * @param tolerance
      **/
-    bool equal( const Pose2D& o, double tolerance = 0.0001 ) const {
-         return position.equal(o.position, tolerance) && ((orientation - o.orientation) < tolerance); 
+    Pose2D operator - () const {
+        double invOrientation = -orientation;
+        double ca = cos ( invOrientation ), sa = sin ( invOrientation );
+        double x = ( ca * -position.x ) + ( -sa * -position.y );
+        double y = ( sa * -position.x ) + ( ca * -position.y );
+        return Pose2D ( x, y, invOrientation );
+    }
+    /** compares with within a tolerance
+     * @param o
+     * @param tolerance
+     **/
+    bool equal ( const Pose2D& o, double tolerance = 0.0001 ) const {
+        return position.equal ( o.position, tolerance ) && ( ( orientation - o.orientation ) < tolerance );
     }
     void setPose ( const ShmFw::Point2D &location, const ShmFw::Point2D &target ) {
         double dx = target.x - location.x;
@@ -92,9 +103,9 @@ public:
         orientation = atan2 ( dy, dx );
     }
     /** set the pose
-     * @param x 
-     * @param y 
-     * @param phi (orientation) 
+     * @param x
+     * @param y
+     * @param phi (orientation)
      **/
     void setPose ( const double &x, const double &y, const double &phi ) {
         position.x = x, position.y = y, orientation = phi;
@@ -103,8 +114,8 @@ public:
      * @param src data source
      **/
     template<typename T2>
-    Pose2D& copyFrom ( const T2 &src) {
-        position.copyFrom(src.position);
+    Pose2D& copyFrom ( const T2 &src ) {
+        position.copyFrom ( src.position );
         orientation = src.orientation;
         return *this;
     }
@@ -112,8 +123,8 @@ public:
      * @param des data target
      **/
     template<typename T2>
-    void copyTo( T2 &des ) const {
-        position.copyTo(des.position);
+    void copyTo ( T2 &des ) const {
+        position.copyTo ( des.position );
         des.orientation = orientation;
     }
     /** translational x component
@@ -165,4 +176,5 @@ protected:
 
 };
 #endif //SHARED_MEM_OBJECTS_POSE2D_H
+
 
