@@ -34,10 +34,13 @@
 
 #include <shmfw/objects/vector3.h>
 #include <shmfw/objects/matrix3x3.h>
-#include <boost/graph/graph_concepts.hpp>
+#include <shmfw/objects/transform2d.h>
 
 namespace ShmFw {
 class Quaternion;
+/**
+  * Class to reprecent transforamtions in 3D
+  **/
 class Transform {
 public:
    

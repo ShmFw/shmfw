@@ -40,6 +40,9 @@
 
 namespace ShmFw {
 
+/**
+  * Class to reprecent transforamtions in 2D
+  **/
 class Transform2D : public ShmFw::BaseObject {
 private:
     ShmFw::Matrix3x3<double> M; // Transformation Matrix
