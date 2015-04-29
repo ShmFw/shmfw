@@ -126,13 +126,33 @@ public:
         T dist = sqrt(dx*dx + dy*dy);
         return dist;
     }
-    /** computes distance to line segment 
-     * @see http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
-     * @return distance to line between the segment endpoints or the distance to the nearest endpoints **/
+    /** computes closest point on line segment to a given point **/
     template <typename T2>
     T distanceTo(const cv::Point_<T2> &pt) const {
         return distanceTo(pt.x, pt.y);
     }
+    /** computes closest point on line segment to a given point **/
+    template <typename T2>
+    cv::Point_<T> closestPointTo(const T2 &x, const T2 y){
+	T px = x2()-x1();
+	T py = y2()-y1();
+	T l2 = px*px + py*py;
+	T  u =  ((x - x1()) * px + (y - y1()) * py) / l2;
+	if (u > 1) u = 1;
+	else if (u < 0) u = 0;
+	cv::Point_<T> p;
+	p.x = x1() + u * px;
+	p.y = y1() + u * py;
+	return p;
+    }
+    /** computes distance to line segment 
+     * @see http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+     * @return distance to line between the segment endpoints or the distance to the nearest endpoints **/
+    template <typename T2>
+    cv::Point_<T> closestPointTo(const cv::Point_<T2> &pt){
+	return closestPointTo(pt.x, pt.y);
+    }
+    
     friend std::ostream &operator << ( std::ostream &os, const ShmFw::LineSegment2D<T> &o ) {
         os << "[[" << o.x1() <<  ", " << o.y1() << "], [" << o.x2() << ", " << o.y2() << "] ]";
         return os;
