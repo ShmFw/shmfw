@@ -10,6 +10,7 @@
 #include "shmfw/objects/point.h"
 #include "shmfw/objects/point2d.h"
 #include "shmfw/objects/twist.h"
+#include "shmfw/objects/transform2d.h"
 #include "shmfw/objects/quaternion.h"
 #include "shmfw/serialization/io_file.h"
 

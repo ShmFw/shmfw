@@ -33,9 +33,12 @@ SET(FILES_H
   vector2.h
   vector3.h
   vector4.h
+  transform.h
+  transform2d.h
 )
 SET(FILES_CPP
   mrpt.cpp
+  transform2d.cpp
   grid_map_header.cpp
 )
 

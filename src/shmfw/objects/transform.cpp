@@ -28,27 +28,34 @@
  *   LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY *
  *   WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE           *
  *   POSSIBILITY OF SUCH DAMAGE.                                           *
- ***************************************************************************/
+ *********************************************************a******************/
 
-#include <shmfw/objects/mrpt.h>
+#include <shmfw/objects/transform.h>
+#include <shmfw/objects/quaternion.h>
 
+ShmFw::Transform::Transform ()
+    : basis ( Matrix3x3<double>::EYE() ), origin ( 0,0,0 ) {};
 
-mrpt::poses::CPoint2D& ShmFw::copy ( const ShmFw::Point2D& src, mrpt::poses::CPoint2D &des ) {
-    des.m_coords[0] = src.x, des.m_coords[1] = src.y;
-    return des;
+ShmFw::Transform::Transform ( const Transform &o ) : basis ( o.basis ), origin ( o.origin ) {};
+
+ShmFw::Transform::Transform(const Matrix3x3<double> &_basis, const Vector3<double> _origin)
+    : basis ( _basis ), origin ( _origin ) {};
+    
+ShmFw::Transform::Transform(const Quaternion &_basis, const Vector3<double> _origin)
+    : basis ( _basis.x, _basis.y, _basis.z, _basis.w ), origin ( _origin ) {};
+    
+std::string ShmFw::Transform::getToString() const {
+    char buf[0xFF];
+    sprintf ( buf, "[ [%lf, %lf, %lf], [ %3.2lf, %3.2lf, %3.2lf; %3.2lf, %3.2lf, %3.2lf; %3.2lf, %3.2lf, %3.2lf] ]", origin.x, origin.y, origin.z,
+              basis.m00, basis.m01, basis.m02, basis.m10, basis.m11, basis.m12, basis.m20, basis.m21, basis.m22 );
+    return std::string ( buf );
 }
-
-mrpt::poses::CPoint3D& ShmFw::copy ( const ShmFw::Point& src, mrpt::poses::CPoint3D &des ) {
-    des.m_coords[0] = src.x,  des.m_coords[1] = src.y,  des.m_coords[2] = src.z;
-    return des;
-}
-
-mrpt::poses::CPose2D& ShmFw::copy ( const ShmFw::Pose2D& src, mrpt::poses::CPose2D &des ) {
-    des.m_coords[0] = src.position.x,  des.m_coords[1] = src.position.y,  des.phi() = src.orientation;
-    return des;
-}
-
-mrpt::poses::CPose2D& ShmFw::copy ( const ShmFw::Pose& src, mrpt::poses::CPose2D &des ) {
-    des.m_coords[0] = src.position.x,  des.m_coords[1] = src.position.y,  des.phi() = src.orientation.getAngleYaw();
-    return des;
+bool ShmFw::Transform::setFromString ( const std::string &str ) {
+    int start = str.find ( "[" );
+    int end = str.find_last_of ( "]" );
+    std::string data = str.substr ( start+1, end-1 );
+    boost::erase_all ( data, " " );
+    if ( sscanf ( data.c_str(), "[%lf,%lf,%lf],[%lf,%lf,%lf;%lf,%lf,%lf;%lf,%lf,%lf]", &origin.x, &origin.y, &origin.z,
+                  &basis.m00, &basis.m01, &basis.m02, &basis.m10, &basis.m11, &basis.m12, &basis.m20, &basis.m21, &basis.m22 ) == EOF ) return false;
+    return true;
 }

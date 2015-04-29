@@ -4,7 +4,9 @@
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/managed_mapped_file.hpp>
 #include <algorithm>
+#include <iostream>
 #include <numeric>
+
 
 namespace bi = boost::interprocess;
 namespace bc = boost::container;

@@ -56,6 +56,22 @@ class access;
  */
 namespace ShmFw {
 
+/**
+ * converts angle degrees into rad
+ * @param deg angle in degrees
+ * @return angle in rad
+ **/
+inline double DEG2RAD(double deg){
+  return M_PI * deg / 180.;
+}
+/**
+ * converts angle rad into degrees
+ * @param rad angle in rad
+ * @return angle in degrees
+ **/
+inline double RAD2DEG(double rad){
+  return 180. * rad / M_PI;
+}
 
 namespace bi = boost::interprocess;
 namespace bp = boost::posix_time;
