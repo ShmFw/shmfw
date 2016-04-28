@@ -9,7 +9,7 @@ v4r_geometry
  cmake ..  
  # cmake -D CMAKE_INSTALL_PREFIX=/usr/ ..  # suggested on ubuntu
  # cmake -D CMAKE_BUILD_TYPE=DEBUG ..
- # cmake -D UNIT_TEST=OFF ..
+ # cmake -D UNITTEST=OFF ..
  make
  sudo make install
 ``` 
