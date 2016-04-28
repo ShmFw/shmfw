@@ -58,7 +58,6 @@
 #include "shmfw/objects/model_state.h"
 #include "shmfw/objects/agent_state.h"
 #include "shmfw/objects/grid_map.h"
-#include "shmfw/objects/mrpt.h"
 #include "shmfw/objects/eigen.h"
 
 #include "shmfw/objects/image.h"
@@ -66,6 +65,10 @@
 #include "shmfw/objects/ros/header.h"
 #include "shmfw/objects/ros/laser_scan.h"
 #include "shmfw/objects/ros/visualization_marker.h"
+
+#ifdef USE_MRPT
+  #include "shmfw/objects/mrpt.h"
+#endif
 
 using namespace ShmFw;
 

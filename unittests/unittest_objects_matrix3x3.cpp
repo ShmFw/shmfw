@@ -5,7 +5,7 @@ namespace ShmFwTest{
 
 
 TEST_F ( ObjectTest, serializeMatrix3x3 ) {
-    std::string filename ( "mat3x3.xml" );
+    std::string filename ( "/tmp/mat3x3.xml" );
     ShmFw::Matrix3x3<> var1, var2;
     var1.rand ( -10, 10 );
     ShmFw::write ( filename, var1, ShmFw::FORMAT_XML );
@@ -15,7 +15,7 @@ TEST_F ( ObjectTest, serializeMatrix3x3 ) {
 }
 
 TEST_F ( ObjectTest, operationsMatrix3x3 ) {
-    std::string filename ( "mat3x3.xml" );
+    std::string filename ( "/tmp/mat3x3.xml" );
     ShmFw::Matrix3x3<> varEye, var1, var2, var3;
     varEye.eye();
     var1.rand ( -10, 10 );
@@ -30,7 +30,7 @@ TEST_F ( ObjectTest, operationsMatrix3x3 ) {
 }
 
 TEST_F ( ObjectTest, operationsVectorMatrix3x3 ) {
-    std::string filename ( "mat3x3.xml" );
+    std::string filename ( "/tmp/mat3x3.xml" );
     ShmFw::Matrix3x3<> varEye, mat1, mat2, mat3;
     ShmFw::Vector3<> vec1, vec2;
     varEye.eye();

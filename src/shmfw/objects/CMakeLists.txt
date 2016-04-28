@@ -14,7 +14,6 @@ SET(FILES_H
   matrix3x3.h
   message.h
   model_state.h
-  mrpt.h
   opencv.h
   parameterentry.h
   plane.h
@@ -37,10 +36,20 @@ SET(FILES_H
   transform2d.h
 )
 SET(FILES_CPP
-  mrpt.cpp
   transform2d.cpp
   grid_map_header.cpp
 )
+
+IF(MRPT_FOUND)
+SET(FILES_H
+  ${FILES_H}
+  mrpt.h
+)
+SET(FILES_CPP
+  ${FILES_CPP}
+  mrpt.cpp
+)
+ENDIF()
 
 add_library(shmfw_objects SHARED ${FILES_H} ${FILES_CPP})
 target_link_libraries(shmfw_objects ${MRPT_LIBS} ${OpenCV_LIBRARIES})

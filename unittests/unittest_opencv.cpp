@@ -58,7 +58,7 @@ protected:
 };
 
 TEST_F ( OpenCVTest, serializeCVPoint ) {
-    std::string filename ( "cvPoint.xml" );
+    std::string filename ( "/tmp/cvPoint.xml" );
     cv::Point a(rand(),rand()), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
@@ -66,7 +66,7 @@ TEST_F ( OpenCVTest, serializeCVPoint ) {
 }
 
 TEST_F ( OpenCVTest, serializeCVPoint2f ) {
-    std::string filename ( "cvPoint2f.xml" );
+    std::string filename ( "/tmp/cvPoint2f.xml" );
     cv::Point2f a(rand_01(),rand_01()), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
@@ -75,28 +75,28 @@ TEST_F ( OpenCVTest, serializeCVPoint2f ) {
 
 
 TEST_F ( OpenCVTest, serializeCVPoint2d ) {
-    std::string filename ( "cvPoint2d.xml" );
+    std::string filename ( "/tmp/cvPoint2d.xml" );
     cv::Point2d a(rand_01(),rand_01()), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
     EXPECT_EQ ( a, b );
 }
 TEST_F ( OpenCVTest, serializeCVRect ) {
-    std::string filename ( "cvRect.xml" );
+    std::string filename ( "/tmp/cvRect.xml" );
     cv::Rect a(rand(),rand(), rand(),rand()), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
     EXPECT_EQ ( a, b );
 }
 TEST_F ( OpenCVTest, serializeCVRectf ) {
-    std::string filename ( "cvRectf.xml" );
+    std::string filename ( "/tmp/cvRectf.xml" );
     cv::Rect_<float> a(rand_01(),rand_01(), rand_01(),rand_01()), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
     EXPECT_EQ ( a, b );
 }
 TEST_F ( OpenCVTest, serializeCVRectd ) {
-    std::string filename ( "cvRectd.xml" );
+    std::string filename ( "/tmp/cvRectd.xml" );
     cv::Rect_<double> a(rand_01(),rand_01(), rand_01(),rand_01()), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
@@ -104,7 +104,7 @@ TEST_F ( OpenCVTest, serializeCVRectd ) {
 }
 
 TEST_F ( OpenCVTest, serializeCVSize ) {
-    std::string filename ( "cvSize.xml" );
+    std::string filename ( "/tmp/cvSize.xml" );
     cv::Size a(rand_01(),rand_01()), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
@@ -112,7 +112,7 @@ TEST_F ( OpenCVTest, serializeCVSize ) {
 }
 
 TEST_F ( OpenCVTest, serializeCVSizef ) {
-    std::string filename ( "cvSizef.xml" );
+    std::string filename ( "/tmp/cvSizef.xml" );
     cv::Size_<float> a(rand_01(),rand_01()), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
@@ -120,7 +120,7 @@ TEST_F ( OpenCVTest, serializeCVSizef ) {
 }
 
 TEST_F ( OpenCVTest, serializeCVSized ) {
-    std::string filename ( "cvSized.xml" );
+    std::string filename ( "/tmp/cvSized.xml" );
     cv::Size_<double> a(rand_01(),rand_01()), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
@@ -129,7 +129,7 @@ TEST_F ( OpenCVTest, serializeCVSized ) {
 
 
 TEST_F ( OpenCVTest, serializeCVRotatedRect ) {
-    std::string filename ( "cvRotatedRect.xml" );
+    std::string filename ( "/tmp/cvRotatedRect.xml" );
     cv::RotatedRect a(cv::Point2f(rand_01(),rand_01()), cv::Size2f(rand_01(), rand_01()), rand_01()), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);

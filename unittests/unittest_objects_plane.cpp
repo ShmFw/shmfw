@@ -15,7 +15,7 @@ TEST_F ( ObjectTest, serializeToStringPlaneEquation ) {
 */
 
 TEST_F ( ObjectTest, serializePlaneEquation ) {
-    std::string filename ( "planeEquation.xml" );
+    std::string filename ( "/tmp/planeEquation.xml" );
     ShmFw::PlaneEquation<> var1, var2;
     var1.rand ( -10, 10 );
     ShmFw::write ( filename, var1, ShmFw::FORMAT_XML );
@@ -25,7 +25,7 @@ TEST_F ( ObjectTest, serializePlaneEquation ) {
 }
 
 TEST_F ( ObjectTest, serializePlane ) {
-    std::string filename ( "plane.xml" );
+    std::string filename ( "/tmp/plane.xml" );
     ShmFw::Plane<> var1, var2;
     var1.rand ( -10, 10 );
     ShmFw::write ( filename, var1, ShmFw::FORMAT_XML );

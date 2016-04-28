@@ -39,7 +39,7 @@ TEST_F ( ObjectTest, operationsLineSegment ) {
 
 
 TEST_F ( ObjectTest, serializeLineSegment ) {
-    std::string filename ( "linesegment.xml" );
+    std::string filename ( "/tmp/linesegment.xml" );
     cv::Point_<double> p1(0,0), p2(1,1);
     ShmFw::LineSegment2D<double> a(p1,p2), b;
     ShmFw::write(filename, a);

@@ -4,7 +4,7 @@
 namespace ShmFwTest{
 
 TEST_F ( ObjectTest, serializeTwistXML ) {
-    std::string filename ( "twist.xml" );
+    std::string filename ( "/tmp/twist.xml" );
     ShmFw::Twist a(randf(), randf(), randf(), randf(), randf(), randf());
     ShmFw::Twist b;
     ShmFw::write(filename, a);
@@ -12,7 +12,7 @@ TEST_F ( ObjectTest, serializeTwistXML ) {
     EXPECT_EQ ( a, b );
 }
 TEST_F ( ObjectTest, serializeTwistTXT ) {
-    std::string filename ( "twist.txt" );
+    std::string filename ( "/tmp/twist.txt" );
     ShmFw::Twist a(randf(), randf(), randf(), randf(), randf(), randf());
     ShmFw::Twist b;
     ShmFw::write(filename, a);

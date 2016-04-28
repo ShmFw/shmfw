@@ -325,7 +325,7 @@ TEST_F ( ShmTest, TestSignals ) {
 }
 
 TEST_F ( ShmTest, TestSerializeXML ) {
-    std::string filename ( "unittest.txt" );
+    std::string filename ( "/tmp/unittest.txt" );
     std::string name1 ( "myVar1" );
     std::string name2 ( "myVar2" );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
@@ -341,7 +341,7 @@ TEST_F ( ShmTest, TestSerializeXML ) {
 }
 
 TEST_F ( ShmTest, TestSerializeTXT ) {
-    std::string filename ( "unittest.txt" );
+    std::string filename ( "/tmp/unittest.txt" );
     std::string name1 ( "myVar1" );
     std::string name2 ( "myVar2" );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
@@ -365,7 +365,7 @@ TEST_F ( ShmTest, TestSerializeTXT ) {
 }
 
 TEST_F ( ShmTest, TestSerializeBinary ) {
-    std::string filename ( "unittest.bin" );
+    std::string filename ( "/tmp/unittest.bin" );
     std::string name1 ( "myVar1" );
     std::string name2 ( "myVar2" );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
@@ -389,7 +389,7 @@ TEST_F ( ShmTest, TestSerializeBinary ) {
 }
 
 TEST_F ( ShmTest, TestSerializeVectorXML ) {
-    std::string filename ( "points.xml" );
+    std::string filename ( "/tmp/points.xml" );
     std::string name1 ( "myVector1" );
     std::string name2 ( "myVector2" );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
@@ -407,7 +407,7 @@ TEST_F ( ShmTest, TestSerializeVectorXML ) {
 }
 
 TEST_F ( ShmTest, TestSerializeDequeXML ) {
-    std::string filename ( "pointsDeque.xml" );
+    std::string filename ( "/tmp/pointsDeque.xml" );
     std::string name1 ( "myDeque1" );
     std::string name2 ( "myDeque2" );
     ShmFw::HandlerPtr shmHdl = ShmFw::Handler::create ( shmSegmentName_, shmSegmentSize_ );
@@ -449,7 +449,7 @@ TEST_F ( ShmTest, TestInfoTextShm ) {
 }
 
 TEST_F ( ShmTest, TestInfoTextSerialization ) {
-    std::string filename ( "v0.xml" );
+    std::string filename ( "/tmp/v0.xml" );
     std::string name0 ( "v0" );
     std::string name1 ( "v1" );
     std::string infoA ( "hallo world" );

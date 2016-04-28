@@ -30,6 +30,8 @@
  *   POSSIBILITY OF SUCH DAMAGE.                                           *
  ***************************************************************************/
 
+#ifdef USE_MRPT
+
 #ifndef SHARED_MEM_MRPT
 #define SHARED_MEM_MRPT
 
@@ -252,4 +254,5 @@ inline ShmFw::Pose& operator<< ( ShmFw::Pose &des, const mrpt::poses::CPose3D &s
 }
 
 #endif //SHARED_MEM_MRPT
+#endif //USE_MRPT
 

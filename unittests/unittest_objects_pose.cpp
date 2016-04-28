@@ -14,7 +14,7 @@ TEST_F ( ObjectTest, convertPose2DtoPose3D ) {
 }
 
 TEST_F ( ObjectTest, serializePose ) {
-    std::string filename ( "unittestPose.xml" );
+    std::string filename ( "/tmp/unittestPose.xml" );
     ShmFw::Pose<double> p1, p2;    
     p1.position = ShmFw::Point<double>(::rand(),::rand(),::rand());
     p1.orientation = ShmFw::Quaternion<double>(0,0,0,1);
@@ -24,7 +24,7 @@ TEST_F ( ObjectTest, serializePose ) {
     EXPECT_EQ ( p1, p2 );
 }
 TEST_F ( ObjectTest, serializePoseStamped ) {
-    std::string filename ( "unittestPoseStamped.xml" );
+    std::string filename ( "/tmp/unittestPoseStamped.xml" );
     ShmFw::PoseStamped<double> p1, p2;    
     p1.position = ShmFw::Point<double>(::rand(),::rand(),::rand());
     p1.orientation = ShmFw::Quaternion<double>(0,0,0,1);
@@ -35,7 +35,7 @@ TEST_F ( ObjectTest, serializePoseStamped ) {
     //EXPECT_EQ ( p1, p1 );
 }
 TEST_F ( ObjectTest, serializePose2D ) {
-    std::string filename ( "unittestPose2D.xml" );
+    std::string filename ( "/tmp/unittestPose2D.xml" );
     ShmFw::Pose2D<double> p1, p2;    
     p1.position = ShmFw::Point2D<double>(::rand(),::rand());
     p1.orientation = ::rand();
@@ -45,7 +45,7 @@ TEST_F ( ObjectTest, serializePose2D ) {
     EXPECT_EQ ( p1, p2 );
 }
 TEST_F ( ObjectTest, serializePose2DStamped ) {
-    std::string filename ( "unittestPose2DStamped.xml" );
+    std::string filename ( "/tmp/unittestPose2DStamped.xml" );
     ShmFw::Pose2DStamped<double> p1, p2;    
     p1.position = ShmFw::Point2D<double>(::rand(),::rand());
     p1.orientation = ::rand();

@@ -17,7 +17,7 @@ TEST_F ( ObjectTest, serializeToStringVec ) {
 
 TEST_F ( ObjectTest, serializeVec) {
     static const unsigned int N = 10;
-    std::string filename ( "vec.xml" );
+    std::string filename ( "/tmp/vec.xml" );
     ShmFw::Vec<float, N> var1, var2;
     var1.rand ( -10, 10 );
     ShmFw::write ( filename, var1, ShmFw::FORMAT_XML );

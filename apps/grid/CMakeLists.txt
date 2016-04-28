@@ -12,7 +12,7 @@ _install_binary (shmfw-grid_view_as_plot)
 
 ENDIF(OpenCV_FOUND)
 
-if(MATHGL_FOUND)
+IF(MATHGL_FOUND)
 
 add_executable(shmfw-grid_view grid_view.cpp)
 target_link_libraries(shmfw-grid_view shmfw_objects shmfw_core -pthread ${MATHGL_LIBRARIES})

@@ -12,7 +12,7 @@ TEST_F ( ObjectTest, serializeToStringVector3 ) {
 }
 
 TEST_F ( ObjectTest, serializeVector3 ) {
-    std::string filename ( "vec3.xml" );
+    std::string filename ( "/tmp/vec3.xml" );
     ShmFw::Vector3<> var1, var2;
     var1.rand ( -10, 10 );
     ShmFw::write ( filename, var1, ShmFw::FORMAT_XML );

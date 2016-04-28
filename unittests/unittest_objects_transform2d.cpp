@@ -5,7 +5,7 @@
 namespace ShmFwTest {
 
 TEST_F ( ObjectTest, Transform2DSerializeXML ) {
-    std::string filename ( "Transform2D.xml" );
+    std::string filename ( "/tmp/Transform2D.xml" );
     ShmFw::Transform2D a ( randf(), randf(), randf() );
     ShmFw::Transform2D b;
     ShmFw::write ( filename, a );
@@ -13,7 +13,7 @@ TEST_F ( ObjectTest, Transform2DSerializeXML ) {
     EXPECT_EQ ( a, b );
 }
 TEST_F ( ObjectTest, Transform2DSerializeTXT ) {
-    std::string filename ( "Transform2D.txt" );
+    std::string filename ( "/tmp/Transform2D.txt" );
     ShmFw::Transform2D a ( randf(), randf(), randf() );
     ShmFw::Transform2D b;
     ShmFw::write ( filename, a );

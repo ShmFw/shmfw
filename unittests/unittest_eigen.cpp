@@ -74,49 +74,49 @@ TEST_F ( EigenTest, Matrix3d ) {
     shmHdl->removeSegment();
 }
 TEST_F ( EigenTest, serializeVector3dXML ) {
-    std::string filename ( "Vector3d.xml" );
+    std::string filename ( "/tmp/Vector3d.xml" );
     Eigen::Vector3d a (rand_01(), rand_01(), rand_01()), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
     EXPECT_EQ ( a, b );
 }
 TEST_F ( EigenTest, serializeMatrix3dXML ) {
-    std::string filename ( "Matrix3d.xml" );
+    std::string filename ( "/tmp/Matrix3d.xml" );
     Eigen::Matrix3d a = Eigen::Matrix3d::Random(), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
     EXPECT_EQ ( a, b );
 }
 TEST_F ( EigenTest, serializeVector3dBin ) {
-    std::string filename ( "Vector3d.bin" );
+    std::string filename ( "/tmp/Vector3d.bin" );
     Eigen::Vector3d a (rand_01(), rand_01(), rand_01()), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
     EXPECT_EQ ( a, b );
 }
 TEST_F ( EigenTest, serializeMatrix3dBin ) {
-    std::string filename ( "Matrix3d.bin" );
+    std::string filename ( "/tmp/Matrix3d.bin" );
     Eigen::Matrix3d a = Eigen::Matrix3d::Random(), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
     EXPECT_EQ ( a, b );
 }
 TEST_F ( EigenTest, serializeVector3dTxt ) {
-    std::string filename ( "Vector3d.txt" );
+    std::string filename ( "/tmp/Vector3d.txt" );
     Eigen::Vector3d a (rand_01(), rand_01(), rand_01()), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
     EXPECT_EQ ( a, b );
 }
 TEST_F ( EigenTest, serializeMatrix3dTxt ) {
-    std::string filename ( "Matrix3d.txt" );
+    std::string filename ( "/tmp/Matrix3d.txt" );
     Eigen::Matrix3d a = Eigen::Matrix3d::Random(), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
     EXPECT_EQ ( a, b );
 }
 TEST_F ( EigenTest, serializeVectorXdXML ) {
-    std::string filename ( "VectorXd.xml" );
+    std::string filename ( "/tmp/VectorXd.xml" );
     Eigen::VectorXd a (3), b;
     a << rand_01(), rand_01(), rand_01();;
     ShmFw::write(filename, a);
@@ -124,14 +124,14 @@ TEST_F ( EigenTest, serializeVectorXdXML ) {
     EXPECT_EQ ( a, b );
 }
 TEST_F ( EigenTest, serializeMatrixXdXML ) {
-    std::string filename ( "MatrixXd.xml" );
+    std::string filename ( "/tmp/MatrixXd.xml" );
     Eigen::MatrixXd a = Eigen::MatrixXd::Random ( 3,3 ), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
     EXPECT_EQ ( a, b );
 }
 TEST_F ( EigenTest, serializeVectorXdBin ) {
-    std::string filename ( "VectorXd.bin" );
+    std::string filename ( "/tmp/VectorXd.bin" );
     Eigen::VectorXd a (3), b;
     a << rand_01(), rand_01(), rand_01();;
     ShmFw::write(filename, a);
@@ -139,14 +139,14 @@ TEST_F ( EigenTest, serializeVectorXdBin ) {
     EXPECT_EQ ( a, b );
 }
 TEST_F ( EigenTest, serializeMatrixXdBin ) {
-    std::string filename ( "MatrixXd.bin" );
+    std::string filename ( "/tmp/MatrixXd.bin" );
     Eigen::MatrixXd a = Eigen::MatrixXd::Random ( 3,3 ), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);
     EXPECT_EQ ( a, b );
 }
 TEST_F ( EigenTest, serializeVectorXdTxt ) {
-    std::string filename ( "VectorXd.txt" );
+    std::string filename ( "/tmp/VectorXd.txt" );
     Eigen::VectorXd a (3), b;
     a << rand_01(), rand_01(), rand_01();;
     ShmFw::write(filename, a);
@@ -154,7 +154,7 @@ TEST_F ( EigenTest, serializeVectorXdTxt ) {
     EXPECT_EQ ( a, b );
 }
 TEST_F ( EigenTest, serializeMatrixXdTxt ) {
-    std::string filename ( "MatrixXd.txt" );
+    std::string filename ( "/tmp/MatrixXd.txt" );
     Eigen::MatrixXd a = Eigen::MatrixXd::Random ( 3,3 ), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);

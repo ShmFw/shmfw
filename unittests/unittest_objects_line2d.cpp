@@ -25,7 +25,7 @@ TEST_F ( ObjectTest, operationsLineIntersection ) {
 
 
 TEST_F ( ObjectTest, serializeLine ) {
-    std::string filename ( "line.xml" );
+    std::string filename ( "/tmp/line.xml" );
     ShmFw::Line2D<double> a(rand_01(),rand_01(),rand_01(),rand_01()), b;
     ShmFw::write(filename, a);
     ShmFw::read (filename, b);

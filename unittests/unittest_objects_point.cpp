@@ -4,7 +4,7 @@
 namespace ShmFwTest{
 
 TEST_F ( ObjectTest, serializePoint ) {
-    std::string filename ( "planePoint.xml" );
+    std::string filename ( "/tmp/planePoint.xml" );
     ShmFw::Point p1, p2;
     p1.x = rand(), p1.y = rand(), p1.z = rand();
     ShmFw::write(filename, p1);
