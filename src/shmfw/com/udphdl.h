@@ -53,10 +53,10 @@ using boost::asio::ip::udp;
 ///Simple class to handle UDP messages
 template<typename T>
 class UDPHdl {
-    typedef boost::shared_ptr<boost::thread> ThreadPtr;
-    typedef boost::shared_ptr<udp::socket> SocketPtr;
-    typedef boost::shared_ptr<udp::resolver::query> QueryPtr;
-    typedef boost::shared_ptr<udp::resolver> ResolverPtr;
+    typedef std::shared_ptr<boost::thread> ThreadPtr;
+    typedef std::shared_ptr<udp::socket> SocketPtr;
+    typedef std::shared_ptr<udp::resolver::query> QueryPtr;
+    typedef std::shared_ptr<udp::resolver> ResolverPtr;
 public:
     enum State {
         NA = 0,

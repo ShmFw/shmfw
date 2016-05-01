@@ -86,7 +86,7 @@ typedef Allocator<char> CharAllocator;
 typedef bi::basic_string<char, std::char_traits<char> , CharAllocator > CharString;
 
 class Handler;
-typedef boost::shared_ptr<Handler> HandlerPtr;
+typedef std::shared_ptr<Handler> HandlerPtr;
 
 class HeaderShared {
 public:
@@ -389,7 +389,7 @@ public:
     virtual void destroy() const;
 };
 
-typedef boost::shared_ptr<Header> HeaderPtr;
+typedef std::shared_ptr<Header> HeaderPtr;
 
 
 };

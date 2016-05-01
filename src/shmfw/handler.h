@@ -55,10 +55,10 @@ namespace ShmFw {
   
 namespace bi = boost::interprocess;
 namespace bc = boost::container;
-typedef boost::shared_ptr<bi::managed_shared_memory> ShmPtr;
+typedef std::shared_ptr<bi::managed_shared_memory> ShmPtr;
 
 class Handler;
-typedef boost::shared_ptr<Handler> HandlerPtr;
+typedef std::shared_ptr<Handler> HandlerPtr;
 
 class Handler {
 public:

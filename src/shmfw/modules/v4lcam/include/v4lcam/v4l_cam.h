@@ -43,7 +43,7 @@ public:
     static const int LOAD = 1;
     static const int SAVE = 2;
     typedef int FD;
-    typedef boost::shared_ptr<v4l2_control> v4l2_controlPtr;
+    typedef std::shared_ptr<v4l2_control> v4l2_controlPtr;
     class ControlEntry
     {
     public:
@@ -64,7 +64,7 @@ public:
         bool hasErrorMsg() const;
         bool hasInfoMsg() const;
     };
-    typedef boost::shared_ptr<ControlEntry> ControlEntryPtr;
+    typedef std::shared_ptr<ControlEntry> ControlEntryPtr;
     V4LCam();
     ~V4LCam();
     bool grab();

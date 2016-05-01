@@ -68,9 +68,9 @@ struct Prarmeters {
 };
 
 Prarmeters params;
-boost::shared_ptr< ShmFw::Handler > pShmHdl;
-std::vector< boost::shared_ptr< ShmFw::Vector<double> > > shmData;
-boost::shared_ptr< ShmFw::UDP > pUDP;
+std::shared_ptr< ShmFw::Handler > pShmHdl;
+std::vector< std::shared_ptr< ShmFw::Vector<double> > > shmData;
+std::shared_ptr< ShmFw::UDP > pUDP;
 unsigned int message_count;
 
 
@@ -151,16 +151,16 @@ void print_message ( std::string &msg ) {
     }
 }
 
-void incomming ( boost::shared_ptr<std::string> &msgPtr ) {
+void incomming ( std::shared_ptr<std::string> &msgPtr ) {
     message_count++;
     boost::iostreams::basic_array_source<char> device ( msgPtr->data(), msgPtr->size() );
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s ( device );
 
     print_message ( *msgPtr );
-    boost::shared_ptr< boost::archive::xml_iarchive> xmlPtr;
-    boost::shared_ptr< boost::archive::binary_iarchive> binaryPtr;
-    if ( params.message_format == 0 )  xmlPtr = boost::shared_ptr< boost::archive::xml_iarchive> ( new boost::archive::xml_iarchive ( s ) );
-    else if ( params.message_format == 1 )  binaryPtr = boost::shared_ptr< boost::archive::binary_iarchive> ( new boost::archive::binary_iarchive ( s ) );
+    std::shared_ptr< boost::archive::xml_iarchive> xmlPtr;
+    std::shared_ptr< boost::archive::binary_iarchive> binaryPtr;
+    if ( params.message_format == 0 )  xmlPtr = std::shared_ptr< boost::archive::xml_iarchive> ( new boost::archive::xml_iarchive ( s ) );
+    else if ( params.message_format == 1 )  binaryPtr = std::shared_ptr< boost::archive::binary_iarchive> ( new boost::archive::binary_iarchive ( s ) );
 
     for ( unsigned int i = 0; i < shmData.size(); i++ ) {
         if ( params.message_format == 0 ) ( *xmlPtr ) >> boost::serialization::make_nvp ( shmData[i]->name().c_str(), *shmData[i] );
@@ -186,11 +186,11 @@ int main ( int argc, char *argv[] ) {
     using boost::asio::ip::udp;
     program_options ( argc, argv, params );
 
-    pShmHdl = boost::shared_ptr< ShmFw::Handler > ( new ShmFw::Handler ( params.shm_memory_name, params.shm_memory_size ) );
+    pShmHdl = std::shared_ptr< ShmFw::Handler > ( new ShmFw::Handler ( params.shm_memory_name, params.shm_memory_size ) );
     for ( unsigned int i = 0; i < params.variable_names.size(); i++ ) {
-        shmData.push_back ( boost::shared_ptr< ShmFw::Vector<double> > ( new ShmFw::Vector<double> ( params.variable_names[i], *pShmHdl ) ) );
+        shmData.push_back ( std::shared_ptr< ShmFw::Vector<double> > ( new ShmFw::Vector<double> ( params.variable_names[i], *pShmHdl ) ) );
     }
-    pUDP = boost::shared_ptr< ShmFw::UDP > ( new ShmFw::UDP() );
+    pUDP = std::shared_ptr< ShmFw::UDP > ( new ShmFw::UDP() );
     message_count = 0;
 
     try {
@@ -216,10 +216,10 @@ int main ( int argc, char *argv[] ) {
                 boost::iostreams::back_insert_device<std::string> inserter ( msg );
                 boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> > os ( inserter );
 				
-                boost::shared_ptr< boost::archive::xml_oarchive> xmlPtr;
-                boost::shared_ptr< boost::archive::binary_oarchive> binaryPtr;
-                if ( params.message_format == 0 )  xmlPtr = boost::shared_ptr< boost::archive::xml_oarchive> ( new boost::archive::xml_oarchive ( os ) );
-                else if ( params.message_format == 1 )  binaryPtr = boost::shared_ptr< boost::archive::binary_oarchive> ( new boost::archive::binary_oarchive ( os ) );
+                std::shared_ptr< boost::archive::xml_oarchive> xmlPtr;
+                std::shared_ptr< boost::archive::binary_oarchive> binaryPtr;
+                if ( params.message_format == 0 )  xmlPtr = std::shared_ptr< boost::archive::xml_oarchive> ( new boost::archive::xml_oarchive ( os ) );
+                else if ( params.message_format == 1 )  binaryPtr = std::shared_ptr< boost::archive::binary_oarchive> ( new boost::archive::binary_oarchive ( os ) );
 
                 for ( unsigned int i = 0; i < shmData.size(); i++ ) {
                     if ( params.message_format == 0 ) ( *xmlPtr ) << boost::serialization::make_nvp ( shmData[i]->name().c_str(), *shmData[i] );

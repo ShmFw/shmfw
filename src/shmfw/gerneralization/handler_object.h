@@ -42,7 +42,7 @@ namespace ShmFw {
 
 class HandlerObject;
 
-typedef boost::shared_ptr<HandlerObject> HandlerObjectPtr;
+typedef std::shared_ptr<HandlerObject> HandlerObjectPtr;
 
 /**
  * class to enable polymorphismus on shared objects 

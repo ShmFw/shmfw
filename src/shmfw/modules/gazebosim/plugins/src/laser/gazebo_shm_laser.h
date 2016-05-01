@@ -63,8 +63,8 @@ namespace gazebo
     private: sensors::RaySensorPtr parentSensor;
     
     private: void OnNewLaserScans();
-    boost::shared_ptr<ShmFw::Handler> shmHdl;
-    boost::shared_ptr< ShmFw::Alloc<ShmFw::ros::LaserScan> > shmScan ;
+    std::shared_ptr<ShmFw::Handler> shmHdl;
+    std::shared_ptr< ShmFw::Alloc<ShmFw::ros::LaserScan> > shmScan ;
     boost::posix_time::ptime tstamp;        
 
   };

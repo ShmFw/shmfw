@@ -77,7 +77,7 @@ public:
     static HandlerParameterBase* open(const std::string &name, HandlerPtr &shmHdl);
 };
 
-typedef boost::shared_ptr<HandlerParameterBase> HandlerParameterBasePtr;
+typedef std::shared_ptr<HandlerParameterBase> HandlerParameterBasePtr;
 
 
 template <class T>

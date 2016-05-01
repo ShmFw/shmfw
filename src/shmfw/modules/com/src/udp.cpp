@@ -112,7 +112,7 @@ void UDP::handle_receive_from ( const boost::system::error_code& error, size_t b
    
     if  ( !error && bytes_recvd > 0 ){
         mutex_.lock();
-        boost::shared_ptr<std::string> msg ( new std::string (receiveBuffer_, bytes_recvd ) );
+        std::shared_ptr<std::string> msg ( new std::string (receiveBuffer_, bytes_recvd ) );
         while ( msg_queue_.size() > max_queue ) {
             msg_queue_.pop_back();
         }
@@ -132,7 +132,7 @@ void UDP::handle_receive_from ( const boost::system::error_code& error, size_t b
  * @param msg copy of the dequed object
  * @param front on false it will deque the oldest message
  */
-int UDP::deque ( boost::shared_ptr<std::string> &msgPtr,  bool front ) {
+int UDP::deque ( std::shared_ptr<std::string> &msgPtr,  bool front ) {
     boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lock ( mutex_ );
     if ( msg_queue_.size() > 0 ) {
         if ( front ) {

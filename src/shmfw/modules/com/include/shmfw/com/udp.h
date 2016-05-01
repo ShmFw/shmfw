@@ -54,12 +54,12 @@ namespace ShmFw {
 using boost::asio::ip::udp;
 ///Simple class to handle UDP messages
 class UDP {
-    typedef boost::shared_ptr<boost::thread> ThreadPtr;
-    typedef boost::shared_ptr<udp::socket> SocketPtr;
-    typedef boost::shared_ptr<udp::resolver::query> QueryPtr;
-    typedef boost::shared_ptr<udp::resolver> ResolverPtr;
-    typedef boost::shared_ptr<std::stringstream> StringStreamPtr;
-    typedef boost::shared_ptr<std::string> StringPtr;
+    typedef std::shared_ptr<boost::thread> ThreadPtr;
+    typedef std::shared_ptr<udp::socket> SocketPtr;
+    typedef std::shared_ptr<udp::resolver::query> QueryPtr;
+    typedef std::shared_ptr<udp::resolver> ResolverPtr;
+    typedef std::shared_ptr<std::stringstream> StringStreamPtr;
+    typedef std::shared_ptr<std::string> StringPtr;
 public:
     enum State {
         NA = 0,
@@ -122,7 +122,7 @@ public:
      * @param msg copy of the dequed object
      * @param front on false it will deque the oldest message
      */
-    int deque ( boost::shared_ptr<std::string> &msgPtr, bool front = true );
+    int deque ( std::shared_ptr<std::string> &msgPtr, bool front = true );
 
     /**
      * Returns the configuration send or receiver
@@ -137,7 +137,7 @@ public:
      * @param f
      * @code udp_.setCallback(boost::bind(&CDS::Crane::Receiver::receiveCallback, this, _1));
      */
-    void setCallback ( boost::function<void ( boost::shared_ptr<std::string> &msgPtr ) > f ) {
+    void setCallback ( boost::function<void ( std::shared_ptr<std::string> &msgPtr ) > f ) {
         use_callback_ = true;
         callback_ = f;
     }
@@ -165,11 +165,11 @@ private:
     void *pReceiveFncPtr_;
     char receiveBuffer_[max_length];
     ThreadPtr thread_receiverPtr_;
-    std::deque< boost::shared_ptr<std::string> > msg_queue_;
+    std::deque< std::shared_ptr<std::string> > msg_queue_;
     unsigned int max_queue;
     boost::interprocess::interprocess_mutex mutex_; /// used to prevent concurrent access to the data
     bool use_callback_;
-    boost::function<void ( boost::shared_ptr<std::string>& ) > callback_;
+    boost::function<void ( std::shared_ptr<std::string>& ) > callback_;
 
 };
 };

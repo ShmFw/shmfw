@@ -37,7 +37,7 @@
 
 namespace ShmFw {
   class Handler;
-  typedef boost::shared_ptr<Handler> HandlerPtr;
+  typedef std::shared_ptr<Handler> HandlerPtr;
   template <class> class Var;
   template <class> class Deque;
   template <class> class Vector;

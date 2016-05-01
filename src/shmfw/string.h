@@ -41,7 +41,7 @@
 namespace ShmFw {
 
 typedef bi::allocator<char, bi::managed_shared_memory::segment_manager>   CharAllocator;
-typedef boost::shared_ptr<CharAllocator >   CharAllocatorPtr;
+typedef std::shared_ptr<CharAllocator >   CharAllocatorPtr;
 typedef bi::basic_string<char, std::char_traits<char> , CharAllocator > CharString;
 
 class StringAnonymous : public ShmFw::CharString{
