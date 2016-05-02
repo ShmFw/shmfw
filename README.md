@@ -2,6 +2,15 @@ v4r_geometry
 =====
 
  
+## PREINSTALL:
+### On Ubuntu
+``` 
+sudo apt-get install cmake
+sudo apt-get install libboost-all-dev
+sudo apt-get install libopencv-dev
+sudo apt-get install libeigen3-dev
+
+``` 
 ## INSTALL:
 ``` 
  mkdir build
@@ -13,6 +22,7 @@ v4r_geometry
  make
  sudo make install
 ``` 
+
 
 ## UNINSTALL:
 ``` 
