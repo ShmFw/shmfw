@@ -9,6 +9,7 @@ sudo apt-get install cmake
 sudo apt-get install libboost-all-dev
 sudo apt-get install libopencv-dev
 sudo apt-get install libeigen3-dev
+sudo apt-get install libncurses5-dev
 
 ``` 
 ## INSTALL:
