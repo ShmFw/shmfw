@@ -31,13 +31,19 @@ sudo make uninstall
 ```
  
 ## UNITTESTING:
-### On Ubuntu
+### On Ubuntu 14.04
 The ubuntu package management installs only gtest sources, because of this you have to compile gtest first.
 http://askubuntu.com/questions/145887/why-no-library-files-installed-for-google-test
 ``` 
 sudo apt-get install libgtest-dev
 cd /usr/src/gtest && sudo cmake -DBUILD_SHARED_LIBS=ON . && sudo make && sudo mv libg* /usr/lib/
 ``` 
+### On Ubuntu 16.04
+The logging module is not working as well as the grid apps. 
+``` 
+cmake -DAPPS_GRID=OFF
+``` 
+
 ## Doxygen
 For doxygen run
 ``` 
