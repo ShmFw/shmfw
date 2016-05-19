@@ -140,7 +140,7 @@ void dequeLog ( ShmFw::Log &log, const Prarmeters &params ) {
         msgs.clear();
         log.lock();
 #if BOOST_VERSION / 100 % 1000 <= 55
-        for ( ShmFw::Log::iterator it = log->begin(); it != log->end(); it++ ) {
+        for ( ShmFw::Log::Iterator it = log->begin(); it != log->end(); it++ ) {
 	    //source filter
             if ( (params.source < 0) || (params.source == ( *it ).getSource())) {
                 msgs.push_back ( *it );
