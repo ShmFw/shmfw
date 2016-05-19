@@ -37,6 +37,7 @@
 
 #include <boost/serialization/deque.hpp>
 #include <boost/interprocess/containers/deque.hpp>
+#include <boost/serialization/collections_load_imp.hpp>
 
 namespace boost { 
 namespace serialization {

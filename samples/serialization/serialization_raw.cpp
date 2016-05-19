@@ -4,6 +4,7 @@
 #include <boost/archive/xml_oarchive.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 #include <shmfw/serialization/interprocess_vector.hpp>
+#include <fstream>
 
 typedef boost::interprocess::allocator<int, boost::interprocess::managed_shared_memory::segment_manager> ShmemAllocator;
 typedef boost::interprocess::vector<int, ShmemAllocator> MyVector;

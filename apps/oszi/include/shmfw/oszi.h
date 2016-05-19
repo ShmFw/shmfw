@@ -34,6 +34,7 @@
 #define SHARED_MEM_MODULE_OSZI_H
 
 #include <iostream>
+#include <fstream>
 #include <opencv/cv.h>
 #include <shmfw/vector.h>
 #include <shmfw/serialization/vector.h>

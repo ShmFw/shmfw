@@ -36,6 +36,7 @@
 
 
 #include <shmfw/handler.h>
+#include <fstream>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
 
