@@ -1,4 +1,4 @@
-v4r_geometry
+ShmFw
 =====
 
  
@@ -10,6 +10,7 @@ sudo apt-get install libboost-all-dev
 sudo apt-get install libopencv-dev
 sudo apt-get install libeigen3-dev
 sudo apt-get install libncurses5-dev
+sudo apt-get install libmgl-dev
 
 ``` 
 ## INSTALL:
@@ -31,7 +32,7 @@ sudo make uninstall
 ```
  
 ## UNITTESTING:
-### On Ubuntu 14.04
+### On Ubuntu 14.04/16.04
 The ubuntu package management installs only gtest sources, because of this you have to compile gtest first.
 http://askubuntu.com/questions/145887/why-no-library-files-installed-for-google-test
 ``` 
