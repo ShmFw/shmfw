@@ -51,7 +51,7 @@ There are issus reported if ROS is sourced and the ros-*distribo*-opencv is inst
 You mid get an error on some OpenCV includes.
 
 **Solution:**
-combile ShmFw before sourcing ros.
+combile ShmFw before sourcing ros. You mid have to edit your ~/.bashrc.
 
 ## Doxygen
 For doxygen run
