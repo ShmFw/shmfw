@@ -39,11 +39,19 @@ http://askubuntu.com/questions/145887/why-no-library-files-installed-for-google-
 sudo apt-get install libgtest-dev
 cd /usr/src/gtest && sudo cmake -DBUILD_SHARED_LIBS=ON . && sudo make && sudo mv libg* /usr/lib/
 ``` 
+## KNOWN ISSUS
 ### On Ubuntu 16.04
 The logging module is not working as well as the grid apps. 
 ``` 
 cmake -DAPPS_GRID=OFF
 ``` 
+
+### In combination with ROS
+There are issus reported if ROS is sourced and the ros-*distribo*-opencv is installed.
+You mid get an error on some OpenCV includes.
+
+**Solution:**
+combile ShmFw before sourcing ros.
 
 ## Doxygen
 For doxygen run
